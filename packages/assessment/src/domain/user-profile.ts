@@ -42,16 +42,6 @@ export const deriveAgeBand = (age: number): AgeBand => {
   return "adult_19_plus";
 };
 
-const deriveAgeBasedSegment = (age: number): Segment => {
-  if (age <= 15) {
-    return "explorer";
-  }
-  if (age <= 18) {
-    return "pathfinder";
-  }
-  return "launcher";
-};
-
 export const deriveSegment = (input: { age: number; selfStage: EducationStage }): Segment => {
   switch (input.selfStage) {
     case "school":
@@ -62,7 +52,5 @@ export const deriveSegment = (input: { age: number; selfStage: EducationStage })
     case "graduate":
     case "working":
       return "launcher";
-    case "other":
-      return deriveAgeBasedSegment(input.age);
   }
 };

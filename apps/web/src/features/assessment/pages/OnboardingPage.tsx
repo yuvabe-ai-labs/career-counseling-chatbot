@@ -290,7 +290,13 @@ export function OnboardingPage() {
    * usually fail fast, both surfacing in the same place: emailAvailabilityError, below the email
    * field on this screen.
    */
-  const handleSetPassword = async ({ email: signupEmail, password }: { email: string; password: string }) => {
+  const handleSetPassword = async ({
+    email: signupEmail,
+    password,
+  }: {
+    email: string;
+    password: string;
+  }) => {
     if (!pendingSessionId) {
       throw new Error("Your session expired. Please start again.");
     }
@@ -384,7 +390,13 @@ export function OnboardingPage() {
               key={step}
               className="grid min-h-0 grid-rows-[auto_1fr] overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-500"
             >
-              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 px-6 pt-6 sm:px-10 sm:pt-8 lg:px-14 lg:pt-14">
+              {/* Brand/StepIndicator used to sit flush against this row's bottom edge (all the
+                  vertical space was padding-top, none below) — pt is now split with a matching
+                  pb so the row's total height (and everything below it) is unchanged, but the
+                  content itself sits centered within it instead of pinned to the bottom.
+                  items-center (was items-start) keeps the two elements aligned to each other
+                  now that there's room on both sides. */}
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-6 pt-4 pb-2 sm:px-10 sm:pt-6 lg:px-14 lg:pt-10 lg:pb-4">
                 <Brand />
                 <StepIndicator step={step} totalSteps={2} />
               </div>
@@ -411,7 +423,11 @@ export function OnboardingPage() {
                     <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl lg:text-[36px] lg:leading-[1.2]">
                       Create your password
                     </h1>
-                    <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+                    {/* No max-w-sm here (unlike SignInPage's shorter equivalent) — the minor-flow
+                        copy is long enough that a ~24rem cap wrapped it early, leaving the rest
+                        of this column's width empty for two lines. This lets it use the same
+                        full width as the heading/card below instead. */}
+                    <p className="mt-2 text-sm text-muted-foreground">
                       {isMinorFlow
                         ? "Your parent or guardian has verified this signup. Set a password to finish creating your account."
                         : "Set a password to finish creating your account."}

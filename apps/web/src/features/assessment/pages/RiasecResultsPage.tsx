@@ -13,6 +13,7 @@ import { LoadingState } from "@/components/LoadingState";
 import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/lib/error-messages";
 import { getStoredAssessmentRunId } from "@/lib/storage";
+import { cn } from "@/lib/utils";
 import { useAssessmentResult } from "../hooks/useAssessment";
 import { useSession } from "../state/session-context";
 
@@ -58,9 +59,30 @@ export function RiasecResultsPage() {
     <main className="flex min-h-screen flex-col bg-page">
       <AppHeader />
       <div className="flex flex-1 items-center justify-center px-6 py-10 sm:px-8 sm:py-14 lg:py-[56px]">
-        <div className="w-full max-w-[1260px] animate-in rounded-[27px] border border-border bg-[rgba(224,215,250,0.37)] p-8 fade-in duration-300 sm:p-12 lg:min-h-[751px] lg:p-[64px]">
+        {/* Page background stays bg-page (unchanged) — only this box's own fill switches from a
+            flat bg-[rgba(224,215,250,0.37)] to bg-hero-gradient (index.css), the same diagonal
+            wash HomePage/IntakeQuestionsPage/RiasecAssessmentPage use at the page level.
+            No lg:min-h-[751px] either — this box's content (the trait list + button, or the
+            RIASEC coin) never needs that much height, so the forced minimum just left empty
+            space at the bottom. Sized to its content instead.
+            The border only shows once there's an actual result to frame as a "card" — while
+            loading or on error, it's just this same soft gradient panel with no border, matching
+            how those states look on the other pages (no card at all).
+            flex/items-center/justify-center + lg:min-h-[560px] (RiasecAssessmentPage's own
+            loading-box height) apply only for that same loading/error case, so LoadingState/
+            ErrorState center within a box the same size as it gets on that page, instead of
+            wherever this page's own (now content-sized) box happens to end up. Not applied once
+            a real result renders — that content is a two-column grid meant to fill this box's
+            full width, not sit as a centered flex child. */}
+        <div
+          className={cn(
+            "bg-hero-gradient w-full max-w-[1260px] animate-in rounded-[27px] p-8 fade-in duration-300 sm:p-12 lg:p-[64px]",
+            result && "border border-border",
+            !result && "flex items-center justify-center lg:min-h-[560px]",
+          )}
+        >
           {resultQuery.isLoading ? (
-            <LoadingState message="Scoring your assessment…" />
+            <LoadingState />
           ) : resultQuery.isError ? (
             <ErrorState
               message={getErrorMessage(resultQuery.error, "We couldn't load your results.")}
@@ -100,7 +122,11 @@ export function RiasecResultsPage() {
                             aria-label={`${label} strength`}
                           >
                             <div
-                              className="h-full rounded-[4px] bg-brand"
+                              // brand-glow (index.css) — the design system's lighter violet
+                              // variant, not yet used elsewhere; bg-brand (the darker, saturated
+                              // brand violet) was too dark against this bar's own light-purple
+                              // track.
+                              className="h-full rounded-[4px] bg-brand-glow"
                               style={{ width: `${percent}%` }}
                             />
                           </div>

@@ -202,7 +202,7 @@ export function GuardianConsentPanel({
               type="button"
               onClick={() => void handleSend()}
               disabled={seconds > 0}
-              className="font-semibold text-brand disabled:text-muted-foreground"
+              className="cursor-pointer font-semibold text-brand disabled:cursor-not-allowed disabled:text-muted-foreground"
             >
               Resend OTP
             </button>

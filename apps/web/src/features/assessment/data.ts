@@ -19,5 +19,4 @@ export const EDUCATION_STAGE_OPTIONS: { value: EducationStage; label: string }[]
   { value: "college", label: "In college" },
   { value: "graduate", label: "Graduate" },
   { value: "working", label: "Working" },
-  { value: "other", label: "Other" },
 ];

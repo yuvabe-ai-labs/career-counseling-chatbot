@@ -9,7 +9,7 @@ import {
   Map,
   MapPin,
   User,
- //Wallet,
+  //Wallet,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import { Combobox } from "@/components/ui/combobox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { searchCities, searchStates } from "../api/location";
 import { EDUCATION_STAGE_OPTIONS } from "../data";
 import { calculateAge, MIN_ELIGIBLE_AGE } from "../domain/age";
@@ -140,9 +141,12 @@ export function ProfileFieldsForm({
   };
 
   return (
-    // lg:pt is intentionally smaller than the header row's own lg:pt-14 (OnboardingPage) —
-    // this sits directly below that row, not at the top of a fresh column, so it only needs
-    // the header-to-heading gap (Figma node 139:3934: h1 top 179 minus header bottom 108).
+    // lg:pt is intentionally smaller than the header row's own lg:pt-10+lg:pb-4 total (56px,
+    // OnboardingPage) — this sits directly below that row, not at the top of a fresh column, so
+    // it only needs the header-to-heading gap (Figma node 139:3934: h1 top 179 minus header
+    // bottom 108). The header row's own pt/pb split has since changed (its content is now
+    // vertically centered rather than bottom-pinned) but its total height, and so this row's
+    // start position, has not.
     // overflow-y-auto is a fallback for viewports too short to fit everything, not the norm —
     // see the compact lg: spacing throughout this component, sized to avoid triggering it.
     <div className="flex h-full flex-col overflow-y-auto px-6 py-6 sm:px-10 sm:py-8 lg:px-14 lg:pt-4 lg:pb-4">
@@ -263,14 +267,18 @@ export function ProfileFieldsForm({
 
           <div>
             <Label className="text-foreground">Country</Label>
-            <SelectField
-              value={value.country}
-              onValueChange={(next) => set("country", next)}
-              options={["India"]}
-              icon={<Globe className="size-[18px]" />}
-              aria-label="Country"
-              className="mt-2"
-            />
+            <div className="relative mt-2">
+              <Globe className={fieldIconClass} aria-hidden="true" />
+              {/* The app is India-only for now, so this is a fixed, read-only value rather than
+                  a dropdown with a single option — there's nothing to actually select. */}
+              <Input
+                value={value.country}
+                readOnly
+                aria-readonly="true"
+                aria-label="Country"
+                className={cn(fieldInputClass, "cursor-default text-muted-foreground")}
+              />
+            </div>
           </div>
 
           {/*<label className="flex cursor-pointer items-start gap-2 text-sm text-foreground">

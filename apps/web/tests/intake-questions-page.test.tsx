@@ -136,11 +136,41 @@ describe("IntakeQuestionsPage", () => {
 
     renderAt("/intake-questions");
 
-    expect(await screen.findByText(/1\.Which school board are you studying in\?/)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/1\.Which school board are you studying in\?/),
+    ).toBeInTheDocument();
     expect(screen.getByText(/2\.Which class are you currently in\?/)).toBeInTheDocument();
     expect(screen.getByText(/3\.Which subject do you enjoy most\?/)).toBeInTheDocument();
-    expect(screen.getByText("Question 1 of 3")).toBeInTheDocument();
+    // The counter reflects how many questions are actually answered, not the currently-viewed
+    // question — nothing is answered yet, so it starts at 0/3.
+    expect(screen.getByText("Question 0 of 3")).toBeInTheDocument();
     expect(getIntakeQuestions).toHaveBeenCalledWith("session-id");
+  });
+
+  it("counts only questions with an actual answer, updating live as answers are added, changed, or cleared", async () => {
+    setStoredUserId("user-id");
+    setStoredJourneySessionId("session-id");
+    getIntakeQuestions.mockResolvedValue(QUESTION_SET);
+    const user = userEvent.setup();
+    renderAt("/intake-questions");
+
+    await screen.findByText(/1\.Which school board are you studying in\?/);
+    expect(screen.getByText("Question 0 of 3")).toBeInTheDocument();
+
+    // Answering q3 (short_text) alone moves the count to 1/3 — merely having scrolled past/
+    // rendered q1 and q2 doesn't count them.
+    await user.type(screen.getByPlaceholderText("Example: Mathematics"), "Mathematics");
+    expect(await screen.findByText("Question 1 of 3")).toBeInTheDocument();
+
+    // Answering q1 (single_choice) too moves it to 2/3.
+    const comboboxes = screen.getAllByRole("combobox");
+    await user.click(comboboxes[0]!);
+    await user.click(await screen.findByRole("option", { name: "CBSE" }));
+    expect(await screen.findByText("Question 2 of 3")).toBeInTheDocument();
+
+    // Clearing q3's answer drops the count back down to 1/3.
+    await user.clear(screen.getByPlaceholderText("Example: Mathematics"));
+    expect(await screen.findByText("Question 1 of 3")).toBeInTheDocument();
   });
 
   it("blocks submission and shows field errors when required questions are unanswered", async () => {
@@ -262,7 +292,9 @@ describe("IntakeQuestionsPage", () => {
     renderAt("/intake-questions");
 
     expect(await screen.findByText("RIASEC assessment screen")).toBeInTheDocument();
-    expect(screen.queryByText(/1\.Which school board are you studying in\?/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/1\.Which school board are you studying in\?/),
+    ).not.toBeInTheDocument();
     expect(upsertIntakeAnswer).not.toHaveBeenCalled();
   });
 });

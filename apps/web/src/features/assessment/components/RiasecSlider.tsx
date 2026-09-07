@@ -72,7 +72,7 @@ export function RiasecSlider({ value, onChange, label }: RiasecSliderProps) {
             key={response.label}
             type="button"
             onClick={() => onChange(index)}
-            className={`shrink-0 whitespace-nowrap font-display text-xs font-medium transition-colors sm:text-sm ${
+            className={`shrink-0 cursor-pointer whitespace-nowrap font-display text-xs font-medium transition-colors sm:text-sm ${
               value === index ? "text-brand" : "text-muted-foreground hover:text-foreground"
             }`}
           >

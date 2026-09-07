@@ -13,7 +13,6 @@ export const EducationStageSchema = z.enum([
   "college",
   "graduate",
   "working",
-  "other",
 ]);
 export type EducationStage = z.infer<typeof EducationStageSchema>;
 

@@ -116,7 +116,7 @@ export function SignInForm({ onSubmit, submitting }: SignInFormProps) {
             type="button"
             onClick={() => setShowPassword((value) => !value)}
             aria-label={showPassword ? "Hide password" : "Show password"}
-            className="absolute top-1/2 right-4 -translate-y-1/2 text-muted-foreground"
+            className="absolute top-1/2 right-4 -translate-y-1/2 cursor-pointer text-muted-foreground"
           >
             {showPassword ? (
               <EyeOff className="size-[18px]" aria-hidden="true" />

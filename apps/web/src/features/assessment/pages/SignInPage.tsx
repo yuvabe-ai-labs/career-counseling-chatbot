@@ -64,7 +64,10 @@ export function SignInPage() {
       <div className="h-full w-full bg-card">
         <div className="grid h-full min-h-0 grid-cols-1 lg:grid-cols-2">
           <div className="grid min-h-0 grid-rows-[auto_1fr] overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-500">
-            <div className="px-6 pt-6 sm:px-10 sm:pt-8 lg:px-14 lg:pt-14">
+            {/* pt/pb split evenly (same total as OnboardingPage's identical header row) so Brand
+                sits centered in the row's height instead of pinned to its bottom edge — the
+                row's total height, and so the "Welcome back" row below, is unchanged. */}
+            <div className="px-6 pt-4 pb-2 sm:px-10 sm:pt-6 lg:px-14 lg:pt-10 lg:pb-4">
               <Brand />
             </div>
 

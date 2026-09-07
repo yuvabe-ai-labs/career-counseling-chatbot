@@ -6,7 +6,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useEscapeKey } from "@/lib/use-escape-key";
 import { useNow } from "@/lib/use-now";
 import { deriveResendState, formatCountdown, secondsUntil } from "../domain/otp-timing";
-import type { GuardianVerificationState } from "../types";
+import { emptyGuardianVerificationState, type GuardianVerificationState } from "../types";
 import { OtpInput } from "./OtpInput";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -117,6 +117,21 @@ export function GuardianConsentModal({
     onResendOtp();
   };
 
+  /**
+   * Lets the guardian back out of a wrongly-typed email after Send OTP has already locked the
+   * email field (see the form's own comment above). Resetting straight to
+   * emptyGuardianVerificationState — same object OnboardingPage's own
+   * handleRestartRegistration uses for a full do-over — clears the email, phase, OTP digits,
+   * otpError, consentId, and otpTiming together, so the previous code's resend cooldown and
+   * consentId can't be reused: the Verify/Resend buttons above are already gated on
+   * value.otpTiming existing, and OnboardingPage's handlePendingGuardianVerify separately
+   * requires a consentId, both now cleared. The autofocus effect above then refocuses the email
+   * input the moment `phase` flips back to "email_entry".
+   */
+  const handleChangeEmail = () => {
+    onChange(emptyGuardianVerificationState);
+  };
+
   return (
     <div
       role="dialog"
@@ -220,7 +235,7 @@ export function GuardianConsentModal({
                     type="button"
                     onClick={handleResendClick}
                     disabled={resendState !== "resend_available" || resending}
-                    className="font-bold text-brand disabled:text-muted-foreground"
+                    className="cursor-pointer font-bold text-brand disabled:cursor-not-allowed disabled:text-muted-foreground"
                   >
                     {resending ? "Resending…" : "Resend OTP"}
                   </button>
@@ -240,23 +255,33 @@ export function GuardianConsentModal({
 
           <div className="flex flex-col gap-6">
             <div className="flex items-center gap-1.5">
-              <ShieldAlert
-                className="size-3.5 shrink-0 text-muted-foreground"
-                aria-hidden="true"
-              />
+              <ShieldAlert className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
               <p className="font-display text-xs text-muted-foreground">
                 Your parent will receive a verification code.
               </p>
             </div>
 
-            <Button
-              type="submit"
-              disabled={!isOtpComplete || verifying || !value.otpTiming}
-              className="h-[49px] w-[149px] gap-2 rounded-2xl text-xl font-bold shadow-none"
-            >
-              {verifying ? <Spinner className="size-[18px]" /> : null}
-              {verifying ? "Confirming…" : "Verify"}
-            </Button>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <Button
+                type="submit"
+                disabled={!isOtpComplete || verifying || !value.otpTiming}
+                className="h-[49px] w-[149px] gap-2 rounded-2xl text-xl font-bold shadow-none"
+              >
+                {verifying ? <Spinner className="size-[18px]" /> : null}
+                {verifying ? "Confirming…" : "Verify"}
+              </Button>
+
+              {value.otpTiming ? (
+                <button
+                  type="button"
+                  onClick={handleChangeEmail}
+                  disabled={verifying}
+                  className="cursor-pointer font-display text-[13px] font-bold text-brand disabled:cursor-not-allowed disabled:text-muted-foreground"
+                >
+                  Change email address
+                </button>
+              ) : null}
+            </div>
           </div>
         </form>
       </div>

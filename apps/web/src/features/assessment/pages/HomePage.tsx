@@ -26,10 +26,19 @@ export function HomePage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col bg-[linear-gradient(135deg,#ffffff_0%,#f2eefc_50%,rgba(224,215,250,0.37)_100%)]">
+    <main className="bg-hero-gradient flex min-h-screen flex-col">
       <AppHeader />
-      <div className="flex flex-1 items-center justify-center px-6 py-10 sm:px-8 sm:py-14 lg:py-[56px]">
-        <div className="grid w-full max-w-[1260px] animate-in grid-cols-1 items-center gap-10 rounded-[27px] border border-border p-8 fade-in duration-300 sm:p-12 lg:min-h-[751px] lg:grid-cols-2 lg:gap-16 lg:p-[64px]">
+      {/* Equal padding on every side (was px-6 py-10 sm:px-8 sm:py-14 lg:py-[56px] — vertical
+          padding grew past horizontal at each breakpoint, e.g. 56px top/bottom vs 32px sides at
+          lg), which also reads as excess space above the card once centered in the remaining
+          viewport height. p-6/sm:p-8 keeps horizontal spacing unchanged and brings vertical
+          down to match it, so the section sits closer to center with uniform space all around. */}
+      <div className="flex flex-1 items-center justify-center p-6 sm:p-0">
+        {/* No border/background here (previously `rounded-[27px] border border-border`) — with
+            no fill of its own, that border still read as a boxed white card sitting on top of
+            main's own diagonal gradient. Removed so the hero content sits directly on the
+            gradient instead. */}
+        <div className="grid w-full max-w-[1260px] animate-in grid-cols-1 items-center gap-10 p-8 fade-in duration-300 sm:p-12 lg:min-h-[751px] lg:grid-cols-2 lg:gap-16 lg:p-[64px]">
           <div className="flex flex-col items-start gap-8 sm:gap-10 lg:max-w-[560px]">
             <div className="flex flex-col items-start gap-4 sm:gap-6">
               <h1 className="font-display text-4xl leading-[1.15] font-semibold text-foreground sm:text-5xl lg:text-[64px]">

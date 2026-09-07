@@ -279,6 +279,49 @@ describe("Guardian consent modal — Enter key", () => {
   });
 });
 
+describe("Guardian consent modal — change email address after OTP sent", () => {
+  it("resets to the email step and clears the OTP/timing state, requiring a fresh Send OTP", async () => {
+    setupCommonMocks();
+    requestPendingGuardianConsent.mockResolvedValue({
+      consent: { id: "consent-id", status: "pending" },
+      otpTiming: otpTiming(),
+    });
+    const user = userEvent.setup();
+    renderOnboarding();
+    await completeStepOneAsMinor(user);
+
+    await user.type(
+      await screen.findByLabelText(/parent\/guardian email address/i),
+      "wrong-parent@example.com{Enter}",
+    );
+    await screen.findByLabelText("Parent OTP digit 1");
+    for (let index = 0; index < 6; index += 1) {
+      await user.type(screen.getByLabelText(`Parent OTP digit ${index + 1}`), "1");
+    }
+
+    await user.click(screen.getByRole("button", { name: /change email address/i }));
+
+    // Back to the email-entry step: the field is empty and editable again, the OTP section is
+    // inert again (no otpTiming — cleared digits, disabled input), and the link itself is gone
+    // until a new OTP is sent.
+    const emailField = screen.getByLabelText(/parent\/guardian email address/i);
+    expect(emailField).toHaveValue("");
+    expect(emailField).toBeEnabled();
+    expect(screen.getByLabelText("Parent OTP digit 1")).toHaveValue("");
+    expect(screen.getByLabelText("Parent OTP digit 1")).toBeDisabled();
+    expect(screen.queryByRole("button", { name: /change email address/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Send OTP" })).toBeEnabled();
+
+    // The stale consent/OTP from before the change is never reused — a fresh Send OTP is
+    // required, and it's sent for the new email.
+    await user.type(emailField, "right-parent@example.com{Enter}");
+    await waitFor(() => expect(requestPendingGuardianConsent).toHaveBeenCalledTimes(2));
+    expect(requestPendingGuardianConsent.mock.calls[1]?.[0]).toMatchObject({
+      guardianEmail: "right-parent@example.com",
+    });
+  });
+});
+
 describe("Resend attempts exhausted", () => {
   /** Reaches the OTP screen with a resend that's currently clickable (so the popup can be
    * reached through the same click a real "one last try" race would take), then rejects that

@@ -107,7 +107,9 @@ export function RiasecAssessmentPage() {
       })
       .catch((error: unknown) => {
         startRequestedRef.current = false;
-        setPageError(getErrorMessage(error, "We couldn't start your assessment. Please try again."));
+        setPageError(
+          getErrorMessage(error, "We couldn't start your assessment. Please try again."),
+        );
       });
   }, [sessionId, runId, startRun]);
 
@@ -143,10 +145,15 @@ export function RiasecAssessmentPage() {
   // arrives — including on resume, since progress.nextPosition already reflects wherever the
   // backend says this run actually is. Only fires once per run: viewIndex only ever becomes
   // non-null here, and is reset back to null below whenever runId changes (a stale-run recovery
-  // or a brand new run starting) so this can re-fire for that fresh run's own data.
+  // or a brand new run starting) so this can re-fire for that fresh run's own data. Deferred to a
+  // microtask rather than calling setViewIndex directly in the effect body, same as the
+  // stale-run-recovery effect above (react-hooks' set-state-in-effect check).
   useEffect(() => {
     if (viewIndex !== null || !nextQuery.data) return;
-    setViewIndex(nextQuery.data.progress.nextPosition);
+    const nextPosition = nextQuery.data.progress.nextPosition;
+    void Promise.resolve().then(() => {
+      setViewIndex(nextPosition);
+    });
   }, [viewIndex, nextQuery.data]);
 
   if (!session.userId || !sessionId) {
@@ -158,7 +165,8 @@ export function RiasecAssessmentPage() {
   const progress = current?.progress ?? null;
   const questionNumber = viewIndex !== null ? viewIndex + 1 : 0;
   const total = progress?.total ?? 0;
-  const isReviewingPastQuestion = progress !== null && viewIndex !== null && viewIndex < progress.nextPosition;
+  const isReviewingPastQuestion =
+    progress !== null && viewIndex !== null && viewIndex < progress.nextPosition;
   const isLastQuestion =
     progress !== null && !isReviewingPastQuestion && progress.nextPosition === progress.total - 1;
   const canGoBack = viewIndex !== null && viewIndex > 0 && !submitResponse.isPending;
@@ -228,21 +236,23 @@ export function RiasecAssessmentPage() {
   const isLoading = !current && !pageError;
 
   return (
-    <main
-      className="flex min-h-screen flex-col bg-[linear-gradient(135deg,#ffffff_0%,#f2eefc_50%,rgba(224,215,250,0.37)_100%)]"
-      onKeyDown={handleKeyDown}
-    >
+    // bg-hero-gradient (index.css): same diagonal wash as HomePage/IntakeQuestionsPage, instead
+    // of duplicating this arbitrary gradient value a third time.
+    <main className="bg-hero-gradient flex min-h-screen flex-col" onKeyDown={handleKeyDown}>
       <AppHeader />
       <div className="flex flex-1 items-center justify-center px-6 py-10 sm:px-8 sm:py-14 lg:py-[56px]">
-        <div className="flex w-full max-w-[1260px] animate-in flex-col items-center justify-center gap-8 rounded-[27px] border border-border p-8 fade-in duration-300 sm:p-12 lg:min-h-[560px] lg:p-[64px]">
+        {/* No card here any more (previously `rounded-[27px] border border-border`) — the
+            content sits directly on main's own gradient, same treatment as HomePage/
+            IntakeQuestionsPage. */}
+        <div className="flex w-full max-w-[1260px] animate-in flex-col items-center justify-center gap-8 p-8 fade-in duration-300 sm:p-12 lg:min-h-[560px] lg:p-[64px]">
           {pageError ? (
             <ErrorState message={pageError} onRetry={() => void nextQuery.refetch()} />
           ) : isLoading ? (
-            <LoadingState message="Loading your assessment…" />
+            <LoadingState />
           ) : item && progress ? (
             <div
               key={item.id}
-              className="flex w-full max-w-3xl animate-in flex-col items-center gap-6 fade-in duration-200"
+              className="flex w-full max-w-4xl animate-in flex-col items-center gap-6 fade-in duration-200"
             >
               <div className="w-full rounded-[1.6rem] bg-gradient-to-br from-brand/80 to-brand/30 p-[2px] shadow-soft">
                 <article className="flex flex-col gap-4 rounded-[calc(1.6rem-2px)] bg-background px-5 py-5 sm:px-8 sm:py-6">

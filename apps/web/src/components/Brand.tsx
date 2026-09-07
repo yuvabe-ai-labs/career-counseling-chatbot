@@ -1,11 +1,26 @@
-import yuvabeLogo from "@/assets/yuvabe-logo.png";
+import { Link } from "react-router-dom";
 
 /**
- * Wordmark, from the Figma "career" file's own logo asset (node 139:3937 —
- * "yuvabe", not the app's earlier "Yuva Path" placeholder text/icon mark).
+ * Wordmark — text mark replacing the earlier "yuvabe Studios" logo image (Figma node 139:3937,
+ * the "yuvabe", not the app's own name). Reads as one continuous "yuvaNext", split into "yuva"
+ * (brand violet, --color-brand) and "Next" (the app's standard near-black heading color,
+ * --color-foreground) per the rebrand.
+ *
+ * Wrapped in a Link to "/" (the app's root/onboarding screen) so the wordmark also serves as a
+ * home link everywhere it appears — AppHeader (post-auth pages) and every pre-auth screen that
+ * renders Brand directly.
  */
 export function Brand() {
-  return <img src={yuvabeLogo} alt="yuvabe" className="h-9 w-auto shrink-0 sm:h-[52px]" />;
+  return (
+    <Link
+      to="/"
+      aria-label="yuvaNext home"
+      className="inline-flex w-fit shrink-0 items-baseline font-display text-2xl font-bold tracking-tight sm:text-[28px]"
+    >
+      <span className="text-brand">yuva</span>
+      <span className="text-foreground">Next</span>
+    </Link>
+  );
 }
 
 /** "Step X of Y" pill — Figma node 139:3938, right of the header logo. */

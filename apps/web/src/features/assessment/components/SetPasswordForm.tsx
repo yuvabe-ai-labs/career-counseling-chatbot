@@ -149,7 +149,7 @@ export function SetPasswordForm({
             className={emailFieldInputClass}
           />
         </div>
-        {emailFormatError ?? serverEmailError ? (
+        {(emailFormatError ?? serverEmailError) ? (
           <p className="mt-1 font-display text-xs font-normal text-destructive">
             {emailFormatError ?? serverEmailError}
           </p>
@@ -179,7 +179,7 @@ export function SetPasswordForm({
             type="button"
             onClick={() => setShowPassword((value) => !value)}
             aria-label={showPassword ? "Hide password" : "Show password"}
-            className="absolute top-1/2 right-4 -translate-y-1/2 text-muted-foreground"
+            className="absolute top-1/2 right-4 -translate-y-1/2 cursor-pointer text-muted-foreground"
           >
             {showPassword ? (
               <EyeOff className="size-[18px]" aria-hidden="true" />
@@ -192,28 +192,27 @@ export function SetPasswordForm({
           <p className="mt-1 font-display text-xs font-normal text-destructive">{passwordError}</p>
         ) : null}
 
-        <div className="mt-2 flex flex-col gap-1.5">
-          {[PASSWORD_RULES.slice(0, 2), PASSWORD_RULES.slice(2, 4), PASSWORD_RULES.slice(4)].map(
-            (row, rowIndex) => (
-              <div key={rowIndex} className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
-                {row.map((rule) => {
-                  const met = rule.test(password);
-                  return (
-                    <span
-                      key={rule.label}
-                      className={cn(
-                        "flex items-center gap-1 font-display text-sm",
-                        met ? "text-brand" : "text-muted-foreground",
-                      )}
-                    >
-                      <Check className="size-3 shrink-0" aria-hidden="true" />
-                      {rule.label}
-                    </span>
-                  );
-                })}
-              </div>
-            ),
-          )}
+        {/* A two-column CSS grid (rather than the previous per-row flex-wrap) so the second
+            column actually lines up: each column is sized to its own widest label, instead of
+            starting wherever the first column's item in that particular row happened to end.
+            5 rules auto-flow into the same 2/2/1 layout as before — the last one just lands
+            alone in column 1. */}
+        <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5">
+          {PASSWORD_RULES.map((rule) => {
+            const met = rule.test(password);
+            return (
+              <span
+                key={rule.label}
+                className={cn(
+                  "flex items-center gap-1 font-display text-sm",
+                  met ? "text-brand" : "text-muted-foreground",
+                )}
+              >
+                <Check className="size-3 shrink-0" aria-hidden="true" />
+                {rule.label}
+              </span>
+            );
+          })}
         </div>
       </div>
 
@@ -238,7 +237,7 @@ export function SetPasswordForm({
             type="button"
             onClick={() => setShowConfirmPassword((value) => !value)}
             aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-            className="absolute top-1/2 right-4 -translate-y-1/2 text-muted-foreground"
+            className="absolute top-1/2 right-4 -translate-y-1/2 cursor-pointer text-muted-foreground"
           >
             {showConfirmPassword ? (
               <EyeOff className="size-[18px]" aria-hidden="true" />

@@ -115,6 +115,20 @@
 }
 
 /*
+ * Page-level background shared by every post-auth screen that wants the same soft
+ * white-to-lavender diagonal wash (HomePage originally, now IntakeQuestionsPage too) — a plain
+ * class rather than repeating the same bg-[linear-gradient(...)] arbitrary value on each page.
+ */
+.bg-hero-gradient {
+  background-image: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    #f2eefc 50%,
+    rgba(224, 215, 250, 0.37) 100%
+  );
+}
+
+/*
  * The one styled-scrollbar pattern for a scrollable region that should read as "on brand"
  * instead of the browser's unstyled default (IntakeQuestionsPage's fields column originally sat
  * next to a separate decorative purple bar precisely because the real scrollbar next to it was

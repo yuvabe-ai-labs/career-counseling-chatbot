@@ -228,7 +228,7 @@ export function Combobox({
                   event.preventDefault();
                   runSearch(query ?? "");
                 }}
-                className="font-semibold underline underline-offset-2"
+                className="cursor-pointer font-semibold underline underline-offset-2"
               >
                 Retry
               </button>

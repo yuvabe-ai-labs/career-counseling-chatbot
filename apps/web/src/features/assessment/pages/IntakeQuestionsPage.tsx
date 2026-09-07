@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type UIEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import heroIllustration from "@/assets/hero-illustration.png";
 import { AppHeader } from "@/components/AppHeader";
@@ -7,6 +7,7 @@ import { LoadingState } from "@/components/LoadingState";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { getErrorMessage } from "@/lib/error-messages";
+import { cn } from "@/lib/utils";
 import { IntakeQuestionField } from "../components/IntakeQuestionField";
 import { useIntakeQuestions, useUpsertIntakeAnswer } from "../hooks/useIntake";
 import { useSession } from "../state/session-context";
@@ -45,10 +46,6 @@ export function IntakeQuestionsPage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
-  // Drives only the "Question X of Y" counter below — the scroll position itself is shown by the
-  // fields column's own native scrollbar (styled purple via the scrollbar-brand class), not a
-  // separate decorative bar.
-  const [scrollFraction, setScrollFraction] = useState(0);
 
   const fieldsRef = useRef<HTMLDivElement | null>(null);
   // Guards the one-time "prefill from the server, then scroll to wherever the user left off"
@@ -61,19 +58,11 @@ export function IntakeQuestionsPage() {
 
   const questions = questionsQuery.data?.questions ?? [];
   const total = questions.length;
-
-  const updateScrollIndicator = () => {
-    const el = fieldsRef.current;
-    if (!el) return;
-    const maxScroll = el.scrollHeight - el.clientHeight;
-    setScrollFraction(maxScroll > 0 ? el.scrollTop / maxScroll : 0);
-  };
-
-  // Re-measure once the questions actually render (their count/height determines whether the
-  // fields column scrolls at all — see updateScrollIndicator).
-  useEffect(() => {
-    updateScrollIndicator();
-  }, [total]);
+  // Drives the "Question X of Y" counter below — how many questions actually have a non-empty
+  // answer right now, not which one is currently scrolled into view. Recomputed on every render
+  // from `answers`, so it moves up when a question is answered and back down if that answer is
+  // then cleared (the same isAnswerEmpty check handleSubmit's own required-field validation uses).
+  const answeredCount = questions.filter((question) => !isAnswerEmpty(answers[question.id])).length;
 
   // Resume: the backend now includes this user's own previously-saved answers alongside the
   // questions themselves (see IntakeService.getQuestions / findAnswersForUser) — found by userId
@@ -109,11 +98,9 @@ export function IntakeQuestionsPage() {
       isAnswerEmpty(seeded[question.id]),
     );
     const container = fieldsRef.current;
-    const target =
-      firstUnansweredIndex > 0 ? container?.children[firstUnansweredIndex] : undefined;
+    const target = firstUnansweredIndex > 0 ? container?.children[firstUnansweredIndex] : undefined;
     if (container && target instanceof HTMLElement) {
       container.scrollTop = target.offsetTop;
-      updateScrollIndicator();
     }
   }, [questionsQuery.data, navigate]);
 
@@ -129,9 +116,6 @@ export function IntakeQuestionsPage() {
   if (!session.userId || !sessionId) {
     return <Navigate to="/" replace />;
   }
-
-  const currentQuestionNumber =
-    total === 0 ? 0 : Math.min(total, Math.round(scrollFraction * (total - 1)) + 1);
 
   /**
    * Save-as-you-go: debounced per question (~500ms after the last edit to that specific field),
@@ -200,12 +184,35 @@ export function IntakeQuestionsPage() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col bg-page">
+    // bg-hero-gradient (index.css): same diagonal wash as HomePage, for visual consistency
+    // between the two post-auth screens, instead of this page's own flat bg-page.
+    <main className="bg-hero-gradient flex min-h-screen flex-col">
       <AppHeader />
-      <div className="flex flex-1 items-center justify-center px-6 py-10 sm:px-8 sm:py-14 lg:py-[56px]">
-        <div className="w-full max-w-[1260px] animate-in rounded-[27px] border border-border bg-[rgba(224,215,250,0.37)] p-8 fade-in duration-300 sm:p-12 lg:min-h-[751px] lg:p-[64px]">
+      {/* items-start (was items-center): centering vertically in the full remaining viewport
+          height still left this section sitting noticeably low whenever its own content (even
+          with the equal p-6/sm:p-8 padding — see HomePage's identical fix) was shorter than that
+          space. Anchoring to the top instead — with that same padding as its only gap from the
+          header — moves it up without needing to keep rebalancing padding numbers against
+          viewport height. */}
+      <div className="flex flex-1 items-start justify-center p-6 sm:p-0">
+        {/* No card here any more (previously `rounded-[27px] border border-border
+            bg-[rgba(224,215,250,0.37)]`) — the content now sits directly on main's own gradient,
+            same treatment as HomePage's hero section.
+            flex/items-center/justify-center only while loading or erroring: LoadingState/
+            ErrorState already center themselves within their own box, but this box (up to
+            lg:min-h-[751px] tall) wasn't itself centering that box, so it sat pinned near the
+            top instead of in the middle — inconsistent with RiasecAssessmentPage's already-
+            centered loading state. Not applied once real questions render — that content is a
+            two-column grid meant to fill this box's full width, not sit as a centered flex child. */}
+        <div
+          className={cn(
+            "w-full max-w-[1260px] animate-in p-8 fade-in duration-300 sm:p-12 lg:min-h-[751px] lg:p-[64px]",
+            (questionsQuery.isLoading || questionsQuery.isError) &&
+              "flex items-center justify-center",
+          )}
+        >
           {questionsQuery.isLoading ? (
-            <LoadingState message="Loading your questions…" />
+            <LoadingState />
           ) : questionsQuery.isError ? (
             <ErrorState
               message={getErrorMessage(questionsQuery.error, "We couldn't load your questions.")}
@@ -215,19 +222,25 @@ export function IntakeQuestionsPage() {
             <div className="grid grid-cols-1 gap-10 lg:grid-cols-[472px_1fr] lg:gap-16">
               <div className="flex w-full flex-col items-start gap-6 lg:w-[472px]">
                 <p className="font-display text-sm font-medium text-muted-foreground">
-                  Question {currentQuestionNumber} of {total}
+                  Question {answeredCount} of {total}
                 </p>
 
                 <div
                   ref={fieldsRef}
-                  onScroll={(event: UIEvent<HTMLDivElement>) => {
-                    void event;
-                    updateScrollIndicator();
-                  }}
                   // scrollbar-brand (index.css): the one real scrollbar here, styled purple —
                   // previously a decorative purple bar sat next to the browser's own unstyled
                   // (grey) scrollbar, showing two redundant scroll indicators at once.
-                  className="scrollbar-brand flex max-h-[560px] w-full flex-col items-start gap-6 overflow-y-auto pr-1"
+                  //
+                  // -ml-1/pl-1 (net zero shift — fields still line up with the "Question X of Y"
+                  // text/Start Quiz button above and below, which aren't inset the same way):
+                  // overflow-y-auto here makes the browser treat overflow-x as auto too (a
+                  // scrolling axis can't sit next to a 'visible' one), which clips anything
+                  // painted outside a child's border box — including the focus ring's box-shadow
+                  // — against this container's own edge. There was no left padding to give that
+                  // ring room, only pr-1 on the right, so the ring was clipped on the left only.
+                  // pr-6 (was pr-1) is unrelated to that fix — it's just more breathing room
+                  // between the fields and the scrollbar itself.
+                  className="scrollbar-brand -ml-1 flex max-h-[560px] w-full flex-col items-start gap-6 overflow-y-auto pr-6 pl-1"
                 >
                   {questions.map((question, index) => (
                     <IntakeQuestionField
