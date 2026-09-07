@@ -1,0 +1,17 @@
+{
+  "name": "@yuvanext/recommendations",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^9.1.0",
+    "@yuvanext/contracts": "workspace:*",
+    "@yuvanext/database": "workspace:*",
+    "express": "^5.2.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@yuvanext/test-fixtures": "workspace:*"
+  }
+}

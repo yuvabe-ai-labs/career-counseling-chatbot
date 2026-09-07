@@ -1,0 +1,138 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/*
+ * Design tokens ported from the Yuva Path Connect visual prototype
+ * (C:\Users\HP\Desktop\Yuva Path Connect\src\styles.css). Colors were oklch by
+ * convention there. As of the "career" Figma file (node 139:3934, onboarding
+ * step 1) the color/radius tokens below have been corrected to the exact
+ * values from get_design_context / get_variable_defs, so every screen shares
+ * one source of truth instead of the prototype's eyeballed approximations.
+ * Extend this file as later phases add more of the Figma palette.
+ */
+@theme inline {
+  /* Figma specs Inter for headings/hero copy and Gilroy for form UI text.
+     Gilroy is unlicensed here and isn't on Google Fonts, so Poppins stands
+     in for it (see index.html for the loaded weights). */
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --color-panel: var(--panel);
+  --color-panel-foreground: var(--panel-foreground);
+  --color-page: var(--page);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-glow: var(--brand-glow);
+  --color-highlight: var(--highlight);
+  --shadow-card: var(--shadow-card-value);
+  --shadow-soft: var(--shadow-soft-value);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+:root {
+  /* --radius is 12px (not the old 10px) purely so --radius-2xl below lands on
+     Figma's exact "radius/2xl" = 20px (the onboarding form-card's rounding). */
+  --radius: 0.75rem;
+  /* background/surface — white card & input fill (Figma variable, exact). */
+  --background: #ffffff;
+  /* text/primary (Figma variable, exact). */
+  --foreground: #1e1b4b;
+  /* background/secondary — the outer app canvas behind both columns (Figma variable, exact). */
+  --page: #f4f0ff;
+  /* Onboarding's right-column hero panel background — a literal fill in the
+     Figma frame (not a bound variable there), taken as-is for exactness. */
+  --panel: #ece6fa;
+  --panel-foreground: #1e1b4b;
+  /* brand/primary (Figma variable, exact). */
+  --brand: #592ac7;
+  --brand-foreground: #ffffff;
+  --brand-soft: oklch(0.955 0.025 300);
+  --brand-glow: oklch(0.66 0.19 295);
+  /* Underline accent under the hero heading — literal fill in the Figma frame. */
+  --highlight: #ffc240;
+  --shadow-card-value: 0 24px 60px -24px oklch(0.52 0.23 293 / 25%);
+  --shadow-soft-value: 0 8px 24px -12px oklch(0.52 0.23 293 / 22%);
+  /* background/primary — the left column's own canvas, one shade off the
+     white surface/card above it (Figma variable, exact). Repurposed from its
+     former (unused) shadcn role since --background already covers "white
+     surface" for this design. */
+  --card: #f8f6fd;
+  --card-foreground: #1e1b4b;
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.129 0.042 264.695);
+  --primary: #592ac7;
+  --primary-foreground: #ffffff;
+  --secondary: oklch(0.966 0.018 300);
+  --secondary-foreground: oklch(0.3 0.1 293);
+  --muted: oklch(0.968 0.01 295);
+  /* text/secondary (Figma variable, exact). */
+  --muted-foreground: #6b7280;
+  --accent: oklch(0.955 0.025 300);
+  --accent-foreground: oklch(0.3 0.1 293);
+  /* Error/validation text color — Figma node 139:3886 ("You must be 12 or
+     older to continue"), exact. */
+  --destructive: #db3030;
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  /* Form field border — literal fill in the Figma frame, exact. */
+  --border: #e5edf5;
+  --input: #e5edf5;
+  --ring: #592ac7;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+}
+
+/*
+ * The one styled-scrollbar pattern for a scrollable region that should read as "on brand"
+ * instead of the browser's unstyled default (IntakeQuestionsPage's fields column originally sat
+ * next to a separate decorative purple bar precisely because the real scrollbar next to it was
+ * left unstyled/grey — this replaces that pair with a single, purple, actually-functional one).
+ * scrollbar-color covers Firefox and current Chromium/Safari; the ::-webkit- rules cover older
+ * WebKit that doesn't yet read scrollbar-color.
+ */
+.scrollbar-brand {
+  scrollbar-width: thin;
+  scrollbar-color: var(--brand) transparent;
+}
+.scrollbar-brand::-webkit-scrollbar {
+  width: 8px;
+}
+.scrollbar-brand::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-brand::-webkit-scrollbar-thumb {
+  background-color: var(--brand);
+  border-radius: 9999px;
+}

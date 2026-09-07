@@ -1,0 +1,15 @@
+{
+  "name": "@yuvanext/knowledge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@yuvanext/contracts": "workspace:*",
+    "@yuvanext/database": "workspace:*",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6"
+  }
+}
