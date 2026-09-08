@@ -24,7 +24,7 @@ export type RuntimeApp = {
  * server entrypoint (server.ts) and the Lambda entrypoint (lambda.ts) so the two never drift.
  */
 export const createRuntimeApp = async (
-  appOptions: Pick<CreateAppOptions, "docs"> = {},
+  appOptions: Pick<CreateAppOptions, "docs" | "cors"> = {},
 ): Promise<RuntimeApp> => {
   const fixtureMode = env.COUNSELOR_RUNTIME === "fixture";
   if (fixtureMode && env.NODE_ENV === "production") {

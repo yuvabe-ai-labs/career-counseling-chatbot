@@ -9,7 +9,13 @@ import { createRuntimeApp } from "./app/create-runtime-app.js";
 // The runtime app is built once per execution environment (module scope, not inside the
 // handler) so a warm Lambda instance reuses its database pool and provider clients across
 // invocations instead of reconnecting every request.
-const runtimeAppPromise = createRuntimeApp({ docs: false });
+//
+// cors: false — the Lambda Function URL itself already adds Access-Control-Allow-Origin etc.
+// (see infra/bootstrap-aws.sh). Leaving Express's own `cors` middleware on here would add a
+// second, duplicate set of CORS headers, which browsers reject outright ("contains multiple
+// values ..., but only one is allowed"). The Function URL is the single source of CORS
+// handling in this deployment; server.ts (no such front door) still applies it.
+const runtimeAppPromise = createRuntimeApp({ docs: false, cors: false });
 
 let cachedHandler: ReturnType<typeof serverlessHttp> | undefined;
 

@@ -78,6 +78,15 @@ export type CreateAppOptions = {
    * static assets) stays available either way.
    */
   docs?: boolean;
+  /**
+   * Apply the `cors` middleware (Access-Control-Allow-Origin etc., from CORS_ORIGIN). Defaults
+   * to true. The Lambda entrypoint sets this to false: the Lambda Function URL already adds its
+   * own CORS headers (see infra/bootstrap-aws.sh), so leaving this on there means every response
+   * carries two, comma-joined Access-Control-Allow-Origin values — which browsers reject outright
+   * ("contains multiple values ..., but only one is allowed"). server.ts (local dev / a
+   * non-Lambda deployment) has no CORS-handling front door in front of it, so it keeps this on.
+   */
+  cors?: boolean;
   checkDatabase?: () => Promise<boolean>;
   databaseRequired?: boolean;
   database?: boolean;
@@ -149,9 +158,11 @@ export const createApp = (options: CreateAppOptions = {}): Express => {
 
   app.disable("x-powered-by");
   app.use(helmet({ contentSecurityPolicy: false }));
-  app.use(
-    cors({ origin: env.CORS_ORIGIN.split(",").map((origin) => origin.trim()), credentials: true }),
-  );
+  if (options.cors ?? true) {
+    app.use(
+      cors({ origin: env.CORS_ORIGIN.split(",").map((origin) => origin.trim()), credentials: true }),
+    );
+  }
   app.use(express.json({ limit: "1mb" }));
 
   if (options.logging !== false) {

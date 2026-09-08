@@ -59,8 +59,8 @@ TRUST_POLICY=$(cat <<JSON
       "StringEquals": { "token.actions.githubusercontent.com:aud": "sts.amazonaws.com" },
         "StringLike": {
           "token.actions.githubusercontent.com:sub": [
-            "repo:${GITHUB_REPO}:environment:staging",
-            "repo:${GITHUB_REPO}:environment:production"
+            "repo:yuvabe-ai-labs@234160866/career-counseling-chatbot@1360130169:environment:staging",
+            "repo:yuvabe-ai-labs@234160866/career-counseling-chatbot@1360130169:environment:production"
           ]
         }
     }
