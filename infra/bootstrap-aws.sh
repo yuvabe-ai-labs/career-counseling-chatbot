@@ -21,10 +21,10 @@ set -euo pipefail
 
 AWS_REGION="${AWS_REGION:-us-east-1}"
 GITHUB_REPO="${GITHUB_REPO:-yuvabe-ai-labs/career-counseling-chatbot}"
-ROLE_NAME="${ROLE_NAME:-github-actions-yuvanext-deploy}"
-EXEC_ROLE_NAME="${EXEC_ROLE_NAME:-yuvanext-api-lambda-exec}"
-FUNCTION_STAGING="${FUNCTION_STAGING:-yuvanext-api-staging}"
-FUNCTION_PROD="${FUNCTION_PROD:-yuvanext-api-prod}"
+ROLE_NAME="${ROLE_NAME:-github-actions-ccc-deploy}"
+EXEC_ROLE_NAME="${EXEC_ROLE_NAME:-ccc-api-lambda-exec}"
+FUNCTION_STAGING="${FUNCTION_STAGING:-ccc-staging}"
+FUNCTION_PROD="${FUNCTION_PROD:-ccc-prod}"
 
 echo "Region:            $AWS_REGION"
 echo "GitHub repo:       $GITHUB_REPO"
@@ -57,12 +57,12 @@ TRUST_POLICY=$(cat <<JSON
     "Action": "sts:AssumeRoleWithWebIdentity",
     "Condition": {
       "StringEquals": { "token.actions.githubusercontent.com:aud": "sts.amazonaws.com" },
-      "StringLike": {
-        "token.actions.githubusercontent.com:sub": [
-          "repo:${GITHUB_REPO}:ref:refs/heads/staging",
-          "repo:${GITHUB_REPO}:ref:refs/heads/main"
-        ]
-      }
+        "StringLike": {
+          "token.actions.githubusercontent.com:sub": [
+            "repo:${GITHUB_REPO}:environment:staging",
+            "repo:${GITHUB_REPO}:environment:production"
+          ]
+        }
     }
   }]
 }
@@ -131,14 +131,25 @@ fi
 EXEC_ROLE_ARN="arn:aws:iam::${ACCOUNT_ID}:role/${EXEC_ROLE_NAME}"
 
 # --- 4. The two Lambda functions themselves, with a placeholder handler ---
-PLACEHOLDER_DIR="$(mktemp -d)"
+PLACEHOLDER_DIR="./.aws-bootstrap-tmp"
+rm -rf "$PLACEHOLDER_DIR"
+mkdir -p "$PLACEHOLDER_DIR"
 cat > "$PLACEHOLDER_DIR/lambda.mjs" <<'JS'
 export const handler = async () => ({
   statusCode: 503,
   body: JSON.stringify({ status: "not_deployed", message: "Waiting for the first deploy.yml run." }),
 });
 JS
-(cd "$PLACEHOLDER_DIR" && zip -q placeholder.zip lambda.mjs)
+if command -v zip >/dev/null 2>&1; then
+  (cd "$PLACEHOLDER_DIR" && zip -q placeholder.zip lambda.mjs)
+elif command -v powershell.exe >/dev/null 2>&1; then
+  # Git Bash on Windows typically has no `zip` on PATH; fall back to PowerShell's equivalent.
+  powershell.exe -NoProfile -Command \
+    "Compress-Archive -Path '$(cygpath -w "$PLACEHOLDER_DIR/lambda.mjs" 2>/dev/null || echo "$PLACEHOLDER_DIR/lambda.mjs")' -DestinationPath '$(cygpath -w "$PLACEHOLDER_DIR/placeholder.zip" 2>/dev/null || echo "$PLACEHOLDER_DIR/placeholder.zip")' -Force"
+else
+  echo "Need either a 'zip' binary or powershell.exe on PATH to build the placeholder package." >&2
+  exit 1
+fi
 
 create_function_if_missing() {
   local name="$1"
