@@ -9,6 +9,7 @@ export default tseslint.config(
     ignores: [
       "**/node_modules/**",
       "**/dist/**",
+      "**/dist-lambda/**",
       "coverage/**",
       "docs/**",
       "packages/database/src/database.types.ts",

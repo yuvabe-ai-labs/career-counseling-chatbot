@@ -71,6 +71,13 @@ import { modules } from "./modules.js";
 
 export type CreateAppOptions = {
   logging?: boolean;
+  /**
+   * Mount the interactive Swagger UI at /docs. Defaults to true. The Lambda entrypoint sets
+   * this to false: swagger-ui-express serves static HTML/CSS/JS from swagger-ui-dist on disk,
+   * which doesn't survive esbuild bundling into a single file. /openapi.json (pure JSON, no
+   * static assets) stays available either way.
+   */
+  docs?: boolean;
   checkDatabase?: () => Promise<boolean>;
   databaseRequired?: boolean;
   database?: boolean;
@@ -293,11 +300,13 @@ export const createApp = (options: CreateAppOptions = {}): Express => {
   openApiDocument.paths = orderedPaths;
 
   app.get("/openapi.json", (_request, response) => response.json(openApiDocument));
-  app.use(
-    "/docs",
-    swaggerUi.serve,
-    swaggerUi.setup(undefined, { swaggerOptions: { url: "/openapi.json" } }),
-  );
+  if (options.docs ?? true) {
+    app.use(
+      "/docs",
+      swaggerUi.serve,
+      swaggerUi.setup(undefined, { swaggerOptions: { url: "/openapi.json" } }),
+    );
+  }
 
   app.use(notFoundHandler);
   app.use(errorHandler);

@@ -1,0 +1,134 @@
+name: Deploy
+
+# staging branch -> the "staging" GitHub Environment / Lambda function.
+# main branch    -> the "production" GitHub Environment / Lambda function.
+# Requires the one-time AWS bootstrap in infra/bootstrap-aws.sh to have been run, and the
+# environment variables/secrets listed in infra/README.md to be configured on both GitHub
+# Environments before this can deploy anything.
+on:
+  push:
+    branches: [staging, main]
+
+permissions:
+  contents: read
+  id-token: write # required to assume the AWS role via OIDC — no stored AWS keys
+
+concurrency:
+  group: deploy-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.23.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # Same quality gate as ci.yml. Kept self-contained here (rather than depending on ci.yml's
+      # run) so a deploy can never ship code that hasn't just been verified, regardless of which
+      # workflows happen to be required checks on the branch.
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm db:validate-migration
+
+      - run: pnpm build:lambda
+      - run: node scripts/package-lambda.mjs
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Build Lambda environment variables
+        env:
+          NODE_ENV: production
+          COUNSELOR_RUNTIME: integrated
+          CORS_ORIGIN: ${{ vars.CORS_ORIGIN }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_SSL: "true"
+          INTERNAL_API_KEY: ${{ secrets.INTERNAL_API_KEY }}
+          AI_PROVIDER: ${{ vars.AI_PROVIDER }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}
+          SAFETY_SERVICE_URL: ${{ vars.SAFETY_SERVICE_URL }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ vars.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_FROM: ${{ vars.SMTP_FROM }}
+        run: |
+          # Named --arg per variable (never jq's blanket `env` builtin, which would also pick up
+          # unrelated runner env vars like GITHUB_TOKEN) and drop unset optional ones so they
+          # don't overwrite an existing Lambda config value with an empty string.
+          jq -n \
+            --arg NODE_ENV "$NODE_ENV" \
+            --arg COUNSELOR_RUNTIME "$COUNSELOR_RUNTIME" \
+            --arg CORS_ORIGIN "$CORS_ORIGIN" \
+            --arg SUPABASE_URL "$SUPABASE_URL" \
+            --arg SUPABASE_ANON_KEY "$SUPABASE_ANON_KEY" \
+            --arg SUPABASE_SERVICE_ROLE_KEY "$SUPABASE_SERVICE_ROLE_KEY" \
+            --arg DATABASE_URL "$DATABASE_URL" \
+            --arg DATABASE_SSL "$DATABASE_SSL" \
+            --arg INTERNAL_API_KEY "$INTERNAL_API_KEY" \
+            --arg AI_PROVIDER "$AI_PROVIDER" \
+            --arg GEMINI_API_KEY "$GEMINI_API_KEY" \
+            --arg GEMINI_MODEL "$GEMINI_MODEL" \
+            --arg ANTHROPIC_API_KEY "$ANTHROPIC_API_KEY" \
+            --arg ANTHROPIC_MODEL "$ANTHROPIC_MODEL" \
+            --arg SAFETY_SERVICE_URL "$SAFETY_SERVICE_URL" \
+            --arg SMTP_HOST "$SMTP_HOST" \
+            --arg SMTP_PORT "$SMTP_PORT" \
+            --arg SMTP_USER "$SMTP_USER" \
+            --arg SMTP_PASSWORD "$SMTP_PASSWORD" \
+            --arg SMTP_FROM "$SMTP_FROM" \
+            '{ Variables: ($ARGS.named | with_entries(select(.value != ""))) }' \
+            > lambda-environment.json
+
+      - name: Update Lambda code
+        run: |
+          aws lambda update-function-code \
+            --function-name "${{ vars.LAMBDA_FUNCTION_NAME }}" \
+            --zip-file fileb://function.zip \
+            --output text > /dev/null
+          aws lambda wait function-updated \
+            --function-name "${{ vars.LAMBDA_FUNCTION_NAME }}"
+
+      - name: Update Lambda configuration
+        run: |
+          aws lambda update-function-configuration \
+            --function-name "${{ vars.LAMBDA_FUNCTION_NAME }}" \
+            --environment file://lambda-environment.json \
+            --output text > /dev/null
+          aws lambda wait function-updated \
+            --function-name "${{ vars.LAMBDA_FUNCTION_NAME }}"
+          rm -f lambda-environment.json
+
+      - name: Smoke test
+        run: |
+          url="${{ vars.LAMBDA_FUNCTION_URL }}api/v1/health"
+          for attempt in 1 2 3 4 5; do
+            status=$(curl -s -o /tmp/health.json -w '%{http_code}' "$url")
+            if [ "$status" = "200" ]; then
+              echo "Health check passed:"; cat /tmp/health.json; exit 0
+            fi
+            echo "Attempt $attempt: HTTP $status, retrying in 5s..."
+            sleep 5
+          done
+          echo "Health check failed after 5 attempts:"; cat /tmp/health.json 2>/dev/null
+          exit 1

@@ -9,11 +9,16 @@ coverage/
 !.env.example
 
 apps/*/dist/
+apps/*/dist-lambda/
 packages/*/dist/
 
 .supabase/
 supabase/.branches/
 supabase/.temp/
+
+# Lambda packaging output (scripts/package-lambda.mjs) — rebuilt fresh in CI each deploy.
+/.deploy/
+/function.zip
 
 *.log
 .DS_Store
