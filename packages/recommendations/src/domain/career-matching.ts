@@ -95,10 +95,21 @@ export function scoreCareers(input: CareerRecommendationInput): ScoredCareer[] {
     .filter((career) => career.verified)
     .map((career) => {
       const normalizedCareer = normalizeRiasecVector(career.riasec);
-      const interestFit = round((pearsonCorrelation(normalizedProfile, normalizedCareer) + 1) / 2, input.config.roundingScale);
-      const valuesFit = calculateValuesFit(input.profile.workValues, career.workValues, input.config.roundingScale);
+      const interestFit = round(
+        (pearsonCorrelation(normalizedProfile, normalizedCareer) + 1) / 2,
+        input.config.roundingScale,
+      );
+      const valuesFit = calculateValuesFit(
+        input.profile.workValues,
+        career.workValues,
+        input.config.roundingScale,
+      );
       const feasibility = lookupFeasibility(input.profile, career, input.feasibilityRules ?? []);
-      const contextBoost = lookupContextBoost(career.careerId, input.counselorPriorities ?? [], input.config.roundingScale);
+      const contextBoost = lookupContextBoost(
+        career.careerId,
+        input.counselorPriorities ?? [],
+        input.config.roundingScale,
+      );
       const weights = resolveWeights(input.config, valuesFit === undefined);
       const fitScore = round(
         interestFit * weights.interest +
@@ -216,10 +227,18 @@ function calculateValuesFit(
     return undefined;
   }
 
-  return round((pearsonCorrelation(normalizeRiasecVector(profileValues), normalizeRiasecVector(careerValues)) + 1) / 2, roundingScale);
+  return round(
+    (pearsonCorrelation(normalizeRiasecVector(profileValues), normalizeRiasecVector(careerValues)) +
+      1) /
+      2,
+    roundingScale,
+  );
 }
 
-function resolveWeights(config: MatchingConfig, valuesMissing: boolean): CareerFitExplanation["weights"] {
+function resolveWeights(
+  config: MatchingConfig,
+  valuesMissing: boolean,
+): CareerFitExplanation["weights"] {
   if (!valuesMissing) {
     return {
       interest: config.interestWeight,
@@ -255,19 +274,27 @@ function lookupFeasibility(
   return matches[0]?.reachability ?? 0.65;
 }
 
-function lookupContextBoost(careerId: string, priorities: CounselorPriority[], roundingScale: number): number {
+function lookupContextBoost(
+  careerId: string,
+  priorities: CounselorPriority[],
+  roundingScale: number,
+): number {
   const priority = priorities.find((candidate) => candidate.careerId === careerId);
   return round(Math.min(Math.max(priority?.boost ?? 0, 0), 1), roundingScale);
 }
 
-function topRiasecLetters(vector: RiasecVector, tieOrder: MatchingConfig["riasecTieOrder"]): RiasecLetter[] {
+function topRiasecLetters(
+  vector: RiasecVector,
+  tieOrder: MatchingConfig["riasecTieOrder"],
+): RiasecLetter[] {
   const highest = Math.max(...RIASEC_LETTERS.map((letter) => vector[letter]));
   return tieOrder.filter((letter) => vector[letter] === highest);
 }
 
 function adjacentRiasecLetters(letter: RiasecLetter): RiasecLetter[] {
   const index = RIASEC_LETTERS.indexOf(letter);
-  const previous = RIASEC_LETTERS[(index + RIASEC_LETTERS.length - 1) % RIASEC_LETTERS.length] ?? "R";
+  const previous =
+    RIASEC_LETTERS[(index + RIASEC_LETTERS.length - 1) % RIASEC_LETTERS.length] ?? "R";
   const next = RIASEC_LETTERS[(index + 1) % RIASEC_LETTERS.length] ?? "R";
   return [previous, next];
 }
@@ -279,7 +306,9 @@ function takeMatching(
   predicate: (career: ScoredCareer) => boolean,
 ): ScoredCareer[] {
   const takenIds = new Set(alreadyTaken.map((career) => career.entityId));
-  const matches = candidates.filter((career) => !takenIds.has(career.entityId) && predicate(career));
+  const matches = candidates.filter(
+    (career) => !takenIds.has(career.entityId) && predicate(career),
+  );
 
   if (matches.length >= targetCount) {
     return matches.slice(0, targetCount);
@@ -328,7 +357,10 @@ function rebalanceVocationalOuter(
   }
 }
 
-function withRing(careers: ScoredCareer[], ring: NonNullable<ScoredCareer["ring"]>): ScoredCareer[] {
+function withRing(
+  careers: ScoredCareer[],
+  ring: NonNullable<ScoredCareer["ring"]>,
+): ScoredCareer[] {
   return careers.map((career) => ({ ...career, ring }));
 }
 
@@ -338,7 +370,10 @@ function compareScoredCareers(left: ScoredCareer, right: ScoredCareer): number {
     return scoreDifference;
   }
 
-  const titleDifference = normalizeTitle(left.title).localeCompare(normalizeTitle(right.title), "en");
+  const titleDifference = normalizeTitle(left.title).localeCompare(
+    normalizeTitle(right.title),
+    "en",
+  );
   if (titleDifference !== 0) {
     return titleDifference;
   }
