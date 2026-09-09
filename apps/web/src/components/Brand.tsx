@@ -18,7 +18,7 @@ export function Brand() {
       className="inline-flex w-fit shrink-0 items-baseline font-display text-2xl font-bold tracking-tight sm:text-[28px]"
     >
       <span className="text-brand">yuva</span>
-      <span className="text-foreground">Next</span>
+      <span className="text-foreground">Path</span>
     </Link>
   );
 }
