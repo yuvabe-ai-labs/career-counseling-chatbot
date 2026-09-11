@@ -85,7 +85,7 @@ for (const row of rows) {
 
   let occupation = occupationsByCode.get(onetCode);
   if (!occupation) {
-    occupation = { code: onetCode, title: row.B ?? onetCode, values: new Array(6).fill(undefined) };
+    occupation = { code: onetCode, title: row.B ?? onetCode, values: new Array<number | undefined>(6).fill(undefined) };
     occupationsByCode.set(onetCode, occupation);
   }
   occupation.values[letterIndex] = Number(row.G);
