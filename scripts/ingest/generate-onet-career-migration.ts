@@ -35,8 +35,8 @@ function unescapeXml(value: string): string {
 function parseSharedStrings(xml: string): string[] {
   const strings: string[] = [];
   for (const siMatch of xml.matchAll(/<si>(.*?)<\/si>/gs)) {
-    const text = [...siMatch[1].matchAll(/<t[^>]*>(.*?)<\/t>/gs)]
-      .map((textMatch) => unescapeXml(textMatch[1]))
+    const text = [...(siMatch[1] ?? "").matchAll(/<t[^>]*>(.*?)<\/t>/gs)]
+      .map((textMatch) => unescapeXml(textMatch[1] ?? ""))
       .join("");
     strings.push(text);
   }
@@ -50,10 +50,10 @@ function parseSheetRows(xml: string, sharedStrings: string[]): SheetRow[] {
   for (const rowMatch of xml.matchAll(/<row r="(\d+)"[^>]*>(.*?)<\/row>/gs)) {
     if (Number(rowMatch[1]) === 1) continue; // header row
     const row: SheetRow = {};
-    for (const cellMatch of rowMatch[2].matchAll(/<c r="([A-Z]+)\d+"([^>]*)>(?:<v>(.*?)<\/v>)?<\/c>/gs)) {
+    for (const cellMatch of (rowMatch[2] ?? "").matchAll(/<c r="([A-Z]+)\d+"([^>]*)>(?:<v>(.*?)<\/v>)?<\/c>/gs)) {
       const [, column, attrs, rawValue] = cellMatch;
-      if (rawValue === undefined) continue;
-      const isSharedString = /\bt="s"/.test(attrs);
+      if (column === undefined || rawValue === undefined) continue;
+      const isSharedString = /\bt="s"/.test(attrs ?? "");
       row[column] = isSharedString ? (sharedStrings[Number(rawValue)] ?? "") : rawValue;
     }
     rows.push(row);
