@@ -9,7 +9,7 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry: () 
   return (
     <div className="flex min-h-[280px] flex-col items-center justify-center gap-4 text-center">
       <p className="font-display text-lg text-destructive">{message}</p>
-      <Button variant="outline" onClick={onRetry} className="rounded-2xl shadow-none">
+      <Button variant="outline" onClick={onRetry}>
         Try again
       </Button>
     </div>

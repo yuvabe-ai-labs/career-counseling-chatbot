@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { Brand } from "@/components/Brand";
 import { getErrorMessage } from "@/lib/error-messages";
 import { GUARDIAN_CONSENT_TEXT_VERSION } from "../data";
+import { AuthFormCard } from "../components/AuthFormCard";
+import { AuthLayout } from "../components/AuthLayout";
 import { GuardianConsentPanel } from "../components/GuardianConsentPanel";
 import { useRequestGuardianConsent, useVerifyGuardianConsent } from "../hooks/useGuardianConsent";
 import { useSession } from "../state/session-context";
@@ -60,18 +61,19 @@ export function GuardianConsentPage() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col bg-page">
-      <div className="px-6 pt-4 sm:px-10 sm:pt-5">
-        <Brand />
-      </div>
-      <div className="flex flex-1 items-center justify-center p-6">
+    <AuthLayout>
+      <AuthFormCard
+        srHeading="Parent/Guardian consent required"
+        title="Guardian consent"
+        description="Since you're under 18, we need approval from your parent or guardian to continue."
+      >
         <GuardianConsentPanel
           onSendOtp={handleSendOtp}
           onVerify={handleVerify}
           sending={requestConsent.isPending}
           verifying={verifyConsent.isPending}
         />
-      </div>
-    </main>
+      </AuthFormCard>
+    </AuthLayout>
   );
 }

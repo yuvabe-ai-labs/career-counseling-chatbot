@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { SubmitAssessmentResponseRequest } from "@yuvanext/contracts";
+import { createAssessmentSnapshot } from "../api/assessment-snapshot";
 import {
   getNextAssessmentBatch,
   scoreAssessmentRun,
@@ -50,4 +51,13 @@ export function useAssessmentResult(runId: string | null) {
     enabled: runId !== null,
     retry: false,
   });
+}
+
+/**
+ * Not idempotent on the backend (see api/assessment-snapshot.ts) — callers must check
+ * `getStoredProfileSnapshotId()` before calling `mutateAsync`, same guard pattern
+ * `getStoredAssessmentRunId` already uses for `useStartAssessmentRun`.
+ */
+export function useCreateAssessmentSnapshot(sessionId: string, runId: string) {
+  return useMutation({ mutationFn: () => createAssessmentSnapshot(sessionId, runId) });
 }

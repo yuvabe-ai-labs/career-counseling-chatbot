@@ -12,6 +12,8 @@ const JOURNEY_SESSION_ID_KEY = "yuvanext.journeySessionId";
 const PENDING_SESSION_ID_KEY = "yuvanext.pendingSessionId";
 const EMAIL_KEY = "yuvanext.email";
 const ASSESSMENT_RUN_ID_KEY = "yuvanext.assessmentRunId";
+const PROFILE_SNAPSHOT_ID_KEY = "yuvanext.profileSnapshotId";
+const EXPLORE_GATING_CONTEXT_KEY = "yuvanext.exploreGatingContext";
 
 function read(key: string): string | null {
   try {
@@ -65,10 +67,51 @@ export const getStoredAssessmentRunId = () => read(ASSESSMENT_RUN_ID_KEY);
 export const setStoredAssessmentRunId = (runId: string) => write(ASSESSMENT_RUN_ID_KEY, runId);
 export const clearStoredAssessmentRunId = () => remove(ASSESSMENT_RUN_ID_KEY);
 
+/**
+ * The ProfileSnapshot id every recommendation call (career/stream/pathway/...) is keyed on.
+ * `createAssessmentSnapshot` (features/assessment/api/assessment-snapshot.ts) is NOT
+ * idempotent on the backend — each call makes a new snapshot row — so callers must check this
+ * is unset before calling it, exactly like `getStoredAssessmentRunId` guards `startRun` above.
+ */
+export const getStoredProfileSnapshotId = () => read(PROFILE_SNAPSHOT_ID_KEY);
+export const setStoredProfileSnapshotId = (profileSnapshotId: string) =>
+  write(PROFILE_SNAPSHOT_ID_KEY, profileSnapshotId);
+export const clearStoredProfileSnapshotId = () => remove(PROFILE_SNAPSHOT_ID_KEY);
+
+/**
+ * The tab-gating fields (docs/poc/launcher-goal-based-recommendations.md Part 5's
+ * `tabsToShow()`) needed by ExplorePathPage/CareerPage — segment, whether aid was requested,
+ * and (Launcher only) their goal. Stored as plain JSON here rather than re-fetched via
+ * `GET /api/v1/assessment-snapshots`, which requires a Supabase Auth bearer token this app
+ * doesn't implement (see api/assessment-snapshot.ts) — the POST that creates the snapshot
+ * already returns everything needed, so it's captured there once instead.
+ */
+export type ExploreGatingContext = {
+  segment: "explorer" | "pathfinder" | "launcher";
+  wantsAid: boolean;
+  currentGoal: string | undefined;
+};
+
+export function getStoredExploreGatingContext(): ExploreGatingContext | null {
+  const raw = read(EXPLORE_GATING_CONTEXT_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as ExploreGatingContext;
+  } catch {
+    return null;
+  }
+}
+
+export function setStoredExploreGatingContext(context: ExploreGatingContext): void {
+  write(EXPLORE_GATING_CONTEXT_KEY, JSON.stringify(context));
+}
+
 export function clearStoredSession(): void {
   remove(USER_ID_KEY);
   remove(JOURNEY_SESSION_ID_KEY);
   remove(PENDING_SESSION_ID_KEY);
   remove(EMAIL_KEY);
   remove(ASSESSMENT_RUN_ID_KEY);
+  remove(PROFILE_SNAPSHOT_ID_KEY);
+  remove(EXPLORE_GATING_CONTEXT_KEY);
 }

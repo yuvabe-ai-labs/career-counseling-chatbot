@@ -182,8 +182,14 @@ export function RiasecAssessmentPage() {
     setSelectedIndex(targetItem?.responseValue != null ? targetItem.responseValue - 1 : null);
   };
 
-  const handleAdvance = async () => {
-    if (!runId || !item || !progress || selectedIndex === null || submitResponse.isPending) return;
+  /**
+   * `answerIndex` defaults to whatever is in state (the Next/Finish button and the Enter
+   * shortcut), but auto-advance passes the just-picked value explicitly: setSelectedIndex has
+   * not applied yet on that tick, so reading it back from state here would submit the *previous*
+   * answer, or nothing at all on the first question.
+   */
+  const handleAdvance = async (answerIndex: number | null = selectedIndex) => {
+    if (!runId || !item || !progress || answerIndex === null || submitResponse.isPending) return;
     setPageError(null);
     try {
       const saved = await submitResponse.mutateAsync({
@@ -192,7 +198,7 @@ export function RiasecAssessmentPage() {
         // (SubmitAssessmentResponseRequestSchema) is just index + 1. Works identically whether
         // this item was already answered (editing — the backend upserts in place) or is the
         // current frontier item (answering for the first time).
-        responseValue: selectedIndex + 1,
+        responseValue: answerIndex + 1,
       });
       queryClient.setQueryData(assessmentNextQueryKey(runId), saved.next);
 
@@ -211,6 +217,22 @@ export function RiasecAssessmentPage() {
     } catch (error) {
       setPageError(getErrorMessage(error, "We couldn't save your answer. Please try again."));
     }
+  };
+
+  /**
+   * A deliberate answer: record it, save it, and move on — the student no longer has to reach for
+   * Next after every question (Next still works, and is what's used when stepping forward through
+   * a question that was already answered).
+   *
+   * This only ever runs from a real slider interaction, never on load, which is what keeps the
+   * distinction the assessment depends on: a freshly-loaded question renders its thumb at
+   * "Unsure" because that's the neutral resting position, but nothing is saved and nothing
+   * advances until the student actually acts. Choosing Unsure on purpose does come through here,
+   * so it saves and advances like any other answer.
+   */
+  const handleSelect = (index: number) => {
+    setSelectedIndex(index);
+    void handleAdvance(index);
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -261,13 +283,13 @@ export function RiasecAssessmentPage() {
                       {String(questionNumber).padStart(2, "0")}
                     </span>
                     <span className="h-8 w-px shrink-0 bg-brand/20" aria-hidden="true" />
-                    <p className="min-w-0 flex-1 text-left font-display text-lg font-bold leading-snug tracking-tight text-foreground sm:text-xl md:text-2xl">
+                    <p className="min-w-0 flex-1 text-left font-display text-lg font-medium leading-snug tracking-tight text-foreground sm:text-xl md:text-2xl">
                       {item.promptText}
                     </p>
                   </div>
                   <RiasecSlider
                     value={selectedIndex}
-                    onChange={setSelectedIndex}
+                    onChange={handleSelect}
                     label={item.promptText ?? `Question ${questionNumber}`}
                   />
                 </article>
@@ -291,7 +313,7 @@ export function RiasecAssessmentPage() {
                   variant="outline"
                   onClick={handlePrevious}
                   disabled={!canGoBack}
-                  className="h-[49px] w-[151px] gap-2 rounded-2xl text-base font-semibold shadow-none"
+                  className="w-[170px]"
                 >
                   <ArrowLeft className="size-[18px]" aria-hidden="true" />
                   Previous
@@ -301,7 +323,7 @@ export function RiasecAssessmentPage() {
                   ref={advanceButtonRef}
                   onClick={() => void handleAdvance()}
                   disabled={selectedIndex === null || submitResponse.isPending}
-                  className="h-[49px] w-[180px] gap-2 rounded-2xl text-base font-semibold shadow-none"
+                  className="w-[170px]"
                 >
                   {submitResponse.isPending ? "Saving…" : isLastQuestion ? "Finish" : "Next"}
                   {submitResponse.isPending ? (

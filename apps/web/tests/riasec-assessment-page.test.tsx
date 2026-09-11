@@ -1,5 +1,5 @@
 import { QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -13,11 +13,7 @@ import {
 } from "@/lib/storage";
 import { RiasecAssessmentPage, SessionProvider } from "@/features/assessment";
 
-const {
-  startAssessmentRun,
-  getNextAssessmentBatch,
-  submitAssessmentResponse,
-} = vi.hoisted(() => ({
+const { startAssessmentRun, getNextAssessmentBatch, submitAssessmentResponse } = vi.hoisted(() => ({
   startAssessmentRun: vi.fn(),
   getNextAssessmentBatch: vi.fn(),
   submitAssessmentResponse: vi.fn(),
@@ -72,7 +68,7 @@ const batch = (
   nextPosition: number,
   items: (typeof ITEM_1)[],
   answered: number,
-  answeredItems: ((typeof ITEM_1) & { responseValue: number | null })[] = [],
+  answeredItems: (typeof ITEM_1 & { responseValue: number | null })[] = [],
 ) => ({
   run: RUN,
   progress: { answered, total: 3, nextPosition, isComplete: nextPosition >= 3 },
@@ -158,10 +154,12 @@ describe("RiasecAssessmentPage", () => {
     await user.click(screen.getByRole("button", { name: "Love it" })); // index 4 -> responseValue 5
     await user.click(screen.getByRole("button", { name: /next/i }));
 
-    await waitFor(() => expect(submitAssessmentResponse).toHaveBeenCalledWith("run-1", {
-      itemId: "item-1",
-      responseValue: 5,
-    }));
+    await waitFor(() =>
+      expect(submitAssessmentResponse).toHaveBeenCalledWith("run-1", {
+        itemId: "item-1",
+        responseValue: 5,
+      }),
+    );
     expect(await screen.findByText(ITEM_2.promptText)).toBeInTheDocument();
     expect(screen.getByText("Question 2 of 3")).toBeInTheDocument();
   });
@@ -173,7 +171,7 @@ describe("RiasecAssessmentPage", () => {
    * event.target was *any* HTMLButtonElement, which silently also blocked the single most common
    * post-answer focus target, not just the Next/Finish button it was meant to guard against.
    */
-  it("advances on Enter after answering via a click, even though the clicked label keeps focus", async () => {
+  it("saves and advances on its own when an answer is picked, with no Next click", async () => {
     setStoredUserId("user-id");
     setStoredJourneySessionId("session-id");
     setStoredAssessmentRunId("run-1");
@@ -186,15 +184,14 @@ describe("RiasecAssessmentPage", () => {
     renderAt("/riasec-assessment");
 
     await screen.findByText(ITEM_1.promptText);
-    const loveIt = screen.getByRole("button", { name: "Love it" });
-    await user.click(loveIt); // leaves focus on this button, same as a real click would
-    expect(loveIt).toHaveFocus();
-    await user.keyboard("{Enter}");
+    await user.click(screen.getByRole("button", { name: "Love it" }));
 
-    await waitFor(() => expect(submitAssessmentResponse).toHaveBeenCalledWith("run-1", {
-      itemId: "item-1",
-      responseValue: 5,
-    }));
+    await waitFor(() =>
+      expect(submitAssessmentResponse).toHaveBeenCalledWith("run-1", {
+        itemId: "item-1",
+        responseValue: 5,
+      }),
+    );
     expect(await screen.findByText(ITEM_2.promptText)).toBeInTheDocument();
   });
 
@@ -205,7 +202,11 @@ describe("RiasecAssessmentPage", () => {
     getNextAssessmentBatch.mockResolvedValue(batch(2, [ITEM_3], 2));
     submitAssessmentResponse.mockResolvedValue({
       response: { id: "resp-3" },
-      next: { run: RUN, progress: { answered: 3, total: 3, nextPosition: 3, isComplete: true }, items: [] },
+      next: {
+        run: RUN,
+        progress: { answered: 3, total: 3, nextPosition: 3, isComplete: true },
+        items: [],
+      },
     });
     const user = userEvent.setup();
     renderAt("/riasec-assessment");
@@ -213,9 +214,81 @@ describe("RiasecAssessmentPage", () => {
     await screen.findByText(ITEM_3.promptText);
     expect(screen.getByRole("button", { name: /finish/i })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Dislike" }));
-    await user.click(screen.getByRole("button", { name: /finish/i }));
 
     expect(await screen.findByText("RIASEC results screen")).toBeInTheDocument();
+  });
+
+  /**
+   * The slider parks its thumb at "Unsure" on a fresh question because that's the neutral
+   * resting position — it is emphatically not an answer of Unsure. These four cover the seam
+   * between the two, which is the thing most likely to regress.
+   */
+  const arriveAtItem1 = async () => {
+    setStoredUserId("user-id");
+    setStoredJourneySessionId("session-id");
+    setStoredAssessmentRunId("run-1");
+    getNextAssessmentBatch.mockResolvedValue(batch(0, [ITEM_1], 0));
+    submitAssessmentResponse.mockResolvedValue({
+      response: { id: "resp-1" },
+      next: batch(1, [ITEM_2], 1),
+    });
+    renderAt("/riasec-assessment");
+    await screen.findByText(ITEM_1.promptText);
+  };
+
+  it("does not count the slider's initial Unsure position as an answer", async () => {
+    await arriveAtItem1();
+
+    expect(screen.getByRole("slider")).toHaveAttribute("aria-valuetext", "Unsure");
+    // Nothing saved, nothing advanced, and Next has nothing to submit.
+    expect(submitAssessmentResponse).not.toHaveBeenCalled();
+    expect(screen.getByText(ITEM_1.promptText)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /next/i })).toBeDisabled();
+  });
+
+  it("saves Unsure and advances when the student deliberately picks it", async () => {
+    const user = userEvent.setup();
+    await arriveAtItem1();
+
+    await user.click(screen.getByRole("button", { name: "Unsure" }));
+
+    await waitFor(() =>
+      expect(submitAssessmentResponse).toHaveBeenCalledWith("run-1", {
+        itemId: "item-1",
+        responseValue: 3,
+      }),
+    );
+    expect(await screen.findByText(ITEM_2.promptText)).toBeInTheDocument();
+  });
+
+  it("commits Unsure when the track is clicked without the value changing", async () => {
+    await arriveAtItem1();
+
+    // A range input fires no change event for a click on the value it already shows, so this is
+    // the path that would otherwise make a deliberate Unsure unreachable from the track itself.
+    fireEvent.click(screen.getByRole("slider"));
+
+    await waitFor(() =>
+      expect(submitAssessmentResponse).toHaveBeenCalledWith("run-1", {
+        itemId: "item-1",
+        responseValue: 3,
+      }),
+    );
+  });
+
+  it("submits once when a drag both changes the value and fires a click", async () => {
+    await arriveAtItem1();
+
+    const slider = screen.getByRole("slider");
+    fireEvent.change(slider, { target: { value: "4" } });
+    fireEvent.click(slider);
+
+    await screen.findByText(ITEM_2.promptText);
+    expect(submitAssessmentResponse).toHaveBeenCalledTimes(1);
+    expect(submitAssessmentResponse).toHaveBeenCalledWith("run-1", {
+      itemId: "item-1",
+      responseValue: 5,
+    });
   });
 
   it("Previous is disabled on the first question", async () => {
@@ -262,7 +335,7 @@ describe("RiasecAssessmentPage", () => {
     expect(screen.getByRole("button", { name: /previous/i })).toBeDisabled();
   });
 
-  it("editing a past answer and clicking Next re-submits the new value and continues from the review point, not the true frontier", async () => {
+  it("editing a past answer re-submits the new value and continues from the review point, not the true frontier", async () => {
     setStoredUserId("user-id");
     setStoredJourneySessionId("session-id");
     setStoredAssessmentRunId("run-1");
@@ -289,7 +362,6 @@ describe("RiasecAssessmentPage", () => {
     await screen.findByText(ITEM_1.promptText);
 
     await user.click(screen.getByRole("button", { name: "Dislike" })); // index 0 -> responseValue 1
-    await user.click(screen.getByRole("button", { name: /next/i }));
 
     await waitFor(() =>
       expect(submitAssessmentResponse).toHaveBeenCalledWith("run-1", {

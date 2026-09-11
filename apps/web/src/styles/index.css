@@ -129,6 +129,21 @@
 }
 
 /*
+ * The auth hero-card's own fill — Figma node 462:3034 ("hero-card"), exact stops. Deliberately
+ * separate from .bg-hero-gradient above (135deg, post-auth screens): this one runs left-to-right
+ * so the lavender end lands behind the illustration column rather than in a corner.
+ */
+.bg-auth-hero-gradient {
+  background-image: linear-gradient(
+    90deg,
+    rgb(251, 251, 251) 0%,
+    rgb(252, 251, 253) 31.971%,
+    rgb(253, 251, 255) 63.942%,
+    rgb(240, 236, 255) 100%
+  );
+}
+
+/*
  * The one styled-scrollbar pattern for a scrollable region that should read as "on brand"
  * instead of the browser's unstyled default (IntakeQuestionsPage's fields column originally sat
  * next to a separate decorative purple bar precisely because the real scrollbar next to it was
@@ -137,16 +152,354 @@
  * WebKit that doesn't yet read scrollbar-color.
  */
 .scrollbar-brand {
+  /* Firefox: thumb colour then track colour. It renders its own shape, so the pill ends below
+     are a Chromium/WebKit refinement rather than something Firefox can be made to match. */
   scrollbar-width: thin;
-  scrollbar-color: var(--brand) transparent;
+  scrollbar-color: var(--brand) var(--muted);
 }
 .scrollbar-brand::-webkit-scrollbar {
-  width: 8px;
+  width: 14px;
 }
+/* No stepper arrows at either end — the bar is track and thumb only. */
+.scrollbar-brand::-webkit-scrollbar-button {
+  display: none;
+  height: 0;
+  width: 0;
+}
+/*
+ * A visible light-lavender capsule rather than an invisible rail: --muted is the same token the
+ * rest of the app uses for a faint surface, so it reads clearly against the page gradient
+ * without competing with the questions. Inset equally from the panel's top and bottom, so the
+ * track stays centred in the scroll area and reads as a compact pill instead of a full-height
+ * line. It's still the real scrollbar for this panel — nothing here is decorative.
+ */
 .scrollbar-brand::-webkit-scrollbar-track {
-  background: transparent;
+  background-color: var(--muted);
+  border-radius: 9999px;
+  margin-block: 28px;
 }
+/*
+ * Same width as the track, so the purple sits inside the capsule and the lavender shows above
+ * and below it. min-height only sets a floor for grabbability — the thumb's actual length is the
+ * browser's honest representation of how much content is scrollable, so it shortens as more
+ * questions are added and there is no way to cap it without faking the bar.
+ */
 .scrollbar-brand::-webkit-scrollbar-thumb {
   background-color: var(--brand);
   border-radius: 9999px;
+  min-height: 36px;
+}
+
+/*
+ * Native <input type="date"> (ProfileFieldsForm's "Date of birth" field) renders its empty
+ * dd/mm/yyyy placeholder through its own internal UA shadow-DOM segments, which don't inherit
+ * the input's font-family/weight by default in Chromium — they fall back to the browser's own
+ * default UI font, which reads visibly heavier/bolder than the Inter-400 placeholder text every
+ * other field uses. Forcing `font: inherit` on each segment matches it to the rest of the form.
+ */
+input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+input[type="date"]::-webkit-datetime-edit-text,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  font: inherit;
+  color: inherit;
+}
+
+/*
+ * …but while the field is still empty, that inherited colour is the *value* colour, which left
+ * the dd-mm-yyyy hint reading as filled-in text. With no value it's a placeholder, so it takes
+ * the same --muted-foreground every other field's `placeholder:text-muted-foreground` uses. The
+ * class is applied only while the input is empty (see ProfileFieldsForm) rather than keyed off
+ * :invalid, which an empty non-required date input isn't. Selector repeats the [type="date"]
+ * element to outrank the rule above; only the colour changes, never the dd-mm-yyyy format.
+ */
+input[type="date"].date-placeholder-empty::-webkit-datetime-edit,
+input[type="date"].date-placeholder-empty::-webkit-datetime-edit-fields-wrapper,
+input[type="date"].date-placeholder-empty::-webkit-datetime-edit-text,
+input[type="date"].date-placeholder-empty::-webkit-datetime-edit-day-field,
+input[type="date"].date-placeholder-empty::-webkit-datetime-edit-month-field,
+input[type="date"].date-placeholder-empty::-webkit-datetime-edit-year-field {
+  color: var(--muted-foreground);
+}
+
+/*
+ * Career ring map (features/recommendations/components/CareerRingMap.tsx) — ported from the
+ * user-supplied HTML/CSS/JS prototype (a radial career map: 3 concentric zoomable rings, dot
+ * nodes per ring, center hub). `container-type: size` + `cqmin` units (rather than the
+ * prototype's fixed 350px phone-frame pixels) is what makes the whole radial trig layout
+ * responsive: cqmin is 1% of the container's own smaller dimension, so it composes correctly
+ * inside calc()+cos()/sin() and rescales automatically at every breakpoint with zero JS
+ * measurement. Dot nodes themselves are conditionally rendered in React (only the active
+ * zoom stage's items exist in the DOM at a time), so — unlike the prototype, which always
+ * rendered all 3 stages' nodes and toggled visibility per zoom class — there's no per-stage
+ * visibility CSS needed here, only the entrance animation below.
+ */
+.career-ring-map {
+  container-type: size;
+  container-name: ring-map;
+  width: clamp(280px, 60vmin, 560px);
+  height: clamp(280px, 60vmin, 560px);
+  margin: 0 auto;
+  position: relative;
+  touch-action: none;
+  user-select: none;
+}
+
+.career-ring-map .ring-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(89, 42, 199, 0.07), rgba(89, 42, 199, 0) 70%);
+  pointer-events: none;
+}
+
+.career-ring-map .ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  transform: translate3d(-50%, -50%, 0);
+  transition:
+    transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.4s ease,
+    border-color 0.4s ease,
+    box-shadow 0.4s ease;
+  cursor: pointer;
+}
+
+.career-ring-map .ring-outer {
+  width: 100cqmin;
+  height: 100cqmin;
+  border: 1.5px solid var(--border);
+}
+.career-ring-map .ring-middle {
+  width: 74cqmin;
+  height: 74cqmin;
+  border: 1.5px solid #cfc6f1;
+}
+.career-ring-map .ring-inner {
+  width: 48cqmin;
+  height: 48cqmin;
+  border: 2px solid #b9a8f2;
+}
+
+/*
+ * Entrance reveal: the three rings draw themselves in from the outside in when the screen is
+ * entered, so the map reads as being generated rather than just appearing.
+ *
+ * Deliberately an animation rather than a transition, and with fill-mode `backwards` so each
+ * ring holds the `from` state (invisible) through its delay instead of flashing in early. Once
+ * it finishes, no fill is retained and the rings fall back to the normal cascade below, which is
+ * what keeps the zoom states authoritative — a ring's scale/opacity while zooming is still
+ * purely the [data-zoom] rules. The animation runs once on mount; changing zoom re-renders but
+ * neither re-creates these elements nor toggles their class, so it never replays mid-session.
+ *
+ * The keyframes end on exactly the [data-zoom="1"] transform (translate3d only, no scale), so
+ * there is no snap at the hand-off.
+ */
+@keyframes career-ring-in {
+  from {
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) scale(0.86);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) scale(1);
+  }
+}
+.career-ring-map.is-revealing .ring-inner {
+  animation: career-ring-in 460ms cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+}
+.career-ring-map.is-revealing .ring-middle {
+  animation: career-ring-in 460ms cubic-bezier(0.22, 0.61, 0.36, 1) 140ms backwards;
+}
+.career-ring-map.is-revealing .ring-outer {
+  animation: career-ring-in 460ms cubic-bezier(0.22, 0.61, 0.36, 1) 280ms backwards;
+}
+/*
+ * Promotion and the backdrop-filter suspension below are scoped to .is-revealing, which the
+ * component drops once the reveal is over: will-change held permanently costs memory for no
+ * benefit, and the blur is wanted again as soon as nothing is moving behind it.
+ */
+.career-ring-map.is-revealing .ring {
+  will-change: transform, opacity;
+}
+/*
+ * The single biggest cost during the reveal: every label is a backdrop-filter surface, so each
+ * one re-samples what's behind it on every frame while the rings scale. Suspended for the ~740ms
+ * of the reveal and restored afterwards -- the labels are already 92% opaque white, so the blur
+ * is barely perceptible while they are fading in anyway.
+ */
+.career-ring-map.is-revealing .dot-label {
+  backdrop-filter: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .career-ring-map.is-revealing .ring-inner,
+  .career-ring-map.is-revealing .ring-middle,
+  .career-ring-map.is-revealing .ring-outer,
+  .career-ring-map.is-revealing .dot-node {
+    animation: none;
+  }
+}
+
+.career-ring-map[data-zoom="1"] .ring-outer {
+  border-color: var(--brand);
+  box-shadow: 0 0 15px rgba(89, 42, 199, 0.15);
+}
+.career-ring-map[data-zoom="2"] .ring-outer,
+.career-ring-map[data-zoom="3"] .ring-outer {
+  opacity: 0.35;
+  border-style: dashed;
+}
+.career-ring-map[data-zoom="2"] .ring-middle {
+  transform: translate3d(-50%, -50%, 0) scale(1.185);
+  border-color: var(--brand);
+  box-shadow: 0 0 18px rgba(89, 42, 199, 0.18);
+}
+.career-ring-map[data-zoom="3"] .ring-middle {
+  opacity: 0.35;
+  border-style: dashed;
+  transform: translate3d(-50%, -50%, 0) scale(1.28);
+}
+.career-ring-map[data-zoom="2"] .ring-inner {
+  transform: translate3d(-50%, -50%, 0) scale(1.08);
+}
+.career-ring-map[data-zoom="3"] .ring-inner {
+  transform: translate3d(-50%, -50%, 0) scale(1.55);
+  border-color: var(--brand);
+  box-shadow: 0 0 20px rgba(89, 42, 199, 0.2);
+}
+
+.career-ring-map .center-hub {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 26cqmin;
+  height: 26cqmin;
+  min-width: 64px;
+  min-height: 64px;
+  transform: translate3d(-50%, -50%, 0);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1.5px solid #b9a8f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  z-index: 2;
+  box-shadow: 0 7px 22px rgba(64, 43, 150, 0.08);
+  transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.career-ring-map[data-zoom="2"] .center-hub {
+  transform: translate3d(-50%, -50%, 0) scale(0.88);
+}
+.career-ring-map[data-zoom="3"] .center-hub {
+  transform: translate3d(-50%, -50%, 0) scale(1.04);
+  border-color: #a995ef;
+}
+
+/*
+ * A career item is a single column -- dot on top, label directly under it -- whose *centre* is
+ * translated onto the item's point on the active ring's circumference. Centring the whole column
+ * there is what produces the intended ring -> dot -> label reading with no extra offsets: the
+ * column is 12px dot + 6px gap + ~39px label = ~57px tall, so the ring line lands 9px above the
+ * label's centre, i.e. it passes through the label's top third (the label visibly sits *on* the
+ * ring) while the dot clears the line by 13px just above it.
+ *
+ * Everything here is a function of --a, --r and the container size, so the same rule places all
+ * three rings' items and rescales with the map; there are no per-item or per-side values.
+ */
+.career-ring-map .dot-node {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  z-index: 5;
+  transform: translate3d(
+    calc(-50% + var(--r) * cos(var(--a))),
+    calc(-50% + var(--r) * sin(var(--a))),
+    0
+  );
+  animation: career-dot-in 380ms ease-out both;
+}
+/*
+ * Opacity only -- deliberately not transform. This used to interpolate from a centred scale(0)
+ * out to the final calc(cos/sin) radial position in cqmin units, which meant every label flew
+ * outward while the browser re-resolved container-relative trig each frame: both the jitter and
+ * the "labels recalculating into position" came from here. The dot's radial transform is now
+ * purely static, so a career item fades in exactly where it will stay.
+ */
+@keyframes career-dot-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.career-ring-map.is-revealing .dot-node {
+  animation-delay: 280ms;
+}
+.career-ring-map .dot {
+  width: 12px;
+  height: 12px;
+  background: var(--brand);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(89, 42, 199, 0.4);
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
+}
+.career-ring-map .dot-node:hover .dot,
+.career-ring-map .dot-node[data-selected="true"] .dot {
+  transform: scale(1.45);
+  background: #ff5e7e;
+}
+
+/*
+ * Every label is one fixed box, identical for all careers on all three rings: the same width and
+ * the same two-line height whether the title is "Neuropsychologists" or "Philosophy and Religion
+ * Teachers, Postsecondary". Short titles centre inside the two-line box rather than shrinking it,
+ * which is what keeps the ring visually regular.
+ *
+ * Height is min-height, not height, and there is deliberately no overflow/line-clamp: the
+ * requirement not to truncate or clip a career name outranks uniformity for the rare O*NET title
+ * long enough to need a third line (the catalog runs to ~105 characters, though the titles the
+ * recommender actually surfaces sit around 45). Everything realistic fits two lines -- the 200px
+ * cap holds ~29 characters a line at this size -- so the uniform case is the normal one.
+ *
+ * Width scales with the map (cqmin) between a floor and that cap, so labels stay proportionate as
+ * the viewport changes instead of being fixed to one screen's pixels.
+ */
+.career-ring-map .dot-label {
+  width: clamp(118px, 36cqmin, 200px);
+  min-height: calc(2.6em + 10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-wrap: balance;
+  font-size: 0.7rem;
+  line-height: 1.3;
+  font-weight: 700;
+  color: var(--foreground);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(4px);
+  padding: 4px 9px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e3dcfc;
+  transition: border-color 0.2s ease;
+}
+.career-ring-map .dot-node:hover .dot-label,
+.career-ring-map .dot-node[data-selected="true"] .dot-label {
+  border-color: #ff5e7e;
+  color: #ff5e7e;
 }

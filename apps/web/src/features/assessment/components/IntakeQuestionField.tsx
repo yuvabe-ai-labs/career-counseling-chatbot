@@ -39,7 +39,8 @@ function parseOptionValues(options: unknown): string[] {
 // panel, unlike e.g. ProfileFieldsForm's fields, which sit inside their own opaque white card —
 // the shared Input/Combobox's default bg-transparent would otherwise show that purple through,
 // not the crisp white box the design calls for.
-const fieldInputClass = "h-12 w-full rounded-[8px] border-input bg-background px-4 text-sm shadow-none";
+const fieldInputClass =
+  "h-12 w-full rounded-[8px] border-input bg-background px-4 text-sm shadow-none";
 
 export interface IntakeQuestionFieldProps {
   question: IntakeQuestion;
@@ -66,10 +67,14 @@ export function IntakeQuestionField({
   const optionValues = parseOptionValues(question.options);
 
   return (
-    <div className="flex w-full flex-col items-start gap-4">
+    // gap-2 (was gap-4) between the question and its input, so more questions sit in the panel
+    // at once without the pair reading as two loose elements.
+    <div className="flex w-full flex-col items-start gap-2">
+      {/* 16px against the answer fields' 14px — the size difference, on top of font-medium,
+          is what keeps the question reading as the question. */}
       <label
         htmlFor={fieldId}
-        className="font-display text-xl font-medium text-foreground not-italic"
+        className="font-display text-base font-medium text-foreground not-italic"
       >
         {displayIndex}.{question.promptText}
       </label>

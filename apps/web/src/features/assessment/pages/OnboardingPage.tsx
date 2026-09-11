@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { EducationStage } from "@yuvanext/contracts";
-import { Brand, StepIndicator } from "@/components/Brand";
-import { PromoPanel } from "@/components/PromoPanel";
 import { ApiRequestError } from "@/lib/api-client";
 import { getErrorMessage } from "@/lib/error-messages";
 import {
@@ -11,6 +9,8 @@ import {
   setStoredPendingSessionId,
 } from "@/lib/storage";
 import { AttemptsExhaustedModal } from "../components/AttemptsExhaustedModal";
+import { AuthFormCard } from "../components/AuthFormCard";
+import { AuthLayout } from "../components/AuthLayout";
 import { GuardianConsentModal } from "../components/GuardianConsentModal";
 import { ProfileFieldsForm } from "../components/ProfileFieldsForm";
 import { SetPasswordForm } from "../components/SetPasswordForm";
@@ -380,79 +380,43 @@ export function OnboardingPage() {
 
   return (
     <>
-      <main className="h-screen overflow-hidden bg-page">
-        {/* Figma node 139:3935 — the left column sits one shade off the white
-          "surface" cards inside it (see --card in index.css). */}
-        <div className="h-full w-full bg-card">
-          {/* Even 50/50 split, by request — Figma's own 648/792 columns are intentionally not replicated here. */}
-          <div className="grid h-full min-h-0 grid-cols-1 lg:grid-cols-2">
-            <div
-              key={step}
-              className="grid min-h-0 grid-rows-[auto_1fr] overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-500"
-            >
-              {/* Brand/StepIndicator used to sit flush against this row's bottom edge (all the
-                  vertical space was padding-top, none below) — pt is now split with a matching
-                  pb so the row's total height (and everything below it) is unchanged, but the
-                  content itself sits centered within it instead of pinned to the bottom.
-                  items-center (was items-start) keeps the two elements aligned to each other
-                  now that there's room on both sides. */}
-              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-6 pt-4 pb-2 sm:px-10 sm:pt-6 lg:px-14 lg:pt-10 lg:pb-4">
-                <Brand />
-                <StepIndicator step={step} totalSteps={2} />
-              </div>
-
-              <div className="min-h-0">
-                {step === 1 ? (
-                  <>
-                    <ProfileFieldsForm
-                      value={profile}
-                      onChange={setProfile}
-                      onNext={() => void handleProfileNext()}
-                    />
-                    {stepOneError ? (
-                      <p className="px-6 pb-6 font-display text-xs font-normal text-destructive sm:px-10 lg:px-14">
-                        {stepOneError}
-                      </p>
-                    ) : null}
-                  </>
-                ) : (
-                  // Figma node 264:1097 ("Password standard") reuses step 1's "Tell us about
-                  // yourself" / "Signup" heading verbatim — same apparent copy-leftover as the
-                  // rest of this design, so this keeps step-appropriate copy instead.
-                  <div className="flex h-full flex-col overflow-y-auto px-6 py-6 sm:px-10 sm:py-8 lg:px-14 lg:pt-4 lg:pb-4">
-                    <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl lg:text-[36px] lg:leading-[1.2]">
-                      Create your password
-                    </h1>
-                    {/* No max-w-sm here (unlike SignInPage's shorter equivalent) — the minor-flow
-                        copy is long enough that a ~24rem cap wrapped it early, leaving the rest
-                        of this column's width empty for two lines. This lets it use the same
-                        full width as the heading/card below instead. */}
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      {isMinorFlow
-                        ? "Your parent or guardian has verified this signup. Set a password to finish creating your account."
-                        : "Set a password to finish creating your account."}
-                    </p>
-
-                    <div className="mt-6 rounded-2xl border border-input bg-background p-6 sm:p-8">
-                      <SetPasswordForm
-                        email={email}
-                        onEmailChange={setEmail}
-                        onSubmit={handleSetPassword}
-                        submitting={isSigningUp}
-                        emailError={emailAvailabilityError}
-                        onEmailErrorClear={() => setEmailAvailabilityError(null)}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="hidden min-h-0 lg:block">
-              <PromoPanel />
-            </div>
-          </div>
-        </div>
-      </main>
+      {/* Both steps are the same card — only its contents (and the step dot that's filled)
+          differ. contentKey replays the column's entrance animation on the step change. */}
+      <AuthLayout contentKey={step}>
+        {step === 1 ? (
+          <AuthFormCard srHeading="Tell us about yourself" title="Sign Up" step={1} totalSteps={2}>
+            <ProfileFieldsForm
+              value={profile}
+              onChange={setProfile}
+              onNext={() => void handleProfileNext()}
+            />
+            {stepOneError ? (
+              <p className="font-display text-xs font-normal text-destructive">{stepOneError}</p>
+            ) : null}
+          </AuthFormCard>
+        ) : (
+          <AuthFormCard
+            srHeading="Create your password"
+            title="Sign Up"
+            step={2}
+            totalSteps={2}
+            description={
+              isMinorFlow
+                ? "Your parent or guardian has verified this signup. Set a password to finish creating your account."
+                : "Set a password to finish creating your account."
+            }
+          >
+            <SetPasswordForm
+              email={email}
+              onEmailChange={setEmail}
+              onSubmit={handleSetPassword}
+              submitting={isSigningUp}
+              emailError={emailAvailabilityError}
+              onEmailErrorClear={() => setEmailAvailabilityError(null)}
+            />
+          </AuthFormCard>
+        )}
+      </AuthLayout>
       {showConsentModal ? (
         <GuardianConsentModal
           value={guardianState}

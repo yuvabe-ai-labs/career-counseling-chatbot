@@ -15,7 +15,7 @@ export const GUARDIAN_CONSENT_TEXT_VERSION = "v1";
 /** Display labels for EducationStageSchema (packages/contracts/src/profile.ts) — not in the prototype, required by the real contract. */
 export const EDUCATION_STAGE_OPTIONS: { value: EducationStage; label: string }[] = [
   { value: "school", label: "In school" },
-  { value: "higher_secondary", label: "Higher secondary (11th / 12th)" },
+  { value: "higher_secondary", label: "Higher secondary" },
   { value: "college", label: "In college" },
   { value: "graduate", label: "Graduate" },
   { value: "working", label: "Working" },

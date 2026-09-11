@@ -8,13 +8,19 @@ import innerRing from "@/assets/riasec-coin-inner-ring.svg";
 import mainFace from "@/assets/riasec-coin-main-face.svg";
 import outerRim from "@/assets/riasec-coin-outer-rim.svg";
 import { AppHeader } from "@/components/AppHeader";
+import { flowCardBandClass, flowCardClass } from "@/components/flow-card";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
 import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/lib/error-messages";
-import { getStoredAssessmentRunId } from "@/lib/storage";
+import {
+  getStoredAssessmentRunId,
+  getStoredProfileSnapshotId,
+  setStoredExploreGatingContext,
+  setStoredProfileSnapshotId,
+} from "@/lib/storage";
 import { cn } from "@/lib/utils";
-import { useAssessmentResult } from "../hooks/useAssessment";
+import { useAssessmentResult, useCreateAssessmentSnapshot } from "../hooks/useAssessment";
 import { useSession } from "../state/session-context";
 
 /**
@@ -29,6 +35,21 @@ import { useSession } from "../state/session-context";
  * normalizedScores (scoreAssessmentResponses, packages/assessment/src/domain/scoring.ts) — none
  * of it is computed or hardcoded here.
  */
+
+/**
+ * `ProfileSnapshot.intakeSummary` entries are stored as `{ value: "..." }` (confirmed against
+ * real assessment.profile_snapshots rows — verified via psql, e.g. `current_goal:
+ * { value: "skill_building" }`), not plain scalars, so a naive `typeof intakeSummary[key] ===
+ * "string"` check always fails on real data.
+ */
+function readIntakeAnswer(intakeSummary: Record<string, unknown>, key: string): string | undefined {
+  const entry = intakeSummary[key];
+  if (typeof entry === "string") return entry;
+  if (entry && typeof entry === "object" && "value" in entry && typeof entry.value === "string") {
+    return entry.value;
+  }
+  return undefined;
+}
 
 const TRAIT_ORDER: { scale: RiasecScale; label: string; Icon: LucideIcon }[] = [
   { scale: "R", label: "Realistic", Icon: House },
@@ -45,6 +66,8 @@ export function RiasecResultsPage() {
   const [runId] = useState(() => getStoredAssessmentRunId());
 
   const resultQuery = useAssessmentResult(runId);
+  const createSnapshot = useCreateAssessmentSnapshot(session.journeySessionId ?? "", runId ?? "");
+  const [isNavigating, setIsNavigating] = useState(false);
 
   if (!session.userId || !session.journeySessionId) {
     return <Navigate to="/" replace />;
@@ -55,10 +78,35 @@ export function RiasecResultsPage() {
 
   const result = resultQuery.data?.result ?? null;
 
+  /**
+   * `createAssessmentSnapshot` isn't idempotent on the backend (a fresh snapshot row every
+   * call) — guarded here by only ever calling it once, the first time this button is used,
+   * and reusing the stored id on every visit after that.
+   */
+  const handleExplorePath = async () => {
+    setIsNavigating(true);
+    try {
+      if (!getStoredProfileSnapshotId()) {
+        const { snapshot } = await createSnapshot.mutateAsync();
+        setStoredProfileSnapshotId(snapshot.snapshotId);
+        setStoredExploreGatingContext({
+          segment: snapshot.segment,
+          wantsAid: snapshot.wantsAid,
+          currentGoal: readIntakeAnswer(snapshot.intakeSummary, "current_goal"),
+        });
+      }
+      void navigate("/explore-path");
+    } catch {
+      // Snapshot creation failed — stay on this page rather than navigating somewhere that
+      // has no profileSnapshotId to work with; the button's error state (below) explains it.
+      setIsNavigating(false);
+    }
+  };
+
   return (
-    <main className="flex min-h-screen flex-col bg-page">
+    <main className="flex min-h-screen flex-col bg-page lg:h-screen lg:overflow-hidden">
       <AppHeader />
-      <div className="flex flex-1 items-center justify-center px-6 py-10 sm:px-8 sm:py-14 lg:py-[56px]">
+      <div className={flowCardBandClass}>
         {/* Page background stays bg-page (unchanged) — only this box's own fill switches from a
             flat bg-[rgba(224,215,250,0.37)] to bg-hero-gradient (index.css), the same diagonal
             wash HomePage/IntakeQuestionsPage/RiasecAssessmentPage use at the page level.
@@ -76,7 +124,11 @@ export function RiasecResultsPage() {
             full width, not sit as a centered flex child. */}
         <div
           className={cn(
-            "bg-hero-gradient w-full max-w-[1260px] animate-in rounded-[27px] p-8 fade-in duration-300 sm:p-12 lg:p-[64px]",
+            // max-w 1140 rather than 1260: the right column is a fixed 385px, so every pixel of
+            // container width lands on the left column and stretches the trait bars. Narrowing
+            // the card is the one knob that tightens the whole row — labels, bars and values keep
+            // their proportions, nothing else needed adjusting.
+            flowCardClass,
             result && "border border-border",
             !result && "flex items-center justify-center lg:min-h-[560px]",
           )}
@@ -89,26 +141,26 @@ export function RiasecResultsPage() {
               onRetry={() => void resultQuery.refetch()}
             />
           ) : result ? (
-            <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[1fr_385px] lg:gap-16">
-              <div className="flex flex-col items-start gap-8">
-                <h1 className="font-display text-3xl leading-[1.2] font-semibold text-foreground sm:text-4xl">
+            <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[1fr_385px] lg:gap-12">
+              <div className="flex flex-col items-start gap-5">
+                <h1 className="font-display text-2xl leading-[1.2] font-semibold text-foreground sm:text-3xl">
                   Personality Type Trait Strength!
                 </h1>
 
-                <div className="flex w-full flex-col gap-4">
+                <div className="flex w-full flex-col gap-2">
                   {TRAIT_ORDER.map(({ scale, label, Icon }) => {
                     const normalized = result.normalizedScores[scale] ?? 0;
                     const percent = Math.round(normalized * 100);
                     return (
                       <div
                         key={scale}
-                        className="flex w-full items-center justify-between gap-4 py-2"
+                        className="flex w-full items-center justify-between gap-4 py-1"
                       >
                         <div className="flex shrink-0 items-center gap-2.5">
                           <span className="grid size-7 shrink-0 place-items-center rounded-[14px] bg-page">
                             <Icon className="size-[18px] text-foreground" aria-hidden="true" />
                           </span>
-                          <p className="w-[130px] font-display text-lg font-medium text-foreground sm:w-[158px] sm:text-2xl">
+                          <p className="w-[130px] font-display text-base font-medium text-foreground sm:w-[158px]">
                             {label}
                           </p>
                         </div>
@@ -130,7 +182,7 @@ export function RiasecResultsPage() {
                               style={{ width: `${percent}%` }}
                             />
                           </div>
-                          <p className="w-[56px] shrink-0 text-right font-display text-base text-foreground sm:w-[78px] sm:text-2xl">
+                          <p className="w-[56px] shrink-0 text-right font-display text-sm text-foreground sm:w-[78px]">
                             {percent}%
                           </p>
                         </div>
@@ -140,15 +192,24 @@ export function RiasecResultsPage() {
                 </div>
 
                 <Button
-                  onClick={() => void navigate("/home")}
-                  className="h-[49px] w-[176px] rounded-2xl text-xl font-bold shadow-none"
+                  onClick={() => void handleExplorePath()}
+                  disabled={isNavigating}
+                  className="w-[176px]"
                 >
-                  Explore Path
+                  {isNavigating ? "Loading…" : "Explore Path"}
                 </Button>
+                {createSnapshot.isError ? (
+                  <p className="text-sm text-destructive">
+                    {getErrorMessage(
+                      createSnapshot.error,
+                      "Couldn't start Explore Path — try again.",
+                    )}
+                  </p>
+                ) : null}
               </div>
 
-              <div className="flex flex-col items-center gap-6 sm:gap-[29px]">
-                <p className="font-display text-2xl font-semibold text-foreground sm:text-[32px]">
+              <div className="flex flex-col items-center gap-4">
+                <p className="font-display text-xl font-semibold text-foreground sm:text-2xl">
                   Your <span className="text-brand">RIASEC</span> Code
                 </p>
                 <div

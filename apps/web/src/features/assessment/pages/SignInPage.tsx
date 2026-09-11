@@ -1,17 +1,18 @@
 import { useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Brand } from "@/components/Brand";
-import { PromoPanel } from "@/components/PromoPanel";
+import { useLocation, useNavigate } from "react-router-dom";
 import { getErrorMessage } from "@/lib/error-messages";
+import { AuthFormCard } from "../components/AuthFormCard";
+import { AuthLayout } from "../components/AuthLayout";
 import { SignInForm } from "../components/SignInForm";
 import { useSignInWithPassword } from "../hooks/useIdentity";
 import { useCreateJourneySession } from "../hooks/useJourneySession";
 import { useSession } from "../state/session-context";
 
 /**
- * Sign-in — same left/right split shell as OnboardingPage (Figma "career" file node
- * 139:3935/139:3994), reused here for a returning user instead of a new one. Single screen, so
- * no StepIndicator (that only makes sense across OnboardingPage's two steps).
+ * Sign-in — same floating hero-card shell as OnboardingPage (Figma "career" file node
+ * 462:3028), reused here for a returning user instead of a new one. Single screen, so no
+ * StepIndicator (that only makes sense across OnboardingPage's two steps) and no header row
+ * of its own — AppHeader already supplies the one logo both pages need.
  *
  * On success this establishes the same session state OnboardingPage's password step does
  * (userId, email, a fresh journey session) and lands on the same /home Home/Dashboard page —
@@ -58,47 +59,14 @@ export function SignInPage() {
   };
 
   return (
-    <main className="h-screen overflow-hidden bg-page">
-      {/* Figma node 139:3935 — the left column sits one shade off the white "surface" cards
-        inside it (see --card in index.css), same as OnboardingPage. */}
-      <div className="h-full w-full bg-card">
-        <div className="grid h-full min-h-0 grid-cols-1 lg:grid-cols-2">
-          <div className="grid min-h-0 grid-rows-[auto_1fr] overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-500">
-            {/* pt/pb split evenly (same total as OnboardingPage's identical header row) so Brand
-                sits centered in the row's height instead of pinned to its bottom edge — the
-                row's total height, and so the "Welcome back" row below, is unchanged. */}
-            <div className="px-6 pt-4 pb-2 sm:px-10 sm:pt-6 lg:px-14 lg:pt-10 lg:pb-4">
-              <Brand />
-            </div>
-
-            <div className="min-h-0 overflow-y-auto px-6 py-6 sm:px-10 sm:py-8 lg:px-14 lg:pt-4 lg:pb-4">
-              <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl lg:text-[36px] lg:leading-[1.2]">
-                Welcome back
-              </h1>
-              <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-                Sign in with your email and password to continue.
-              </p>
-
-              <div className="mt-6 rounded-2xl border border-input bg-background p-6 sm:p-8">
-                <SignInForm
-                  onSubmit={handleSubmit}
-                  submitting={signIn.isPending || createJourneySession.isPending}
-                />
-              </div>
-
-              <p className="mt-4 text-center text-xs text-muted-foreground">
-                Don&apos;t have an account?{" "}
-                <Link to="/" className="font-semibold text-brand hover:underline">
-                  Sign up
-                </Link>
-              </p>
-            </div>
-          </div>
-          <div className="hidden min-h-0 lg:block">
-            <PromoPanel />
-          </div>
-        </div>
-      </div>
-    </main>
+    // No step dots — there's only one sign-in screen, so there's no progression to show.
+    <AuthLayout>
+      <AuthFormCard srHeading="Welcome back" title="Sign In" description="">
+        <SignInForm
+          onSubmit={handleSubmit}
+          submitting={signIn.isPending || createJourneySession.isPending}
+        />
+      </AuthFormCard>
+    </AuthLayout>
   );
 }

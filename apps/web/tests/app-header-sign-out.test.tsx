@@ -30,11 +30,62 @@ function renderHome() {
   );
 }
 
+// AuthLayout renders the same AppHeader pre-auth, so SignInPage is the real host for the
+// signed-out state — rendered with localStorage cleared, exactly as a visitor arrives at it.
+function renderSignIn() {
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <SessionProvider>
+        <MemoryRouter initialEntries={["/sign-in"]}>
+          <Routes>
+            <Route path="/sign-in" element={<SignInPage />} />
+          </Routes>
+        </MemoryRouter>
+      </SessionProvider>
+    </QueryClientProvider>,
+  );
+}
+
 describe("AppHeader — account menu / sign out", () => {
   beforeEach(() => {
     localStorage.clear();
     setStoredUserId("user-id");
     setStoredJourneySessionId("session-id");
+  });
+
+  it("shows Help above Sign out for a logged-in user", async () => {
+    const user = userEvent.setup();
+    renderHome();
+
+    await user.click(screen.getByRole("button", { name: "Account menu" }));
+
+    expect(screen.getAllByRole("menuitem").map((item) => item.textContent)).toEqual([
+      "Help",
+      "Sign out",
+    ]);
+  });
+
+  it("shows Help only — never Sign out — with no session (sign-in / onboarding)", async () => {
+    localStorage.clear();
+    const user = userEvent.setup();
+    renderSignIn();
+
+    await user.click(screen.getByRole("button", { name: "Account menu" }));
+
+    expect(screen.getAllByRole("menuitem").map((item) => item.textContent)).toEqual(["Help"]);
+    expect(screen.queryByRole("menuitem", { name: /sign out/i })).not.toBeInTheDocument();
+  });
+
+  it("closes the menu when Help is clicked, leaving the session untouched", async () => {
+    const user = userEvent.setup();
+    renderHome();
+
+    await user.click(screen.getByRole("button", { name: "Account menu" }));
+    await user.click(screen.getByRole("menuitem", { name: /help/i }));
+
+    expect(screen.queryByRole("menuitem")).not.toBeInTheDocument();
+    expect(getStoredUserId()).toBe("user-id");
+    expect(screen.getByRole("heading", { name: /find your path/i })).toBeInTheDocument();
   });
 
   it("opens the account menu on click and shows Sign out", async () => {

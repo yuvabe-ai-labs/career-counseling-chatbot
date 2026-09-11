@@ -22,6 +22,13 @@ import { searchCities, searchStates } from "../api/location";
 import { EDUCATION_STAGE_OPTIONS } from "../data";
 import { calculateAge, MIN_ELIGIBLE_AGE } from "../domain/age";
 import type { ProfileFormValues } from "../types";
+import {
+  authFormClass,
+  fieldIconClass,
+  fieldInputClass,
+  formSectionClass,
+  primaryButtonClass,
+} from "./form-styles";
 
 /** Native date input's max — never let today's date register as a valid DOB. */
 const todayDateString = (): string => new Date().toISOString().slice(0, 10);
@@ -33,12 +40,6 @@ function FieldError({ message }: { message?: string | undefined }) {
   if (!message) return null;
   return <p className="mt-1 font-display text-xs font-normal text-destructive">{message}</p>;
 }
-
-/** Icon size/position for a leading glyph inside a 48px field (Figma node 139:3941 — icon 18px, 16px inset). */
-const fieldIconClass =
-  "pointer-events-none absolute top-1/2 left-4 size-[18px] -translate-y-1/2 text-brand";
-/** 48px height, 8px radius, 16/12px icon clearance — Figma's input-* frames (e.g. 139:3946). */
-const fieldInputClass = "h-12 rounded-[8px] border-input pr-4 pl-[46px] text-sm shadow-none";
 
 /**
  * Step 1 of onboarding — adapted from the prototype's StepOne.tsx, restyled to
@@ -141,56 +142,42 @@ export function ProfileFieldsForm({
   };
 
   return (
-    // lg:pt is intentionally smaller than the header row's own lg:pt-10+lg:pb-4 total (56px,
-    // OnboardingPage) — this sits directly below that row, not at the top of a fresh column, so
-    // it only needs the header-to-heading gap (Figma node 139:3934: h1 top 179 minus header
-    // bottom 108). The header row's own pt/pb split has since changed (its content is now
-    // vertically centered rather than bottom-pinned) but its total height, and so this row's
-    // start position, has not.
-    // overflow-y-auto is a fallback for viewports too short to fit everything, not the norm —
-    // see the compact lg: spacing throughout this component, sized to avoid triggering it.
-    <div className="flex h-full flex-col overflow-y-auto px-6 py-6 sm:px-10 sm:py-8 lg:px-14 lg:pt-4 lg:pb-4">
-      <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl lg:text-[36px] lg:leading-[1.2]">
-        Tell us about yourself
-      </h1>
-
-      <form
-        onSubmit={handleSubmit}
-        onKeyDown={handleFormKeyDown}
-        // The email and date inputs' native HTML5 constraints (type="email" format, the date
-        // input's max) would otherwise silently block the browser's own submit event before our
-        // handler ever runs — confirmed the hard way once already (see GuardianConsentModal's
-        // OTP-form Enter fix) — so this form relies entirely on runSubmit()'s own validation,
-        // which already covers everything those constraints would and shows it the same way as
-        // every other error here (a red FieldError), rather than an unstyled native tooltip.
-        noValidate
-        className="mt-6 flex flex-col gap-6 rounded-2xl bg-background p-6 sm:p-8 lg:mt-4 lg:gap-5 lg:p-6"
-      >
-        <p className="text-2xl font-medium text-foreground sm:text-[32px] sm:leading-[1.2]">
-          Signup
-        </p>
-
-        <div className="flex flex-col gap-4 lg:gap-3">
-          <div>
-            <Label htmlFor="name" className="text-foreground">
-              What should we call you? *
-            </Label>
-            <div className="relative mt-2">
-              <User className={fieldIconClass} aria-hidden="true" />
-              <Input
-                id="name"
-                value={value.name}
-                onChange={(event) => set("name", event.target.value)}
-                placeholder="Enter your name"
-                maxLength={60}
-                aria-invalid={Boolean(errors.name)}
-                className={fieldInputClass}
-              />
-            </div>
-            <FieldError message={errors.name} />
+    // Just the fields and actions — the card around them (border, padding, "Signup" title, step
+    // dots) is AuthFormCard, shared with every other onboarding screen.
+    <form
+      onSubmit={handleSubmit}
+      onKeyDown={handleFormKeyDown}
+      // The email and date inputs' native HTML5 constraints (type="email" format, the date
+      // input's max) would otherwise silently block the browser's own submit event before our
+      // handler ever runs — confirmed the hard way once already (see GuardianConsentModal's
+      // OTP-form Enter fix) — so this form relies entirely on runSubmit()'s own validation,
+      // which already covers everything those constraints would and shows it the same way as
+      // every other error here (a red FieldError), rather than an unstyled native tooltip.
+      noValidate
+      className={authFormClass}
+    >
+      <div className={formSectionClass}>
+        <div>
+          <Label htmlFor="name" className="text-foreground">
+            What should we call you? *
+          </Label>
+          <div className="relative mt-2">
+            <User className={fieldIconClass} aria-hidden="true" />
+            <Input
+              id="name"
+              value={value.name}
+              onChange={(event) => set("name", event.target.value)}
+              placeholder="Enter your name"
+              maxLength={60}
+              aria-invalid={Boolean(errors.name)}
+              className={fieldInputClass}
+            />
           </div>
+          <FieldError message={errors.name} />
+        </div>
 
-          <div>
+        <div className="flex flex-col gap-4 sm:flex-row sm:gap-3">
+          <div className="sm:flex-1">
             <Label htmlFor="dateOfBirth" className="text-foreground">
               Date of birth *
             </Label>
@@ -204,13 +191,16 @@ export function ProfileFieldsForm({
                 max={todayDateString()}
                 autoComplete="bday"
                 aria-invalid={Boolean(errors.dateOfBirth)}
-                className={fieldInputClass}
+                // Empty: the browser's own dd-mm-yyyy hint is a placeholder, so it takes the
+                // placeholder colour (see index.css). Once a date is picked it drops back to the
+                // normal value colour like any other field.
+                className={cn(fieldInputClass, !value.dateOfBirth && "date-placeholder-empty")}
               />
             </div>
             <FieldError message={errors.dateOfBirth} />
           </div>
 
-          <div>
+          <div className="sm:flex-1">
             <Label className="text-foreground">Current stage *</Label>
             <SelectField
               value={value.selfStage}
@@ -224,64 +214,65 @@ export function ProfileFieldsForm({
             />
             <FieldError message={errors.selfStage} />
           </div>
+        </div>
 
-          <div className="flex flex-col gap-4 sm:flex-row sm:gap-3">
-            <div className="sm:flex-1">
-              <Label className="text-foreground">State *</Label>
-              <Combobox
-                label={value.state}
-                onSelect={handleStateSelect}
-                search={async (query) => {
-                  const { data } = await searchStates(query);
-                  return data.map((state) => ({ value: state.code, label: state.name }));
-                }}
-                placeholder="Type to search your state"
-                icon={<Map className="size-[18px]" />}
-                aria-label="State"
-                aria-invalid={Boolean(errors.state)}
-                className="mt-2"
-              />
-              <FieldError message={errors.state} />
-            </div>
-
-            <div className="sm:flex-1">
-              <Label className="text-foreground">City *</Label>
-              <Combobox
-                label={value.city}
-                onSelect={handleCitySelect}
-                search={async (query) => {
-                  const { data } = await searchCities(value.stateCode, query);
-                  return data.map((city) => ({ value: city.id, label: city.name }));
-                }}
-                placeholder="Type to search your city"
-                disabledPlaceholder="Select a state first"
-                disabled={!value.stateCode}
-                icon={<MapPin className="size-[18px]" />}
-                aria-label="City"
-                aria-invalid={Boolean(errors.city)}
-                className="mt-2"
-              />
-              <FieldError message={errors.city} />
-            </div>
+        <div className="flex flex-col gap-4 sm:flex-row sm:gap-3">
+          <div className="sm:flex-1">
+            <Label className="text-foreground">State *</Label>
+            <Combobox
+              label={value.state}
+              onSelect={handleStateSelect}
+              search={async (query) => {
+                const { data } = await searchStates(query);
+                return data.map((state) => ({ value: state.code, label: state.name }));
+              }}
+              placeholder="Type to search your state"
+              icon={<Map className="size-[18px]" />}
+              aria-label="State"
+              aria-invalid={Boolean(errors.state)}
+              className="mt-2"
+            />
+            <FieldError message={errors.state} />
           </div>
 
-          <div>
-            <Label className="text-foreground">Country</Label>
-            <div className="relative mt-2">
-              <Globe className={fieldIconClass} aria-hidden="true" />
-              {/* The app is India-only for now, so this is a fixed, read-only value rather than
+          <div className="sm:flex-1">
+            <Label className="text-foreground">City *</Label>
+            <Combobox
+              label={value.city}
+              onSelect={handleCitySelect}
+              search={async (query) => {
+                const { data } = await searchCities(value.stateCode, query);
+                return data.map((city) => ({ value: city.id, label: city.name }));
+              }}
+              placeholder="Type to search your city"
+              disabledPlaceholder="Select a state first"
+              disabled={!value.stateCode}
+              icon={<MapPin className="size-[18px]" />}
+              aria-label="City"
+              aria-invalid={Boolean(errors.city)}
+              className="mt-2"
+            />
+            <FieldError message={errors.city} />
+          </div>
+        </div>
+
+        <div>
+          <Label className="text-foreground">Country</Label>
+          <div className="relative mt-2">
+            <Globe className={fieldIconClass} aria-hidden="true" />
+            {/* The app is India-only for now, so this is a fixed, read-only value rather than
                   a dropdown with a single option — there's nothing to actually select. */}
-              <Input
-                value={value.country}
-                readOnly
-                aria-readonly="true"
-                aria-label="Country"
-                className={cn(fieldInputClass, "cursor-default text-muted-foreground")}
-              />
-            </div>
+            <Input
+              value={value.country}
+              readOnly
+              aria-readonly="true"
+              aria-label="Country"
+              className={cn(fieldInputClass, "cursor-default text-muted-foreground")}
+            />
           </div>
+        </div>
 
-          {/*<label className="flex cursor-pointer items-start gap-2 text-sm text-foreground">
+        {/*<label className="flex cursor-pointer items-start gap-2 text-sm text-foreground">
             <input
               type="checkbox"
               checked={value.wantsAid}
@@ -293,29 +284,25 @@ export function ProfileFieldsForm({
               I&apos;m interested in financial aid / scholarship options
             </span>
           </label>*/}
-        </div>
+      </div>
 
-        <div className="flex flex-col gap-4 lg:gap-3">
-          <Button
-            type="submit"
-            className="h-12 w-full gap-2 rounded-2xl text-xl font-bold shadow-none"
-          >
-            Next
-            <ArrowRight className="size-[18px]" aria-hidden="true" />
-          </Button>
-          <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-            <LogIn className="size-3.5 shrink-0" aria-hidden="true" />
-            Already have an account?{" "}
-            <Link to="/sign-in" className="font-semibold text-brand hover:underline">
-              Sign in
-            </Link>
-          </p>
-          <p className="flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
-            <Lock className="size-3.5 shrink-0 text-brand" aria-hidden="true" />
-            We value your privacy. Your details are secure with us.
-          </p>
-        </div>
-      </form>
-    </div>
+      <div className={formSectionClass}>
+        <Button type="submit" className={primaryButtonClass}>
+          Next
+          <ArrowRight className="size-[18px]" aria-hidden="true" />
+        </Button>
+        <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+          <LogIn className="size-3.5 shrink-0" aria-hidden="true" />
+          Already have an account?{" "}
+          <Link to="/sign-in" className="font-semibold text-brand hover:underline">
+            Sign In
+          </Link>
+        </p>
+        <p className="flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
+          <Lock className="size-3.5 shrink-0 text-brand" aria-hidden="true" />
+          We value your privacy. Your details are secure with us.
+        </p>
+      </div>
+    </form>
   );
 }

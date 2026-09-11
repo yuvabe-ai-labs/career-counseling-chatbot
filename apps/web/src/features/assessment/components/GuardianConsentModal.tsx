@@ -7,7 +7,7 @@ import { useEscapeKey } from "@/lib/use-escape-key";
 import { useNow } from "@/lib/use-now";
 import { deriveResendState, formatCountdown, secondsUntil } from "../domain/otp-timing";
 import { emptyGuardianVerificationState, type GuardianVerificationState } from "../types";
-import { OtpInput } from "./OtpInput";
+import { OtpInput, type OtpInputHandle } from "./OtpInput";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -56,16 +56,20 @@ export function GuardianConsentModal({
   verifying,
 }: GuardianConsentModalProps) {
   const emailInputRef = useRef<HTMLInputElement>(null);
+  const otpInputRef = useRef<OtpInputHandle>(null);
   const now = useNow();
 
   useEscapeKey(true, onClose);
 
   // Autofocus the first field of whichever sub-view is current, including when the OTP step
   // first appears (guardian just verified their email) — keeps keyboard focus inside the modal
-  // rather than on whatever the background page last focused.
+  // rather than on whatever the background page last focused, and means the code can be typed
+  // as soon as it arrives without clicking into a box first.
   useEffect(() => {
     if (value.phase === "email_entry") {
       emailInputRef.current?.focus();
+    } else if (value.phase === "otp_verification") {
+      otpInputRef.current?.focus();
     }
   }, [value.phase]);
 
@@ -87,7 +91,11 @@ export function GuardianConsentModal({
   const submitOtp = () => {
     if (verifying) return;
     if (!isOtpComplete) {
+      // Reachable now that Verify is only disabled while a request is in flight (it used to be
+      // disabled on !isOtpComplete too, so pressing it with an empty code did nothing at all).
+      // Sending focus to the first empty box means the guardian can just start typing.
       onChange({ ...value, otpError: "Please enter the 6-digit OTP." });
+      otpInputRef.current?.focus();
       return;
     }
     onChange({ ...value, otpError: null });
@@ -190,13 +198,26 @@ export function GuardianConsentModal({
             ) : null}
           </div>
 
+          {/* While sending, the label is replaced by a centred spinner rather than swapped for
+              "Sending…" text. The fixed width is load-bearing for that: without it the button
+              would collapse to the spinner's width, since the label left behind is sr-only
+              (absolutely positioned). Height and pill shape come from Button itself. The label
+              stays in the accessibility tree so the button keeps its name, and `disabled` is
+              what actually prevents a second submit. */}
           <Button
             type="submit"
             disabled={sending || Boolean(value.otpTiming)}
-            className="h-[49px] w-[149px] gap-2 rounded-2xl text-xl font-bold shadow-none"
+            aria-busy={sending}
+            className="w-[149px]"
           >
-            {sending ? <Spinner className="size-[18px]" /> : null}
-            {sending ? "Sending…" : "Send OTP"}
+            {sending ? (
+              <>
+                <Spinner className="size-5" />
+                <span className="sr-only">Send OTP</span>
+              </>
+            ) : (
+              "Send OTP"
+            )}
           </Button>
         </form>
 
@@ -212,6 +233,7 @@ export function GuardianConsentModal({
               </p>
               <div onKeyDown={handleOtpKeyDown}>
                 <OtpInput
+                  ref={otpInputRef}
                   length={6}
                   digits={value.otpDigits}
                   onChange={(digits) => onChange({ ...value, otpDigits: digits, otpError: null })}
@@ -262,13 +284,23 @@ export function GuardianConsentModal({
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-3">
+              {/* Deliberately NOT disabled on an incomplete code — pressing it then is what
+                  focuses the first empty box (see submitOtp). Still disabled while verifying, so
+                  the request can't be fired twice, and until a code exists to check against. */}
               <Button
                 type="submit"
-                disabled={!isOtpComplete || verifying || !value.otpTiming}
-                className="h-[49px] w-[149px] gap-2 rounded-2xl text-xl font-bold shadow-none"
+                disabled={verifying || !value.otpTiming}
+                aria-busy={verifying}
+                className="w-[149px]"
               >
-                {verifying ? <Spinner className="size-[18px]" /> : null}
-                {verifying ? "Confirming…" : "Verify"}
+                {verifying ? (
+                  <>
+                    <Spinner className="size-5" />
+                    <span className="sr-only">Verify</span>
+                  </>
+                ) : (
+                  "Verify"
+                )}
               </Button>
 
               {value.otpTiming ? (

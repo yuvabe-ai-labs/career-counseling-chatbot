@@ -13,6 +13,8 @@
  * caller (RiasecAssessmentPage) converts index -> responseValue at submit time, so this
  * component doesn't need to know the backend's numbering at all.
  */
+import { useRef } from "react";
+
 const RESPONSES: { emoji: string; label: string }[] = [
   { emoji: "😣", label: "Dislike" },
   { emoji: "😕", label: "Not really" },
@@ -31,8 +33,15 @@ export interface RiasecSliderProps {
 export function RiasecSlider({ value, onChange, label }: RiasecSliderProps) {
   // Unanswered still needs *some* thumb position to render at — centered ("Unsure") is neutral
   // rather than biasing toward either end, and the dimmed opacity below is what actually signals
-  // "nothing chosen yet" to the student.
+  // "nothing chosen yet" to the student. `displayed` is only ever where the thumb *sits*; the
+  // answer itself stays `value`, which is null until the student actually picks something.
   const displayed = value ?? 2;
+  // A range input fires no change event when a click lands on the value it is already showing,
+  // so deliberately choosing "Unsure" on a fresh question — where the thumb already rests at
+  // Unsure — would otherwise be impossible from the track itself. onClick below commits in that
+  // case; this flag stops it committing a second time when a change did fire (click follows
+  // change on the same drag/press, and by then the parent may have moved to the next question).
+  const changedRef = useRef(false);
   const pct = (displayed / (RESPONSES.length - 1)) * 100;
   const current = RESPONSES[displayed]!;
 
@@ -40,8 +49,12 @@ export function RiasecSlider({ value, onChange, label }: RiasecSliderProps) {
     <div className="mt-6 w-full">
       <div className="relative h-10">
         <div className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-muted" />
+        {/* The fill ramps from a soft purple up to full brand at the thumb, so how far the
+            answer sits from "Dislike" reads as strength rather than as a flat bar. Same purple
+            family as the rest of the product — no new hues, and nothing bright enough to pull
+            attention off the question. */}
         <div
-          className="absolute top-1/2 left-0 h-1.5 -translate-y-1/2 rounded-full bg-brand transition-all duration-300"
+          className="absolute top-1/2 left-0 h-1.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-brand/30 via-brand/65 to-brand transition-all duration-300"
           style={{ width: `${pct}%` }}
         />
         <span
@@ -59,7 +72,17 @@ export function RiasecSlider({ value, onChange, label }: RiasecSliderProps) {
           max={RESPONSES.length - 1}
           step={1}
           value={displayed}
-          onChange={(event) => onChange(Number(event.target.value))}
+          onChange={(event) => {
+            changedRef.current = true;
+            onChange(Number(event.target.value));
+          }}
+          onClick={(event) => {
+            if (changedRef.current) {
+              changedRef.current = false;
+              return;
+            }
+            onChange(Number(event.currentTarget.value));
+          }}
           aria-label={label}
           aria-valuetext={current.label}
           className="absolute inset-0 h-full w-full cursor-pointer appearance-none bg-transparent opacity-0"

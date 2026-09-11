@@ -1,8 +1,16 @@
 import { useEffect, useState } from "react";
-import { ArrowRight, Lock, Mail, ShieldCheck, UserRound } from "lucide-react";
+import { ArrowRight, Lock, Mail, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import {
+  authFormClass,
+  fieldIconClass,
+  fieldInputClass,
+  formSectionClass,
+  primaryButtonClass,
+} from "./form-styles";
 import { OtpInput } from "./OtpInput";
 
 const RESEND_SECONDS = 30;
@@ -91,29 +99,18 @@ export function GuardianConsentPanel({
   };
 
   return (
-    <div className="w-full max-w-md rounded-2xl bg-background p-6 shadow-card sm:p-8">
-      <div className="flex flex-col items-center text-center">
-        <span className="grid size-12 place-items-center rounded-xl bg-brand-soft">
-          <UserRound className="size-6 text-brand" aria-hidden="true" />
-        </span>
-        <h1 className="mt-4 font-display text-lg font-bold text-foreground">
-          Parent/Guardian consent required
-        </h1>
-        <p className="mt-2 max-w-xs text-xs leading-relaxed text-muted-foreground">
-          Since you&apos;re under 18, we need approval from your parent or guardian to continue.
-        </p>
-      </div>
-
-      <div className="mt-6 space-y-4">
+    // Just the fields and actions — the card, title and description around them are AuthFormCard,
+    // shared with every other onboarding screen. This used to be its own card with a centered
+    // icon header and a smaller type scale (44px `rounded-lg` fields, 16px icons, text-xs
+    // labels), which is what made this screen look unlike the rest of the flow.
+    <div className={authFormClass}>
+      <div className={formSectionClass}>
         <div>
-          <Label htmlFor="student-email" className="text-xs font-semibold text-foreground">
+          <Label htmlFor="student-email" className="text-foreground">
             Your email address
           </Label>
           <div className="relative mt-2">
-            <Mail
-              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-brand"
-              aria-hidden="true"
-            />
+            <Mail className={fieldIconClass} aria-hidden="true" />
             <Input
               id="student-email"
               type="email"
@@ -126,23 +123,22 @@ export function GuardianConsentPanel({
               autoComplete="email"
               disabled={sent}
               aria-invalid={Boolean(studentEmailError)}
-              className="h-11 rounded-lg pl-10"
+              className={fieldInputClass}
             />
           </div>
           {studentEmailError ? (
-            <p className="mt-1 text-xs font-medium text-destructive">{studentEmailError}</p>
+            <p className="mt-1 font-display text-xs font-normal text-destructive">
+              {studentEmailError}
+            </p>
           ) : null}
         </div>
 
         <div>
-          <Label htmlFor="guardian-email" className="text-xs font-semibold text-foreground">
+          <Label htmlFor="guardian-email" className="text-foreground">
             Parent/Guardian email address
           </Label>
           <div className="relative mt-2">
-            <Mail
-              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-brand"
-              aria-hidden="true"
-            />
+            <Mail className={fieldIconClass} aria-hidden="true" />
             <Input
               id="guardian-email"
               type="email"
@@ -155,34 +151,36 @@ export function GuardianConsentPanel({
               autoComplete="email"
               disabled={sent}
               aria-invalid={Boolean(guardianEmailError)}
-              className="h-11 rounded-lg pl-10"
+              className={fieldInputClass}
             />
           </div>
           {guardianEmailError ? (
-            <p className="mt-1 text-xs font-medium text-destructive">{guardianEmailError}</p>
+            <p className="mt-1 font-display text-xs font-normal text-destructive">
+              {guardianEmailError}
+            </p>
           ) : null}
-          <p className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+          <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
             <Lock className="size-3.5 shrink-0 text-brand" aria-hidden="true" />
             Your parent will receive a verification code by email.
           </p>
-
-          {!sent ? (
-            <Button
-              type="button"
-              onClick={() => void handleSend()}
-              disabled={sending}
-              className="mt-4 h-11 w-full gap-2 rounded-lg shadow-soft"
-            >
-              {sending ? "Sending…" : "Send OTP"}
-              <ArrowRight className="size-4" aria-hidden="true" />
-            </Button>
-          ) : null}
         </div>
       </div>
 
+      {!sent ? (
+        <Button
+          type="button"
+          onClick={() => void handleSend()}
+          disabled={sending}
+          className={primaryButtonClass}
+        >
+          {sending ? "Sending…" : "Send OTP"}
+          <ArrowRight className="size-[18px]" aria-hidden="true" />
+        </Button>
+      ) : null}
+
       {sent ? (
-        <div className="mt-6 animate-in fade-in duration-200">
-          <Label className="text-xs font-semibold text-foreground">Enter the 6-digit OTP</Label>
+        <div className="animate-in fade-in duration-200">
+          <Label className="text-foreground">Enter the 6-digit OTP</Label>
           <div className="mt-3">
             <OtpInput
               length={6}
@@ -217,10 +215,10 @@ export function GuardianConsentPanel({
             type="button"
             disabled={!isOtpComplete || verifying}
             onClick={() => void handleVerify()}
-            className="mt-4 h-11 w-full gap-2 rounded-lg shadow-soft"
+            className={cn(primaryButtonClass, "mt-4")}
           >
             {verifying ? "Confirming…" : "Confirm & Continue"}
-            <ArrowRight className="size-4" aria-hidden="true" />
+            <ArrowRight className="size-[18px]" aria-hidden="true" />
           </Button>
         </div>
       ) : null}

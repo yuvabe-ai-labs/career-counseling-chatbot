@@ -66,11 +66,7 @@ export function AttemptsExhaustedModal({ onRestart }: AttemptsExhaustedModalProp
         <p className="font-display text-sm leading-5 text-muted-foreground">
           You have used all available OTP resend attempts. Please try again later.
         </p>
-        <Button
-          type="button"
-          onClick={onRestart}
-          className="h-[49px] w-full rounded-2xl text-xl font-bold shadow-none"
-        >
+        <Button type="button" onClick={onRestart} className="w-full">
           Close
         </Button>
       </div>

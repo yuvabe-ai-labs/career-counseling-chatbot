@@ -8,6 +8,7 @@ import {
   RiasecResultsPage,
   SignInPage,
 } from "@/features/assessment";
+import { CareerPage, ExplorePathPage } from "@/features/recommendations";
 
 export const router = createBrowserRouter([
   { path: "/", element: <OnboardingPage /> },
@@ -17,4 +18,6 @@ export const router = createBrowserRouter([
   { path: "/intake-questions", element: <IntakeQuestionsPage /> },
   { path: "/riasec-assessment", element: <RiasecAssessmentPage /> },
   { path: "/riasec-results", element: <RiasecResultsPage /> },
+  { path: "/explore-path", element: <ExplorePathPage /> },
+  { path: "/explore-path/career", element: <CareerPage /> },
 ]);

@@ -184,17 +184,17 @@ export function IntakeQuestionsPage() {
   };
 
   return (
-    // bg-hero-gradient (index.css): same diagonal wash as HomePage, for visual consistency
-    // between the two post-auth screens, instead of this page's own flat bg-page.
-    <main className="bg-hero-gradient flex min-h-screen flex-col">
+    // bg-auth-hero-gradient (index.css): the same fill the sign-in/sign-up hero-card and the
+    // home hero use, so all four screens share one background rather than this page having its
+    // own diagonal variant. No card is added — the content sits straight on the gradient.
+    //
+    // h-screen + overflow-hidden from lg up is what stops the *window* scrolling: the page is
+    // sized to the viewport and the question panel below owns the only scrollbar. Below lg the
+    // columns stack and genuinely need more height than a short screen has, so it stays a normal
+    // scrolling page rather than clipping questions off the bottom.
+    <main className="bg-auth-hero-gradient flex min-h-screen flex-col lg:h-screen lg:overflow-hidden">
       <AppHeader />
-      {/* items-start (was items-center): centering vertically in the full remaining viewport
-          height still left this section sitting noticeably low whenever its own content (even
-          with the equal p-6/sm:p-8 padding — see HomePage's identical fix) was shorter than that
-          space. Anchoring to the top instead — with that same padding as its only gap from the
-          header — moves it up without needing to keep rebalancing padding numbers against
-          viewport height. */}
-      <div className="flex flex-1 items-start justify-center p-6 sm:p-0">
+      <div className="flex min-h-0 flex-1 justify-center px-6 py-6 sm:px-8">
         {/* No card here any more (previously `rounded-[27px] border border-border
             bg-[rgba(224,215,250,0.37)]`) — the content now sits directly on main's own gradient,
             same treatment as HomePage's hero section.
@@ -204,11 +204,14 @@ export function IntakeQuestionsPage() {
             top instead of in the middle — inconsistent with RiasecAssessmentPage's already-
             centered loading state. Not applied once real questions render — that content is a
             two-column grid meant to fill this box's full width, not sit as a centered flex child. */}
+        {/* lg:min-h-[751px] and the 64px padding are gone: together they forced 879px of content
+            under an 84px header, which is what made the window itself scroll. The section now
+            takes the height that's left (min-h-0 + flex-1 above) and hands it to the question
+            panel, so the only scrollbar on the page belongs to that panel. */}
         <div
           className={cn(
-            "w-full max-w-[1260px] animate-in p-8 fade-in duration-300 sm:p-12 lg:min-h-[751px] lg:p-[64px]",
-            (questionsQuery.isLoading || questionsQuery.isError) &&
-              "flex items-center justify-center",
+            "flex w-full min-h-0 max-w-[1260px] animate-in flex-col fade-in duration-300",
+            (questionsQuery.isLoading || questionsQuery.isError) && "items-center justify-center",
           )}
         >
           {questionsQuery.isLoading ? (
@@ -219,8 +222,19 @@ export function IntakeQuestionsPage() {
               onRetry={() => void questionsQuery.refetch()}
             />
           ) : (
-            <div className="grid grid-cols-1 gap-10 lg:grid-cols-[472px_1fr] lg:gap-16">
-              <div className="flex w-full flex-col items-start gap-6 lg:w-[472px]">
+            /* Both tracks are sized to their content and the pair is centred, so the questions
+               are inset from the container's left edge by the same amount the right column is
+               from its right edge. Previously the right track was 1fr: it took every remaining
+               pixel (724px for ~524px of content) while the left column sat flush against the
+               container edge with no inset at all, which is what made the two sides look
+               unrelated. 540 is the subtitle's own width plus a little slack, so nothing
+               re-wraps, and the left column keeps its 472px — neither side was resized to force
+               the alignment. minmax(0,…) keeps both able to shrink on a narrower viewport. */
+            <div className="grid min-h-0 flex-1 grid-cols-1 gap-10 lg:grid-cols-[minmax(0,472px)_minmax(0,540px)] lg:justify-center lg:gap-16">
+              {/* min-h-0 lets this column be bounded by the row rather than by its own content,
+                  which is the precondition for the panel inside it scrolling instead of the page.
+                  gap-4 (was gap-6) tightens the counter/panel/button stack. */}
+              <div className="flex min-h-0 w-full flex-col items-start gap-4 lg:w-[472px]">
                 <p className="font-display text-sm font-medium text-muted-foreground">
                   Question {answeredCount} of {total}
                 </p>
@@ -240,7 +254,11 @@ export function IntakeQuestionsPage() {
                   // ring room, only pr-1 on the right, so the ring was clipped on the left only.
                   // pr-6 (was pr-1) is unrelated to that fix — it's just more breathing room
                   // between the fields and the scrollbar itself.
-                  className="scrollbar-brand -ml-1 flex max-h-[560px] w-full flex-col items-start gap-6 overflow-y-auto pr-6 pl-1"
+                  // flex-1 + min-h-0 instead of a fixed max-h-[560px]: the panel now takes exactly
+                  // whatever height the viewport leaves after the header, counter and button, so
+                  // it's the one thing that scrolls and the page never does. gap-5 (was gap-6)
+                  // between questions.
+                  className="scrollbar-brand -ml-1 flex min-h-0 w-full flex-1 flex-col items-start gap-5 overflow-y-auto pr-6 pl-1"
                 >
                   {questions.map((question, index) => (
                     <IntakeQuestionField
@@ -261,7 +279,7 @@ export function IntakeQuestionsPage() {
                 <Button
                   onClick={() => void handleSubmit()}
                   disabled={upsertAnswer.isPending || total === 0}
-                  className="h-[49px] w-[151px] gap-2 rounded-2xl text-xl font-bold shadow-none"
+                  className="w-[151px]"
                 >
                   {upsertAnswer.isPending ? <Spinner className="size-[18px]" /> : null}
                   {upsertAnswer.isPending ? "Saving…" : "Start Quiz"}
@@ -274,8 +292,15 @@ export function IntakeQuestionsPage() {
                 ) : null}
               </div>
 
-              <div className="flex h-full flex-col items-start justify-center gap-6">
-                <div className="flex flex-col items-start gap-6">
+              {/* Heading, subtitle and illustration are one compact group that centres as a unit.
+                  The illustration wrapper deliberately has no flex-1: when it did, it absorbed
+                  all the leftover row height and the artwork drifted to the bottom of that space,
+                  which is what read as the right side "sitting too low" and as a big gap under
+                  the subtitle. Sized to its content instead, the group stays together, and
+                  min-h-0 + max-h-full on the image let it shrink on a short viewport rather than
+                  pushing the column past the fold. */}
+              <div className="flex h-full min-h-0 flex-col items-start justify-center gap-4">
+                <div className="flex flex-col items-start gap-3">
                   <h1 className="font-display text-3xl leading-[1.2] font-semibold text-foreground sm:text-4xl">
                     Let&apos;s get to know <span className="text-brand">you!</span>
                   </h1>
@@ -283,11 +308,11 @@ export function IntakeQuestionsPage() {
                     Answer few questions to complete your profile
                   </p>
                 </div>
-                <div className="flex w-full justify-center">
+                <div className="flex min-h-0 w-full justify-center">
                   <img
                     src={heroIllustration}
                     alt="Student sitting cross-legged with a laptop, books, a plant, and a backpack, with a graduation cap floating above her"
-                    className="w-full max-w-[320px] object-contain sm:max-w-[378px]"
+                    className="max-h-full w-full max-w-[320px] object-contain sm:max-w-[378px]"
                   />
                 </div>
               </div>

@@ -5,6 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
+import {
+  authFormClass,
+  fieldIconClass,
+  fieldInputClass,
+  fieldInputWithTrailingClass,
+  formSectionClass,
+  primaryButtonClass,
+} from "./form-styles";
 
 /** Same policy as the backend's SignUpWithPasswordRequestSchema (packages/contracts/src/auth.ts). */
 const PASSWORD_RULES: { label: string; test: (password: string) => boolean }[] = [
@@ -16,11 +24,6 @@ const PASSWORD_RULES: { label: string; test: (password: string) => boolean }[] =
 ];
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-const fieldIconClass =
-  "pointer-events-none absolute top-1/2 left-4 size-[18px] -translate-y-1/2 text-brand";
-const fieldInputClass = "h-12 rounded-[8px] border-input pr-11 pl-[46px] text-sm shadow-none";
-const emailFieldInputClass = "h-12 rounded-[8px] border-input pr-4 pl-[46px] text-sm shadow-none";
 
 export interface SetPasswordFormProps {
   email: string;
@@ -57,6 +60,7 @@ export function SetPasswordForm({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
   const [emailFormatError, setEmailFormatError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [confirmError, setConfirmError] = useState<string | null>(null);
@@ -64,6 +68,8 @@ export function SetPasswordForm({
 
   const unmetRules = PASSWORD_RULES.filter((rule) => !rule.test(password));
   const isPasswordValid = unmetRules.length === 0;
+  /** Guidance while typing a password — plus whenever the error that references it is showing. */
+  const showPasswordRules = passwordFocused || Boolean(passwordError);
 
   const runSubmit = () => {
     if (submitting) return;
@@ -126,150 +132,170 @@ export function SetPasswordForm({
       onSubmit={handleSubmit}
       onKeyDown={handleFormKeyDown}
       noValidate
-      className="flex flex-col gap-6"
+      className={authFormClass}
     >
-      <div>
-        <Label htmlFor="signup-email" className="text-foreground">
-          Email address *
-        </Label>
-        <div className="relative mt-2">
-          <Mail className={fieldIconClass} aria-hidden="true" />
-          <Input
-            id="signup-email"
-            type="email"
-            value={email}
-            onChange={(event) => {
-              onEmailChange(event.target.value);
-              setEmailFormatError(null);
-              onEmailErrorClear?.();
-            }}
-            placeholder="Enter your email"
-            autoComplete="email"
-            aria-invalid={Boolean(emailFormatError ?? serverEmailError)}
-            className={emailFieldInputClass}
-          />
+      <div className={formSectionClass}>
+        <div>
+          <Label htmlFor="signup-email" className="text-foreground">
+            Email address *
+          </Label>
+          <div className="relative mt-2">
+            <Mail className={fieldIconClass} aria-hidden="true" />
+            <Input
+              id="signup-email"
+              type="email"
+              value={email}
+              onChange={(event) => {
+                onEmailChange(event.target.value);
+                setEmailFormatError(null);
+                onEmailErrorClear?.();
+              }}
+              placeholder="Enter your email"
+              autoComplete="email"
+              aria-invalid={Boolean(emailFormatError ?? serverEmailError)}
+              className={fieldInputClass}
+            />
+          </div>
+          {(emailFormatError ?? serverEmailError) ? (
+            <p className="mt-1 font-display text-xs font-normal text-destructive">
+              {emailFormatError ?? serverEmailError}
+            </p>
+          ) : null}
         </div>
-        {(emailFormatError ?? serverEmailError) ? (
-          <p className="mt-1 font-display text-xs font-normal text-destructive">
-            {emailFormatError ?? serverEmailError}
-          </p>
-        ) : null}
-      </div>
 
-      <div>
-        <Label htmlFor="signup-password" className="text-foreground">
-          Enter your password
-        </Label>
-        <div className="relative mt-2">
-          <Lock className={fieldIconClass} aria-hidden="true" />
-          <Input
-            id="signup-password"
-            type={showPassword ? "text" : "password"}
-            value={password}
-            onChange={(event) => {
-              setPassword(event.target.value);
-              setPasswordError(null);
+        <div>
+          <Label htmlFor="signup-password" className="text-foreground">
+            Enter your password
+          </Label>
+          {/* Focus is tracked on the wrapper, not the input, so the rules below stay open while
+            the user reaches for the show/hide-password button inside it — moving focus between
+            two children of this div isn't leaving it. */}
+          <div
+            className="relative mt-2"
+            onFocus={() => setPasswordFocused(true)}
+            onBlur={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget)) setPasswordFocused(false);
             }}
-            placeholder="Enter your password"
-            autoComplete="new-password"
-            aria-invalid={Boolean(passwordError)}
-            className={fieldInputClass}
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword((value) => !value)}
-            aria-label={showPassword ? "Hide password" : "Show password"}
-            className="absolute top-1/2 right-4 -translate-y-1/2 cursor-pointer text-muted-foreground"
           >
-            {showPassword ? (
-              <EyeOff className="size-[18px]" aria-hidden="true" />
-            ) : (
-              <Eye className="size-[18px]" aria-hidden="true" />
-            )}
-          </button>
-        </div>
-        {passwordError ? (
-          <p className="mt-1 font-display text-xs font-normal text-destructive">{passwordError}</p>
-        ) : null}
+            <Lock className={fieldIconClass} aria-hidden="true" />
+            <Input
+              id="signup-password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(event) => {
+                setPassword(event.target.value);
+                setPasswordError(null);
+              }}
+              placeholder="Enter your password"
+              autoComplete="new-password"
+              aria-invalid={Boolean(passwordError)}
+              aria-describedby={showPasswordRules ? "signup-password-rules" : undefined}
+              className={fieldInputWithTrailingClass}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((value) => !value)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              className="absolute top-1/2 right-4 -translate-y-1/2 cursor-pointer text-muted-foreground"
+            >
+              {showPassword ? (
+                <EyeOff className="size-[18px]" aria-hidden="true" />
+              ) : (
+                <Eye className="size-[18px]" aria-hidden="true" />
+              )}
+            </button>
+          </div>
+          {passwordError ? (
+            <p className="mt-1 font-display text-xs font-normal text-destructive">
+              {passwordError}
+            </p>
+          ) : null}
 
-        {/* A two-column CSS grid (rather than the previous per-row flex-wrap) so the second
+          {/* Only shown once the password field is being used — it's guidance for typing a
+            password, not something to carry on screen the whole time (it was the tallest block
+            in this card). Also kept open whenever passwordError is set, since that message says
+            the requirements are "below" and would otherwise point at nothing.
+
+            A two-column CSS grid (rather than the previous per-row flex-wrap) so the second
             column actually lines up: each column is sized to its own widest label, instead of
             starting wherever the first column's item in that particular row happened to end.
             5 rules auto-flow into the same 2/2/1 layout as before — the last one just lands
             alone in column 1. */}
-        <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5">
-          {PASSWORD_RULES.map((rule) => {
-            const met = rule.test(password);
-            return (
-              <span
-                key={rule.label}
-                className={cn(
-                  "flex items-center gap-1 font-display text-sm",
-                  met ? "text-brand" : "text-muted-foreground",
-                )}
-              >
-                <Check className="size-3 shrink-0" aria-hidden="true" />
-                {rule.label}
-              </span>
-            );
-          })}
+          {showPasswordRules ? (
+            <div
+              id="signup-password-rules"
+              className="mt-2 grid animate-in grid-cols-2 gap-x-4 gap-y-1.5 fade-in duration-200"
+            >
+              {PASSWORD_RULES.map((rule) => {
+                const met = rule.test(password);
+                return (
+                  <span
+                    key={rule.label}
+                    className={cn(
+                      "flex items-center gap-1 font-display text-sm",
+                      met ? "text-brand" : "text-muted-foreground",
+                    )}
+                  >
+                    <Check className="size-3 shrink-0" aria-hidden="true" />
+                    {rule.label}
+                  </span>
+                );
+              })}
+            </div>
+          ) : null}
         </div>
-      </div>
 
-      <div>
-        <div className="relative">
-          <Lock className={fieldIconClass} aria-hidden="true" />
-          <Input
-            id="signup-confirm-password"
-            type={showConfirmPassword ? "text" : "password"}
-            value={confirmPassword}
-            onChange={(event) => {
-              setConfirmPassword(event.target.value);
-              setConfirmError(null);
-            }}
-            placeholder="Confirm Password"
-            autoComplete="new-password"
-            aria-label="Confirm Password"
-            aria-invalid={Boolean(confirmError)}
-            className={fieldInputClass}
-          />
-          <button
-            type="button"
-            onClick={() => setShowConfirmPassword((value) => !value)}
-            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-            className="absolute top-1/2 right-4 -translate-y-1/2 cursor-pointer text-muted-foreground"
-          >
-            {showConfirmPassword ? (
-              <EyeOff className="size-[18px]" aria-hidden="true" />
-            ) : (
-              <Eye className="size-[18px]" aria-hidden="true" />
-            )}
-          </button>
+        <div>
+          <div className="relative">
+            <Lock className={fieldIconClass} aria-hidden="true" />
+            <Input
+              id="signup-confirm-password"
+              type={showConfirmPassword ? "text" : "password"}
+              value={confirmPassword}
+              onChange={(event) => {
+                setConfirmPassword(event.target.value);
+                setConfirmError(null);
+              }}
+              placeholder="Confirm Password"
+              autoComplete="new-password"
+              aria-label="Confirm Password"
+              aria-invalid={Boolean(confirmError)}
+              className={fieldInputWithTrailingClass}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((value) => !value)}
+              aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+              className="absolute top-1/2 right-4 -translate-y-1/2 cursor-pointer text-muted-foreground"
+            >
+              {showConfirmPassword ? (
+                <EyeOff className="size-[18px]" aria-hidden="true" />
+              ) : (
+                <Eye className="size-[18px]" aria-hidden="true" />
+              )}
+            </button>
+          </div>
+          {confirmError ? (
+            <p className="mt-1 font-display text-xs font-normal text-destructive">{confirmError}</p>
+          ) : null}
         </div>
-        {confirmError ? (
-          <p className="mt-1 font-display text-xs font-normal text-destructive">{confirmError}</p>
+
+        {submitError ? (
+          <p className="font-display text-xs font-normal text-destructive">{submitError}</p>
         ) : null}
       </div>
 
-      {submitError ? (
-        <p className="font-display text-xs font-normal text-destructive">{submitError}</p>
-      ) : null}
-
-      <div className="flex flex-col gap-4">
-        <div className="flex justify-end">
-          <Button
-            type="submit"
-            disabled={submitting}
-            className="h-[49px] w-[169px] gap-2 rounded-2xl text-xl font-bold shadow-none"
-          >
-            {submitting ? "Please wait…" : "Start"}
-            {submitting ? (
-              <Spinner className="size-[18px]" />
-            ) : (
-              <ArrowRight className="size-[18px]" aria-hidden="true" />
-            )}
-          </Button>
-        </div>
+      <div className={formSectionClass}>
+        {/* Full-width, 48px — Figma node 462:3085 ("btn-next"); the earlier right-aligned
+            169px button is gone so both onboarding steps present the same primary action. */}
+        <Button type="submit" disabled={submitting} className={primaryButtonClass}>
+          {submitting ? "Please wait…" : "Start"}
+          {submitting ? (
+            <Spinner className="size-[18px]" />
+          ) : (
+            <ArrowRight className="size-[18px]" aria-hidden="true" />
+          )}
+        </Button>
         <p className="flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
           <Lock className="size-3 shrink-0 text-brand" aria-hidden="true" />
           We value your privacy. Your details are secure with us.

@@ -6,19 +6,28 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiRequestError } from "@/lib/api-client";
 import { queryClient } from "@/lib/query-client";
 import {
+  getStoredExploreGatingContext,
+  getStoredProfileSnapshotId,
   setStoredAssessmentRunId,
   setStoredJourneySessionId,
   setStoredUserId,
 } from "@/lib/storage";
 import { RiasecResultsPage, SessionProvider } from "@/features/assessment";
 
-const { scoreAssessmentRun } = vi.hoisted(() => ({ scoreAssessmentRun: vi.fn() }));
+const { scoreAssessmentRun, createAssessmentSnapshot } = vi.hoisted(() => ({
+  scoreAssessmentRun: vi.fn(),
+  createAssessmentSnapshot: vi.fn(),
+}));
 
 vi.mock("@/features/assessment/api/assessment", () => ({
   startAssessmentRun: vi.fn(),
   getNextAssessmentBatch: vi.fn(),
   submitAssessmentResponse: vi.fn(),
   scoreAssessmentRun,
+}));
+
+vi.mock("@/features/assessment/api/assessment-snapshot", () => ({
+  createAssessmentSnapshot,
 }));
 
 // Deliberately uneven, non-mock-looking percentages, distinct per scale, to prove the bars and
@@ -41,6 +50,16 @@ const RESULT = {
   createdAt: "2026-01-01T00:00:00.000Z",
 };
 
+// intake_summary_json entries are stored as { value: "..." } on real ProfileSnapshot rows
+// (confirmed against the live database), not plain scalars — this mirrors that real shape so
+// the test would catch a regression to the naive typeof-string reading this once had.
+const SNAPSHOT = {
+  snapshotId: "snapshot-1",
+  segment: "launcher" as const,
+  wantsAid: false,
+  intakeSummary: { current_goal: { value: "skill_building" } },
+};
+
 function renderAt(initialPath: string) {
   return render(
     <QueryClientProvider client={queryClient}>
@@ -50,6 +69,7 @@ function renderAt(initialPath: string) {
             <Route path="/" element={<div>Onboarding screen</div>} />
             <Route path="/home" element={<div>Home screen</div>} />
             <Route path="/riasec-results" element={<RiasecResultsPage />} />
+            <Route path="/explore-path" element={<div>Explore Path screen</div>} />
           </Routes>
         </MemoryRouter>
       </SessionProvider>
@@ -84,6 +104,7 @@ describe("RiasecResultsPage", () => {
     setStoredJourneySessionId("session-id");
     setStoredAssessmentRunId("run-1");
     scoreAssessmentRun.mockResolvedValue({ result: RESULT });
+    createAssessmentSnapshot.mockResolvedValue({ snapshot: SNAPSHOT });
     const user = userEvent.setup();
     renderAt("/riasec-results");
 
@@ -99,7 +120,32 @@ describe("RiasecResultsPage", () => {
     expect(screen.getByText("RIA")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Explore Path" }));
-    expect(await screen.findByText("Home screen")).toBeInTheDocument();
+
+    expect(await screen.findByText("Explore Path screen")).toBeInTheDocument();
+    expect(createAssessmentSnapshot).toHaveBeenCalledWith("session-id", "run-1");
+    expect(getStoredProfileSnapshotId()).toBe("snapshot-1");
+    expect(getStoredExploreGatingContext()).toEqual({
+      segment: "launcher",
+      wantsAid: false,
+      currentGoal: "skill_building",
+    });
+  });
+
+  it("reuses the stored snapshot instead of creating a new one on a repeat visit", async () => {
+    setStoredUserId("user-id");
+    setStoredJourneySessionId("session-id");
+    setStoredAssessmentRunId("run-1");
+    scoreAssessmentRun.mockResolvedValue({ result: RESULT });
+    localStorage.setItem("yuvanext.profileSnapshotId", "existing-snapshot");
+    const user = userEvent.setup();
+    renderAt("/riasec-results");
+
+    await user.click(await screen.findByRole("button", { name: "Explore Path" }));
+
+    expect(await screen.findByText("Explore Path screen")).toBeInTheDocument();
+    // createAssessmentSnapshot is NOT idempotent server-side (a fresh row every call) — this is
+    // the guard that keeps a repeat visit from creating a second one.
+    expect(createAssessmentSnapshot).not.toHaveBeenCalled();
   });
 
   it("shows a friendly message and lets the student retry when scoring fails", async () => {
