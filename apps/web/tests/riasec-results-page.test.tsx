@@ -9,6 +9,7 @@ import {
   getStoredExploreGatingContext,
   getStoredProfileSnapshotId,
   setStoredAssessmentRunId,
+  setStoredExploreGatingContext,
   setStoredJourneySessionId,
   setStoredUserId,
 } from "@/lib/storage";
@@ -99,6 +100,30 @@ describe("RiasecResultsPage", () => {
     expect(screen.getByText("Home screen")).toBeInTheDocument();
   });
 
+  it("shows only the shared spinner while scoring — no result card, empty or otherwise, until it's ready", async () => {
+    setStoredUserId("user-id");
+    setStoredJourneySessionId("session-id");
+    setStoredAssessmentRunId("run-1");
+    let resolveScore!: (value: { result: typeof RESULT }) => void;
+    scoreAssessmentRun.mockReturnValue(
+      new Promise((resolve) => {
+        resolveScore = resolve;
+      }),
+    );
+    renderAt("/riasec-results");
+
+    // The one shared loading indicator, and nothing else — no result heading (a fully/partially
+    // populated card) and no visible "Loading" text (the word only exists for screen readers).
+    expect(screen.getByRole("status", { name: /loading/i })).toBeInTheDocument();
+    expect(screen.queryByText("Assessment")).not.toBeInTheDocument();
+    expect(screen.queryByText("Loading…")).not.toBeInTheDocument();
+    expect(screen.queryByText("Loading...")).not.toBeInTheDocument();
+
+    resolveScore({ result: RESULT });
+    expect(await screen.findByText("Assessment")).toBeInTheDocument();
+    expect(screen.queryByRole("status", { name: /loading/i })).not.toBeInTheDocument();
+  });
+
   it("scores the run and renders the real result — trait bars and RIASEC code, nothing hardcoded", async () => {
     setStoredUserId("user-id");
     setStoredJourneySessionId("session-id");
@@ -108,7 +133,7 @@ describe("RiasecResultsPage", () => {
     const user = userEvent.setup();
     renderAt("/riasec-results");
 
-    expect(await screen.findByText("Personality Type Trait Strength!")).toBeInTheDocument();
+    expect(await screen.findByText("Assessment")).toBeInTheDocument();
     expect(scoreAssessmentRun).toHaveBeenCalledWith("run-1");
 
     expect(screen.getByText("Realistic")).toBeInTheDocument();
@@ -117,7 +142,9 @@ describe("RiasecResultsPage", () => {
     expect(screen.getByText("80%")).toBeInTheDocument(); // I: 0.8 -> 80%
     expect(screen.getByText("Conventional")).toBeInTheDocument();
     expect(screen.getByText("10%")).toBeInTheDocument(); // C: 0.1 -> 10%
-    expect(screen.getByText("RIA")).toBeInTheDocument();
+    // "RIA" appears twice — once in the hero band, once in the trait recap line underneath the
+    // bars — so this can't be a single getByText.
+    expect(screen.getAllByText("RIA").length).toBeGreaterThan(0);
 
     await user.click(screen.getByRole("button", { name: "Explore Path" }));
 
@@ -129,6 +156,59 @@ describe("RiasecResultsPage", () => {
       wantsAid: false,
       currentGoal: "skill_building",
     });
+  });
+
+  it("shows confidence but none of the interest-quiz/English/summary copy, and an empty selections placeholder", async () => {
+    setStoredUserId("user-id");
+    setStoredJourneySessionId("session-id");
+    setStoredAssessmentRunId("run-1");
+    scoreAssessmentRun.mockResolvedValue({ result: RESULT });
+    renderAt("/riasec-results");
+
+    expect(await screen.findByText("Confidence: Normal")).toBeInTheDocument();
+    expect(screen.queryByText(/interest quiz/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/mini-iip/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/english/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/summary/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/natural doer/i)).not.toBeInTheDocument();
+
+    expect(screen.getByText("Your Selections & Explorations")).toBeInTheDocument();
+    expect(
+      screen.getByText("Careers and colleges you explore will show up here."),
+    ).toBeInTheDocument();
+  });
+
+  it("shows the segment badge once it's known (a repeat visit), and omits it otherwise", async () => {
+    setStoredUserId("user-id");
+    setStoredJourneySessionId("session-id");
+    setStoredAssessmentRunId("run-1");
+    scoreAssessmentRun.mockResolvedValue({ result: RESULT });
+    setStoredExploreGatingContext({ segment: "launcher", wantsAid: false, currentGoal: undefined });
+    renderAt("/riasec-results");
+
+    expect(await screen.findByText("launcher")).toBeInTheDocument();
+  });
+
+  it("omits the segment badge on a first visit, before any profile snapshot exists", async () => {
+    setStoredUserId("user-id");
+    setStoredJourneySessionId("session-id");
+    setStoredAssessmentRunId("run-1");
+    scoreAssessmentRun.mockResolvedValue({ result: RESULT });
+    renderAt("/riasec-results");
+
+    expect(await screen.findByText("Assessment")).toBeInTheDocument();
+    expect(screen.queryByText(/explorer|pathfinder|launcher/i)).not.toBeInTheDocument();
+  });
+
+  it("shows Download and Talk to counsellor as disabled placeholders — no backend behind either yet", async () => {
+    setStoredUserId("user-id");
+    setStoredJourneySessionId("session-id");
+    setStoredAssessmentRunId("run-1");
+    scoreAssessmentRun.mockResolvedValue({ result: RESULT });
+    renderAt("/riasec-results");
+
+    expect(await screen.findByRole("button", { name: /download/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /talk to counsellor/i })).toBeDisabled();
   });
 
   it("reuses the stored snapshot instead of creating a new one on a repeat visit", async () => {
@@ -160,14 +240,12 @@ describe("RiasecResultsPage", () => {
     );
     renderAt("/riasec-results");
 
-    expect(
-      await screen.findByText(/answer every question before finishing/i),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/answer every question before finishing/i)).toBeInTheDocument();
 
     scoreAssessmentRun.mockResolvedValueOnce({ result: RESULT });
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "Try again" }));
 
-    expect(await screen.findByText("RIA")).toBeInTheDocument();
+    expect(await screen.findAllByText("RIA")).not.toHaveLength(0);
   });
 });

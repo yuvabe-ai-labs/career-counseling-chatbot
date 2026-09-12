@@ -75,16 +75,30 @@ describe("ExplorePathPage — cards follow the user's segment", () => {
     expect(visibleCards()).toEqual(["Career map", "Colleges", "Plan"]);
   });
 
-  it("launcher heading to higher studies gets the full-degree set", () => {
+  it("launcher heading to higher studies gets Colleges but not Streams/Pathway", () => {
     renderFor({ segment: "launcher", wantsAid: false, currentGoal: "higher_studies" });
-    expect(visibleCards()).toEqual(["Career map", "Streams", "Pathway", "Colleges", "Plan"]);
+    expect(visibleCards()).toEqual(["Career map", "Colleges", "Plan"]);
   });
 
-  it("keeps Career map navigable and leaves not-yet-built options non-navigable", () => {
-    renderFor({ segment: "explorer", wantsAid: false, currentGoal: undefined });
+  it("launcher with an open goal (not_sure) matches higher_studies/skill_building exactly", () => {
+    renderFor({ segment: "launcher", wantsAid: false, currentGoal: "not_sure" });
+    expect(visibleCards()).toEqual(["Career map", "Colleges", "Plan"]);
+  });
+
+  it("launcher not enrolling anywhere (job/career_switch/business) gets only Career and Plan", () => {
+    renderFor({ segment: "launcher", wantsAid: false, currentGoal: "job" });
+    expect(visibleCards()).toEqual(["Career map", "Plan"]);
+  });
+
+  it("keeps Career/Streams/Colleges navigable; Pathway and Plan (temporarily) and Scholarships & Aid (not yet built) are non-navigable", () => {
+    renderFor({ segment: "pathfinder", wantsAid: true, currentGoal: undefined });
 
     expect(screen.getByText("Career map").closest("button")).toBeEnabled();
-    expect(screen.getByText("Streams").closest("button")).toBeDisabled();
+    expect(screen.getByText("Streams").closest("button")).toBeEnabled();
+    expect(screen.getByText("Pathway").closest("button")).toBeDisabled();
+    expect(screen.getByText("Colleges").closest("button")).toBeEnabled();
+    expect(screen.getByText("Plan").closest("button")).toBeDisabled();
+    expect(screen.getByText("Scholarships & Aid").closest("button")).toBeDisabled();
   });
 
   it("offers a real route back to the results screen it was opened from", () => {

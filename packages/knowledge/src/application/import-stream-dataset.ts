@@ -35,10 +35,23 @@ export type StreamImportReport = {
   >;
 };
 
+export type ImportStreamDatasetOptions = {
+  /**
+   * Already-published entity ids a pathway/career-pathway link in this batch is allowed to
+   * reference without also including that entity in the same batch — see
+   * validateStreamRecords()'s own comment. Used by the AI-catalog promotion script
+   * (scripts/ingest/promote-ai-catalog.ts), which typically references existing careers and
+   * education routes rather than re-publishing them.
+   */
+  knownCareerIds?: readonly string[];
+  knownEducationRouteIds?: readonly string[];
+};
+
 export async function importStreamDataset(
   manifestInput: unknown,
   recordsText: string,
   publisher: StreamDatasetPublisher,
+  options: ImportStreamDatasetOptions = {},
 ): Promise<StreamImportReport> {
   const checksumSha256 = createHash("sha256")
     .update(recordsText)
@@ -75,6 +88,8 @@ export async function importStreamDataset(
   const validation = validateStreamRecords(
     recordsInput,
     manifest.datasetVersionId,
+    options.knownCareerIds ?? [],
+    options.knownEducationRouteIds ?? [],
   );
   const issues: StreamImportReport["issues"] = validation.success
     ? []
@@ -125,11 +140,13 @@ export async function importStreamDataset(
 export async function validateStreamDataset(
   manifestInput: unknown,
   recordsText: string,
+  options: ImportStreamDatasetOptions = {},
 ): Promise<StreamImportReport> {
   const report = await importStreamDataset(
     manifestInput,
     recordsText,
     { publish: () => Promise.resolve("published") },
+    options,
   );
   return {
     ...report,

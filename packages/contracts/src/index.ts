@@ -1,3 +1,4 @@
+export * from "./ai-generation.js";
 export * from "./audit.js";
 export * from "./auth.js";
 export * from "./catalog.js";
@@ -75,6 +76,7 @@ export {
   CollegeRecommendationRouteRequestSchema,
   CollegeRecommendationSetResponseSchema,
   GeneratedPlanStepSchema,
+  LocationPreferenceSchema,
   MatchingConfigSchema,
   PathwayCatalogRecordSchema,
   PathwayFitExplanationSchema,
@@ -113,6 +115,7 @@ export type {
   CollegeRecommendationRouteRequest,
   CollegeRecommendationSetResponse,
   GeneratedPlanStep,
+  LocationPreference,
   MatchingConfig,
   PathwayCatalogRecord,
   PathwayFitExplanation,

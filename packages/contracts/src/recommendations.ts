@@ -14,6 +14,15 @@ export const RiasecVectorSchema = z.object({
 });
 export type RiasecVector = z.infer<typeof RiasecVectorSchema>;
 
+export const LocationPreferenceSchema = z.enum([
+  "same_city",
+  "same_state",
+  "anywhere_in_india",
+  "remote",
+  "not_sure",
+]);
+export type LocationPreference = z.infer<typeof LocationPreferenceSchema>;
+
 export const ProfileSnapshotForRecommendationsSchema = z.object({
   profileSnapshotId: UuidSchema,
   profileVersion: z.string().min(1),
@@ -21,6 +30,7 @@ export const ProfileSnapshotForRecommendationsSchema = z.object({
   segment: SegmentSchema,
   state: StateSchema.optional(),
   marksBand: z.string().min(1).optional(),
+  locationPreference: LocationPreferenceSchema.optional(),
   riasec: RiasecVectorSchema,
   workValues: RiasecVectorSchema.optional(),
 });
@@ -63,6 +73,9 @@ export type CareerCatalogRecord = z.infer<typeof CareerCatalogRecordSchema>;
 export const StreamCatalogRecordSchema = z.object({
   streamId: UuidSchema,
   title: z.string().trim().min(1),
+  /** knowledge.stream_options.description — the stream's own catalog blurb, not derived from
+   *  scoring. Optional so older callers/fixtures that predate this field still validate. */
+  description: z.string().trim().min(1).optional(),
   riasecLetters: z.array(RiasecLetterSchema).min(1),
   recommendedSegments: z.array(SegmentSchema).min(1),
   marksBands: z.array(z.string().min(1)).optional(),
@@ -162,6 +175,9 @@ export const StreamFitExplanationSchema = z.object({
   catalogPriority: z.number().int().nonnegative(),
   topStudentLetters: z.array(RiasecLetterSchema),
   matchedLetters: z.array(RiasecLetterSchema),
+  /** Carried straight from StreamCatalogRecord.description — optional so recommendation sets
+   *  stored before this field existed still replay/validate correctly. */
+  description: z.string().trim().min(1).optional(),
 });
 export type StreamFitExplanation = z.infer<typeof StreamFitExplanationSchema>;
 

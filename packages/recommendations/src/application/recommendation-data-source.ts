@@ -2,6 +2,7 @@ import type {
   AidSchemeCatalogRecord,
   CareerCatalogRecord,
   CollegeCatalogRecord,
+  LocationPreference,
   MatchingConfig,
   PathwayCatalogRecord,
   PlanTemplateCatalogRecord,
@@ -77,6 +78,9 @@ export function createPostgresRecommendationDataSource(pool: Pool): Recommendati
         segment: row.segment,
         state: row.state,
         ...optionalString("marksBand", readFirstString(row.intake_summary_json, ["marksBand", "marks_band"])),
+        ...optionalLocationPreference(
+          readFirstString(row.intake_summary_json, ["locationPreference", "location_preference"]),
+        ),
         riasec: readRiasecVector(row.result_summary_json),
         ...optionalVector("workValues", readWorkValues(row.result_summary_json)),
       };
@@ -188,20 +192,24 @@ export function createPostgresRecommendationDataSource(pool: Pool): Recommendati
       }));
     },
 
-    async loadStreams(profile, limit = 30) {
+    async loadStreams(profile, limit) {
       const topTwo = topRiasecCode(profile.riasec);
       const result = await pool.query<{
         id: string;
         title: string;
+        description: string;
         rank: number;
         top_two_code: string;
+        map_segment: "explorer" | "pathfinder" | "launcher" | null;
         dataset_version: string;
       }>(
         `select
           stream.id,
           stream.title,
+          stream.description,
           item.rank,
           map.top_two_code,
+          map.segment as map_segment,
           dataset.version as dataset_version
         from knowledge.stream_maps map
         join knowledge.stream_map_items item on item.map_id = map.id
@@ -210,24 +218,48 @@ export function createPostgresRecommendationDataSource(pool: Pool): Recommendati
         where map.status = 'published'
           and stream.status = 'active'
           and map.top_two_code = $1
+          and (map.segment = $2 or map.segment is null)
         order by item.rank asc, stream.title asc
-        limit $2`,
-        [topTwo, limit],
+        limit $3`,
+        [topTwo, profile.segment, limit ?? null],
       );
 
-      return result.rows.map((row) => ({
+      // A stream_maps row scoped to the student's own segment always wins over a
+      // NULL ("general", applies-to-every-segment) row for the same RIASEC pair —
+      // the NULL rows only fill in where no segment-specific content exists yet.
+      // See knowledge.stream_maps.segment (20260731000100_m3_stream_map_segment.sql):
+      // the column was added specifically so this differentiation is possible; the
+      // catalog loader previously ignored it entirely (fixed here).
+      const segmentSpecificRows = result.rows.filter((row) => row.map_segment === profile.segment);
+      const rows = segmentSpecificRows.length > 0
+        ? segmentSpecificRows
+        : result.rows.filter((row) => row.map_segment === null);
+      const recommendedSegments: StreamCatalogRecord["recommendedSegments"] =
+        segmentSpecificRows.length > 0
+          ? [profile.segment]
+          : ["explorer", "pathfinder", "launcher"];
+
+      return rows.map((row) => ({
         streamId: row.id,
         title: row.title,
+        description: row.description,
         riasecLetters: row.top_two_code.split("").filter(isRiasecLetter),
-        recommendedSegments: ["explorer", "pathfinder", "launcher"],
+        recommendedSegments,
         priority: row.rank,
         datasetVersion: row.dataset_version,
         verified: true,
       }));
     },
 
-    async loadPathways(limit = 30) {
+    async loadPathways(limit) {
       const streamIds = await loadActiveStreamIds(pool);
+      // Same reasoning as loadCareers()'s own comment: rank the complete published catalogue by
+      // default. Limiting before scoring discards the student's best matches whenever they sort
+      // later than whatever the cap happens to be — with more than `limit` published pathways
+      // (already true today), `order by title asc limit N` truncates alphabetically BEFORE
+      // scorePathways() ever runs, so every pathway past that cutoff is invisible to every
+      // student regardless of fit. `limit $1` with a null parameter is unlimited in Postgres, so
+      // this only actually caps the result when a caller explicitly asks for one.
       const result = await pool.query<{
         id: string;
         title: string;
@@ -251,7 +283,7 @@ export function createPostgresRecommendationDataSource(pool: Pool): Recommendati
         group by pathway.id, dataset.version, route.route_level
         order by pathway.title asc
         limit $1`,
-        [limit],
+        [limit ?? null],
       );
 
       return result.rows.map((row, index) => ({
@@ -268,7 +300,9 @@ export function createPostgresRecommendationDataSource(pool: Pool): Recommendati
       }));
     },
 
-    async loadColleges(limit = 30) {
+    async loadColleges(limit) {
+      // Same reasoning as loadPathways() above (and loadCareers()'s original comment) — load the
+      // complete verified catalogue by default; `limit $1` with a null parameter is unlimited.
       const result = await pool.query<{
         id: string;
         name: string;
@@ -294,7 +328,7 @@ export function createPostgresRecommendationDataSource(pool: Pool): Recommendati
         group by college.id, dataset.version
         order by college.name asc
         limit $1`,
-        [limit],
+        [limit ?? null],
       );
 
       return result.rows.map((row) => ({
@@ -625,6 +659,21 @@ function optionalString<Key extends string>(key: Key, value: string | undefined)
   return value ? { [key]: value } : {};
 }
 
+const LOCATION_PREFERENCE_VALUES: readonly LocationPreference[] = [
+  "same_city",
+  "same_state",
+  "anywhere_in_india",
+  "remote",
+  "not_sure",
+];
+
+function optionalLocationPreference(
+  value: string | undefined,
+): { locationPreference: LocationPreference } | object {
+  const match = LOCATION_PREFERENCE_VALUES.find((candidate) => candidate === value);
+  return match ? { locationPreference: match } : {};
+}
+
 function optionalVector<Key extends string>(key: Key, value: RiasecVector | undefined): Record<Key, RiasecVector> | object {
   return value ? { [key]: value } : {};
 }
@@ -645,11 +694,27 @@ function isRiasecLetter(value: string): value is RiasecLetter {
   return ["R", "I", "A", "S", "E", "C"].includes(value);
 }
 
-function topRiasecCode(vector: RiasecVector): string {
-  return [...RIASEC_TIE_ORDER]
-    .sort((left, right) => vector[right] - vector[left])
-    .slice(0, 2)
+// Picks the student's top two RIASEC letters by score (unchanged, score-driven — this is
+// the part that must never change), then re-orders just those two letters into the fixed
+// RIASEC_TIE_ORDER sequence before joining them into a lookup key. Without this second
+// step, two students with the exact same top-two letters but a different higher scorer
+// (e.g. I=0.9,R=0.8 vs R=0.9,I=0.8) would produce different strings ("IR" vs "RI") and,
+// since knowledge.stream_maps.top_two_code is matched by exact string equality in
+// loadStreams(), one of the two orderings would silently match zero catalog rows. Every
+// existing stream_maps row already happens to use the canonical (tie-order) ordering
+// (see the mock seed's RI/RA/RS/RE/RC/IA/IS/IE/IC/AS codes), so canonicalizing here reads
+// the existing data correctly instead of requiring new data.
+export function canonicalizeRiasecPair(letters: readonly RiasecLetter[]): string {
+  return [...letters]
+    .sort((left, right) => RIASEC_TIE_ORDER.indexOf(left) - RIASEC_TIE_ORDER.indexOf(right))
     .join("");
+}
+
+function topRiasecCode(vector: RiasecVector): string {
+  const topTwo = [...RIASEC_TIE_ORDER]
+    .sort((left, right) => vector[right] - vector[left])
+    .slice(0, 2);
+  return canonicalizeRiasecPair(topTwo);
 }
 
 function normalizeReachability(value: string): 0.3 | 0.65 | 1 {

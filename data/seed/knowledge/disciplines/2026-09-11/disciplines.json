@@ -1,0 +1,287 @@
+{
+  "colleges": [],
+  "disciplines": [
+    {
+      "id": "1d30f061-a4d4-4c2c-9170-f77c1d14b0e2",
+      "disciplineCode": "mechanical-engineering",
+      "title": "Mechanical Engineering",
+      "domainCode": "engineering",
+      "status": "active"
+    },
+    {
+      "id": "2bc63255-0cd1-4b6e-8cef-5bb5970d5614",
+      "disciplineCode": "civil-engineering",
+      "title": "Civil Engineering",
+      "domainCode": "engineering",
+      "status": "active"
+    },
+    {
+      "id": "58f2eb2b-61a3-4241-8f15-b4f77c7f45ae",
+      "disciplineCode": "electrical-engineering",
+      "title": "Electrical Engineering",
+      "domainCode": "engineering",
+      "status": "active"
+    },
+    {
+      "id": "3739ac67-159e-4873-8900-b6f0d45687be",
+      "disciplineCode": "electronics-communication-engineering",
+      "title": "Electronics & Communication Engineering",
+      "domainCode": "engineering",
+      "status": "active"
+    },
+    {
+      "id": "d37a3fa5-7910-4f90-bbc7-60e7a048f553",
+      "disciplineCode": "automobile-engineering",
+      "title": "Automobile Engineering",
+      "domainCode": "engineering",
+      "status": "active"
+    },
+    {
+      "id": "fbe1b153-39c7-4c42-82c4-92762403c7d2",
+      "disciplineCode": "information-technology",
+      "title": "Information Technology",
+      "domainCode": "technology",
+      "status": "active"
+    },
+    {
+      "id": "7f4a966b-74ce-493a-ad17-b6e15f5076b6",
+      "disciplineCode": "data-science-analytics",
+      "title": "Data Science & Analytics",
+      "domainCode": "technology",
+      "status": "active"
+    },
+    {
+      "id": "f7c70f0f-fe83-461a-83dd-1d12aa0487ce",
+      "disciplineCode": "cybersecurity",
+      "title": "Cybersecurity",
+      "domainCode": "technology",
+      "status": "active"
+    },
+    {
+      "id": "a2157a1e-b8df-4645-8a05-bb521caf8572",
+      "disciplineCode": "medicine",
+      "title": "Medicine (MBBS)",
+      "domainCode": "healthcare",
+      "status": "active"
+    },
+    {
+      "id": "8b35c900-469c-49fd-b8f7-2aa7ed7c4699",
+      "disciplineCode": "nursing",
+      "title": "Nursing",
+      "domainCode": "healthcare",
+      "status": "active"
+    },
+    {
+      "id": "257c48e8-b0a8-4f74-a705-13a648a9f5ac",
+      "disciplineCode": "pharmacy",
+      "title": "Pharmacy",
+      "domainCode": "healthcare",
+      "status": "active"
+    },
+    {
+      "id": "d4976990-9a30-47e6-825c-f4a5252aa20c",
+      "disciplineCode": "medical-laboratory-technology",
+      "title": "Medical Laboratory Technology",
+      "domainCode": "healthcare",
+      "status": "active"
+    },
+    {
+      "id": "f463e432-cb2b-4077-81e8-6216ed1e091b",
+      "disciplineCode": "physiotherapy",
+      "title": "Physiotherapy",
+      "domainCode": "healthcare",
+      "status": "active"
+    },
+    {
+      "id": "17495bdc-c125-4b87-a621-bd2c0639c4a2",
+      "disciplineCode": "dentistry",
+      "title": "Dentistry",
+      "domainCode": "healthcare",
+      "status": "active"
+    },
+    {
+      "id": "1799f40d-7f45-4035-a44a-e3fe910136ee",
+      "disciplineCode": "commerce-accounting",
+      "title": "Commerce & Accounting",
+      "domainCode": "commerce",
+      "status": "active"
+    },
+    {
+      "id": "92bf6ea3-8321-472b-9b77-199aa87c8a66",
+      "disciplineCode": "business-administration",
+      "title": "Business Administration",
+      "domainCode": "commerce",
+      "status": "active"
+    },
+    {
+      "id": "95c10ead-9c2f-4a94-be85-b9401caa9458",
+      "disciplineCode": "banking-finance",
+      "title": "Banking & Finance",
+      "domainCode": "commerce",
+      "status": "active"
+    },
+    {
+      "id": "feb7f4c4-dee1-4e08-844c-ecd50384622d",
+      "disciplineCode": "economics",
+      "title": "Economics",
+      "domainCode": "commerce",
+      "status": "active"
+    },
+    {
+      "id": "9ebd767a-0d35-4fe1-b2af-dd540a28dd2e",
+      "disciplineCode": "supply-chain-logistics",
+      "title": "Supply Chain & Logistics",
+      "domainCode": "commerce",
+      "status": "active"
+    },
+    {
+      "id": "1bb03109-1fc9-4eb7-8b44-827c61945f88",
+      "disciplineCode": "law",
+      "title": "Law",
+      "domainCode": "law",
+      "status": "active"
+    },
+    {
+      "id": "8a697217-f2e6-4b42-838d-8b28d9496df5",
+      "disciplineCode": "education-teacher-training",
+      "title": "Education & Teacher Training",
+      "domainCode": "education",
+      "status": "active"
+    },
+    {
+      "id": "63cd9605-11c8-43c5-8e27-3793824567ed",
+      "disciplineCode": "early-childhood-education",
+      "title": "Early Childhood Education",
+      "domainCode": "education",
+      "status": "active"
+    },
+    {
+      "id": "a8bb4544-65b7-4333-9dd1-d5eae623ea19",
+      "disciplineCode": "psychology",
+      "title": "Psychology",
+      "domainCode": "humanities",
+      "status": "active"
+    },
+    {
+      "id": "221833e8-e2d3-46e1-b62e-c9761b0d3e62",
+      "disciplineCode": "social-work",
+      "title": "Social Work",
+      "domainCode": "humanities",
+      "status": "active"
+    },
+    {
+      "id": "60b449fc-49fa-436b-a7b3-668c23fe0a6a",
+      "disciplineCode": "mass-communication-journalism",
+      "title": "Mass Communication & Journalism",
+      "domainCode": "humanities",
+      "status": "active"
+    },
+    {
+      "id": "dc16613e-eef5-492b-9bdc-f6f20651d23c",
+      "disciplineCode": "political-science",
+      "title": "Political Science",
+      "domainCode": "humanities",
+      "status": "active"
+    },
+    {
+      "id": "11c37a65-b35e-4b31-b5e2-4175e3cf3f60",
+      "disciplineCode": "history",
+      "title": "History",
+      "domainCode": "humanities",
+      "status": "active"
+    },
+    {
+      "id": "b5ee5886-1da5-49d7-b1e7-44db6e89450b",
+      "disciplineCode": "languages-literature",
+      "title": "Languages & Literature",
+      "domainCode": "humanities",
+      "status": "active"
+    },
+    {
+      "id": "d819690c-e984-437d-ad69-36320e45cc1e",
+      "disciplineCode": "visual-communication-design",
+      "title": "Visual Communication Design",
+      "domainCode": "design",
+      "status": "active"
+    },
+    {
+      "id": "fcd4ba86-cda2-4dc3-9b95-1f4bae786f41",
+      "disciplineCode": "fashion-design",
+      "title": "Fashion Design",
+      "domainCode": "design",
+      "status": "active"
+    },
+    {
+      "id": "57bba44a-4372-4f51-9b05-d5374d7848ed",
+      "disciplineCode": "interior-design",
+      "title": "Interior Design",
+      "domainCode": "design",
+      "status": "active"
+    },
+    {
+      "id": "f4587f01-27b7-4b2a-97e7-d53f4bffab8b",
+      "disciplineCode": "fine-arts",
+      "title": "Fine Arts",
+      "domainCode": "design",
+      "status": "active"
+    },
+    {
+      "id": "c4b8e6ef-01d2-4c75-b44e-7a4bba87ea42",
+      "disciplineCode": "architecture",
+      "title": "Architecture",
+      "domainCode": "design",
+      "status": "active"
+    },
+    {
+      "id": "be59e847-79e1-49d8-a451-1c3f733142f7",
+      "disciplineCode": "agriculture-science",
+      "title": "Agricultural Science",
+      "domainCode": "agriculture",
+      "status": "active"
+    },
+    {
+      "id": "6d37dae7-9018-49ad-85e5-dbb599415ca2",
+      "disciplineCode": "horticulture",
+      "title": "Horticulture",
+      "domainCode": "agriculture",
+      "status": "active"
+    },
+    {
+      "id": "b20d93ff-444b-43bb-bcc8-c2185eb661d8",
+      "disciplineCode": "hotel-management-hospitality",
+      "title": "Hotel Management & Hospitality",
+      "domainCode": "hospitality",
+      "status": "active"
+    },
+    {
+      "id": "1abda914-b221-4bfd-86a6-25c277a109cc",
+      "disciplineCode": "tourism-management",
+      "title": "Tourism Management",
+      "domainCode": "hospitality",
+      "status": "active"
+    },
+    {
+      "id": "7dae4fb3-5c8b-499c-be8e-36973599b82b",
+      "disciplineCode": "physical-education-sports-science",
+      "title": "Physical Education & Sports Science",
+      "domainCode": "sports",
+      "status": "active"
+    },
+    {
+      "id": "a376b405-3709-4406-91b1-35e8008992a0",
+      "disciplineCode": "renewable-energy-technology",
+      "title": "Renewable Energy Technology",
+      "domainCode": "engineering",
+      "status": "active"
+    },
+    {
+      "id": "723af741-9e86-4343-a076-94601fb40382",
+      "disciplineCode": "biotechnology",
+      "title": "Biotechnology",
+      "domainCode": "technology",
+      "status": "active"
+    }
+  ],
+  "programs": [],
+  "pathwayDisciplines": []
+}

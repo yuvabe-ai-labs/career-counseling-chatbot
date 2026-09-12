@@ -12,10 +12,23 @@ export type VerificationStatus = z.infer<typeof VerificationStatusSchema>;
 
 export const CollegeSchema = z.object({
   id: UuidSchema,
+  // Nullable+optional (not just nullable): existing published dataset fixtures predate these
+  // three fields and omit them entirely — see
+  // docs/poc/ai-assisted-catalog-implementation-plan.md §22/§23. Previously the college
+  // dataset importer/publisher could not carry any of these at all (hardcoded to null on every
+  // insert), which is why the real TN DCE colleges had to be inserted via a raw SQL migration
+  // instead of the importer.
+  externalCode: z.string().trim().min(1).max(80).nullable().optional(),
   name: z.string().trim().min(1).max(200),
   city: z.string().trim().min(1).max(160),
   state: StateSchema,
   institutionType: z.string().trim().min(1).max(100),
+  // Free-text summaries, not verified claims — see the schema comment on
+  // knowledge.colleges.tier ("never inferred by AI"): tier deliberately has no field here at
+  // all, and never will. admissionRoute/feesBand are the descriptive/structural content Gemini
+  // (or a human) may draft; they carry no factual guarantee beyond what verificationStatus says.
+  admissionRoute: z.string().trim().min(1).max(300).nullable().optional(),
+  feesBand: z.string().trim().min(1).max(160).nullable().optional(),
   websiteUrl: z
     .string()
     .url()
@@ -487,6 +500,22 @@ export const PathwaySchema = z.object({
 
 export type Pathway = z.infer<typeof PathwaySchema>;
 
+// knowledge.career_pathways — previously had no dataset-import coverage at all (every existing
+// row came from a raw SQL migration). Bundled into the stream dataset rather than given its
+// own manifest type: a pathway's linked career(s) are inherent to describing the pathway
+// itself, generated in the same drafting pass as the pathway (see
+// docs/poc/ai-assisted-catalog-implementation-plan.md §5), not a separate dataset concern.
+export const CareerPathwayRelationshipTypeSchema = z.enum(["primary", "alternative", "vocational"]);
+
+export const CareerPathwayLinkSchema = z.object({
+  careerId: UuidSchema,
+  pathwayId: UuidSchema,
+  relationshipType: CareerPathwayRelationshipTypeSchema,
+  displayOrder: z.number().int().positive(),
+});
+
+export type CareerPathwayLink = z.infer<typeof CareerPathwayLinkSchema>;
+
 export const StreamOptionSchema = z.object({
   id: UuidSchema,
   streamCode: z.string().trim().min(1).max(80),
@@ -500,7 +529,13 @@ export type StreamOption = z.infer<typeof StreamOptionSchema>;
 export const StreamMapSchema = z.object({
   id: UuidSchema,
   topTwoCode: RiasecTopTwoSchema,
-  segment: SegmentSchema,
+  // Nullable: knowledge.stream_maps.segment (20260731000100_m3_stream_map_segment.sql) is
+  // nullable by design — a NULL segment means the mapping is "general", applying to every
+  // segment, and is the fallback recommendation-data-source.ts's loadStreams() uses when no
+  // segment-specific row exists (docs/poc/ai-assisted-catalog-implementation-plan.md §14). The
+  // contract previously required a non-null segment, which meant the manifest importer could
+  // never actually publish a general mapping — fixed here.
+  segment: SegmentSchema.nullable(),
   version: z.string().trim().min(1).max(80),
   datasetVersionId: UuidSchema,
   status: z.enum(["draft", "published", "retired"]),
@@ -550,6 +585,8 @@ export type StreamListResponse = z.infer<
 export const StreamDatasetRecordsSchema = z.object({
   educationRoutes: z.array(EducationRouteSchema),
   pathways: z.array(PathwaySchema),
+  // Optional + defaulted: existing published stream datasets predate this field.
+  careerPathways: z.array(CareerPathwayLinkSchema).optional().default([]),
   streamOptions: z.array(StreamOptionSchema),
   streamMaps: z.array(StreamMapSchema),
   streamMapItems: z.array(StreamMapItemSchema),
@@ -570,6 +607,7 @@ export const StreamDatasetManifestSchema = z.object({
   recordCounts: z.object({
     educationRoutes: z.number().int().nonnegative(),
     pathways: z.number().int().nonnegative(),
+    careerPathways: z.number().int().nonnegative().optional(),
     streamOptions: z.number().int().nonnegative(),
     streamMaps: z.number().int().nonnegative(),
     streamMapItems: z.number().int().nonnegative(),

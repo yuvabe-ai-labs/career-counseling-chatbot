@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { tabsToShow } from "@/features/recommendations/lib/tabs-to-show";
 
-// Every row of Part 1's tables in docs/poc/launcher-goal-based-recommendations.md — the 9 real
-// intake-answer combinations the app can actually produce. Each expected visibility set is
-// copied straight from that doc's ✅/❌ columns, not re-derived here.
+// Explorer and Pathfinder's 3 rows are fixed. Launcher's 12 goal x aid combinations collapse
+// into 2 real buckets — see the doc comment on tabsToShow() for why (Stream/Pathway are off
+// for Launcher unconditionally; only College depends on whether the student's goal involves
+// enrolling anywhere) — enumerated here per goal so a future regression on any one goal value
+// is still caught, not just the bucket as a whole.
 describe("tabsToShow", () => {
   it("row 1 — Explorer", () => {
     expect(tabsToShow({ segment: "explorer", wantsAid: false, currentGoal: undefined })).toEqual({
@@ -39,7 +41,7 @@ describe("tabsToShow", () => {
   });
 
   it.each(["job", "career_switch", "business"])(
-    "row 4 — Launcher, goal=%s, no aid",
+    "row 4 — Launcher not enrolling anywhere, goal=%s, no aid",
     (currentGoal) => {
       expect(tabsToShow({ segment: "launcher", wantsAid: false, currentGoal })).toEqual({
         career: true,
@@ -53,7 +55,7 @@ describe("tabsToShow", () => {
   );
 
   it.each(["job", "career_switch", "business"])(
-    "row 5 — Launcher, goal=%s, aid requested",
+    "row 5 — Launcher not enrolling anywhere, goal=%s, aid requested",
     (currentGoal) => {
       expect(tabsToShow({ segment: "launcher", wantsAid: true, currentGoal })).toEqual({
         career: true,
@@ -66,39 +68,13 @@ describe("tabsToShow", () => {
     },
   );
 
-  it("row 6 — Launcher, skill_building, no aid", () => {
-    expect(
-      tabsToShow({ segment: "launcher", wantsAid: false, currentGoal: "skill_building" }),
-    ).toEqual({
-      career: true,
-      stream: false,
-      pathway: false,
-      college: true,
-      scholarship: false,
-      plan: true,
-    });
-  });
-
-  it("row 7 — Launcher, skill_building, aid requested", () => {
-    expect(
-      tabsToShow({ segment: "launcher", wantsAid: true, currentGoal: "skill_building" }),
-    ).toEqual({
-      career: true,
-      stream: false,
-      pathway: false,
-      college: true,
-      scholarship: true,
-      plan: true,
-    });
-  });
-
-  it.each(["higher_studies", "not_sure"])(
-    "row 8 — Launcher, goal=%s, no aid",
+  it.each(["higher_studies", "not_sure", "skill_building"])(
+    "row 6 — Launcher enrolling somewhere, goal=%s, no aid",
     (currentGoal) => {
       expect(tabsToShow({ segment: "launcher", wantsAid: false, currentGoal })).toEqual({
         career: true,
-        stream: true,
-        pathway: true,
+        stream: false,
+        pathway: false,
         college: true,
         scholarship: false,
         plan: true,
@@ -106,13 +82,13 @@ describe("tabsToShow", () => {
     },
   );
 
-  it.each(["higher_studies", "not_sure"])(
-    "row 9 — Launcher, goal=%s, aid requested",
+  it.each(["higher_studies", "not_sure", "skill_building"])(
+    "row 7 — Launcher enrolling somewhere, goal=%s, aid requested",
     (currentGoal) => {
       expect(tabsToShow({ segment: "launcher", wantsAid: true, currentGoal })).toEqual({
         career: true,
-        stream: true,
-        pathway: true,
+        stream: false,
+        pathway: false,
         college: true,
         scholarship: true,
         plan: true,

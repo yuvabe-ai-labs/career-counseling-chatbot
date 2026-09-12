@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "datasetKey": "curated-base-vocabulary-disciplines",
+  "version": "2026-09-11",
+  "datasetVersionId": "1a8b04c1-0d45-4b69-b62b-6431461e46db",
+  "recordsFile": "disciplines.json",
+  "recordCount": 40,
+  "recordCounts": {
+    "colleges": 0,
+    "disciplines": 40,
+    "programs": 0,
+    "pathwayDisciplines": 0
+  },
+  "checksumSha256": "0c2ebf2000585efc9090b1a18071d563c8c1bfd91edeb8165798b8a2e44fa262",
+  "reviewStatus": "approved",
+  "createdAt": "2026-09-11T00:00:00.000Z",
+  "source": {
+    "id": "6efe45e4-d1d5-4999-8446-bc4503c41373",
+    "sourceKey": "yuvanext-curated-discipline-vocabulary",
+    "name": "YuvaNext curated discipline vocabulary",
+    "sourceType": "manual_review",
+    "publisher": "YuvaNext",
+    "trustLevel": "internal_reviewed",
+    "status": "active",
+    "baseUrl": null,
+    "licenseRef": "Internal curated content — human-authored, not sourced from an external dataset."
+  }
+}

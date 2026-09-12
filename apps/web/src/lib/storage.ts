@@ -79,8 +79,10 @@ export const setStoredProfileSnapshotId = (profileSnapshotId: string) =>
 export const clearStoredProfileSnapshotId = () => remove(PROFILE_SNAPSHOT_ID_KEY);
 
 /**
- * The tab-gating fields (docs/poc/launcher-goal-based-recommendations.md Part 5's
- * `tabsToShow()`) needed by ExplorePathPage/CareerPage — segment, whether aid was requested,
+ * The tab-gating fields (see `tabsToShow()` in
+ * apps/web/src/features/recommendations/lib/tabs-to-show.ts, originally ported from
+ * docs/poc/launcher-goal-based-recommendations.md Part 5, since superseded on the Launcher
+ * branch) needed by ExplorePathPage/CareerPage — segment, whether aid was requested,
  * and (Launcher only) their goal. Stored as plain JSON here rather than re-fetched via
  * `GET /api/v1/assessment-snapshots`, which requires a Supabase Auth bearer token this app
  * doesn't implement (see api/assessment-snapshot.ts) — the POST that creates the snapshot

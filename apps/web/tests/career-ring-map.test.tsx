@@ -1,11 +1,12 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { RecommendationItem } from "@yuvanext/contracts";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   CareerRingMap,
   type CareerRings,
 } from "@/features/recommendations/components/CareerRingMap";
+import { truncateLabel } from "@/features/recommendations/components/RingMap";
 
 function item(title: string, rank: number): RecommendationItem {
   return {
@@ -47,8 +48,10 @@ function renderMap() {
   );
 }
 
+// The ring only ever renders a truncated (<=3-word) label — see RingMap.tsx's truncateLabel —
+// so every lookup by title has to go through it rather than assume the full string is on screen.
 function nodeFor(title: string): HTMLElement {
-  const label = screen.getByText(title);
+  const label = screen.getByText(truncateLabel(title));
   const node = label.closest(".dot-node");
   if (!(node instanceof HTMLElement)) throw new Error(`no dot-node for ${title}`);
   return node;
@@ -75,6 +78,8 @@ describe("CareerRingMap", () => {
   it("puts the dot above the label, with the label holding only the career name", () => {
     renderMap();
 
+    // Single-word title, so truncation is a no-op here — this test is about DOM structure, not
+    // truncation itself (see the dedicated "label truncation" tests below for that).
     const node = nodeFor("Neuropsychologists");
     const children = Array.from(node.children);
 
@@ -85,6 +90,52 @@ describe("CareerRingMap", () => {
     expect(within(children[1] as HTMLElement).queryByRole("img")).not.toBeInTheDocument();
     expect((children[1] as HTMLElement).querySelector("svg")).toBeNull();
     expect(children[1]?.textContent).toBe("Neuropsychologists");
+  });
+
+  describe("label truncation", () => {
+    it("truncates a career title longer than 3 words to its first 3 words + '...'", () => {
+      renderMap();
+
+      expect(
+        screen.getByText("Philosophy and Religion..."),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByText("Philosophy and Religion Teachers, Postsecondary"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("leaves a title of exactly 3 words unchanged, with no trailing dots", () => {
+      renderMap();
+
+      // "Sociology Teachers, Postsecondary" is exactly 3 words — the <= 3 boundary.
+      expect(screen.getByText("Sociology Teachers, Postsecondary")).toBeInTheDocument();
+    });
+
+    it("keeps the full, untruncated title available for accessibility and for selection", async () => {
+      const user = userEvent.setup();
+      const onSelectCareer = vi.fn();
+      render(
+        <CareerRingMap
+          rings={rings}
+          hideMatchPercent
+          selectedItemId={null}
+          onSelectCareer={onSelectCareer}
+        />,
+      );
+
+      const node = nodeFor("Philosophy and Religion Teachers, Postsecondary");
+      // Full title stays reachable as a native tooltip even though the visible label is cut.
+      expect(node).toHaveAttribute("title", "Philosophy and Religion Teachers, Postsecondary");
+
+      await user.click(node);
+
+      // Clicking a truncated label still hands the full, untruncated item off to the caller —
+      // e.g. the detail sheet, which is expected to show the real name (see Change 1's brief:
+      // "Keep the full career name in the existing popup/details panel").
+      expect(onSelectCareer).toHaveBeenCalledWith(
+        expect.objectContaining({ title: "Philosophy and Religion Teachers, Postsecondary" }),
+      );
+    });
   });
 
   it("places every career by the same radial rule: even angles, one shared ring radius", () => {
@@ -127,11 +178,13 @@ describe("CareerRingMap", () => {
     const user = userEvent.setup();
     renderMap();
 
-    expect(screen.getByText("Social Work Teachers, Postsecondary")).toBeInTheDocument();
+    expect(screen.getByText(truncateLabel("Social Work Teachers, Postsecondary"))).toBeInTheDocument();
 
     await user.click(screen.getByRole("tab", { name: "Strong Matches" }));
 
     expect(screen.getByText("Middle A")).toBeInTheDocument();
-    expect(screen.queryByText("Social Work Teachers, Postsecondary")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(truncateLabel("Social Work Teachers, Postsecondary")),
+    ).not.toBeInTheDocument();
   });
 });

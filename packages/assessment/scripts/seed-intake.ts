@@ -43,6 +43,10 @@ const questions = {
     ["decision_confidence", 15, "How confident are you about your next step?", "single_choice", ["very_confident", "somewhat_confident", "confused", "starting_from_zero"], false, true, null],
     ["constraints", 16, "Which constraint matters most right now?", "single_choice", ["fees", "distance", "family_expectations", "entrance_exam", "language", "none", "prefer_not_to_say"], true, true, null],
     ["support_needed", 17, "What should YuvaNext help with first?", "single_choice", ["stream_choice", "career_shortlist", "college_pathway", "exam_plan", "aid_options", "not_sure"], false, true, null],
+    // display_order is globally unique across every segment's questions (each segment reserves
+    // a block of 10: explorer 1-10, pathfinder 11-20, launcher 21-30) — 18 is pathfinder's next
+    // free slot within its own block, added after support_needed rather than renumbering it.
+    ["location_preference", 18, "What location option do you prefer?", "single_choice", ["same_city", "same_state", "anywhere_in_india", "remote", "not_sure"], false, true, null],
   ],
   launcher: [
     ["current_status", 21, "What are you doing right now?", "single_choice", ["college", "graduate", "working", "job_search", "gap_year", "other"], false, true, null],

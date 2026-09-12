@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "datasetKey": "curated-base-vocabulary-streams",
+  "version": "2026-09-11",
+  "datasetVersionId": "e912e356-b0ef-40b6-8232-bee51eaae173",
+  "recordsFile": "streams.json",
+  "recordCounts": {
+    "educationRoutes": 4,
+    "pathways": 0,
+    "careerPathways": 0,
+    "streamOptions": 12,
+    "streamMaps": 15,
+    "streamMapItems": 30
+  },
+  "checksumSha256": "67c5e4753ef551e9f977b99f37845ab593eb936489e2a10030cb0154941e335b",
+  "reviewStatus": "approved",
+  "createdAt": "2026-09-11T00:00:00.000Z",
+  "source": {
+    "id": "3524e356-f44e-448a-9e19-0c324134b907",
+    "sourceKey": "yuvanext-curated-base-vocabulary",
+    "name": "YuvaNext curated base vocabulary (education routes, streams, RIASEC stream maps)",
+    "sourceType": "manual_review",
+    "publisher": "YuvaNext",
+    "trustLevel": "internal_reviewed",
+    "status": "active",
+    "baseUrl": null,
+    "licenseRef": "Internal curated content — human-authored, not sourced from an external dataset."
+  }
+}

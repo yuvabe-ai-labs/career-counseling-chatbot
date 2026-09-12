@@ -104,6 +104,11 @@ export function validateCollegeRecords(
   input: unknown,
   expectedDatasetVersionId: string,
   knownPathwayIds: readonly string[] = [],
+  // Same permissive-by-default pattern as knownPathwayIds: a program or pathway-discipline
+  // mapping commonly references a discipline (or college) already published in an earlier
+  // batch rather than one newly included in this same batch.
+  knownDisciplineIds: readonly string[] = [],
+  knownCollegeIds: readonly string[] = [],
 ):
   | { success: true; data: CollegeDatasetRecords; issues: [] }
   | { success: false; issues: CollegeValidationIssue[] } {
@@ -147,7 +152,10 @@ export function validateCollegeRecords(
   });
 
   parsed.data.programs.forEach((program, index) => {
-    if (!collegeIds.has(program.collegeId) || !disciplineIds.has(program.disciplineId)) {
+    const collegeKnown = collegeIds.has(program.collegeId) || knownCollegeIds.includes(program.collegeId);
+    const disciplineKnown =
+      disciplineIds.has(program.disciplineId) || knownDisciplineIds.includes(program.disciplineId);
+    if (!collegeKnown || !disciplineKnown) {
       issues.push({
         code: "ORPHAN_REFERENCE",
         path: `programs.${index}`,
@@ -175,7 +183,9 @@ export function validateCollegeRecords(
   parsed.data.pathwayDisciplines.forEach((mapping, index) => {
     const pathwayKnown =
       knownPathwayIds.length === 0 || knownPathwayIds.includes(mapping.pathwayId);
-    if (!disciplineIds.has(mapping.disciplineId) || !pathwayKnown) {
+    const disciplineKnown =
+      disciplineIds.has(mapping.disciplineId) || knownDisciplineIds.includes(mapping.disciplineId);
+    if (!disciplineKnown || !pathwayKnown) {
       issues.push({
         code: "ORPHAN_REFERENCE",
         path: `pathwayDisciplines.${index}`,

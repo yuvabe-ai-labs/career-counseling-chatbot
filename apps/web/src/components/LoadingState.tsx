@@ -1,29 +1,34 @@
 import { Spinner } from "./ui/spinner";
 
-/** Every caller's default wording — see the component doc below for why this exists at all. */
-const DEFAULT_MESSAGE = "Loading…";
-
 /**
- * The one "this region is loading" pattern, reused everywhere a hero-card is waiting on a
- * network call (IntakeQuestionsPage's questions, RiasecAssessmentPage's next batch,
- * RiasecResultsPage's score) — previously each page rendered its own bare, uncentered
- * <p>Loading…</p> as a direct child of the card, which left it pinned to the card's top-left
- * corner instead of centered in the (often much taller, e.g. lg:min-h-[751px]) card around it.
- * min-h here gives the spinner+message something to center within even before the surrounding
- * card's own min-height kicks in.
+ * The one loading UI for the whole app — a single centered spinner, always in the exact same
+ * viewport position no matter which page renders it or what that page's own header/card/layout
+ * looks like. `fixed` positioning (not inline flow) is what makes that true: the previous
+ * version was `min-h-[280px]` centered in whatever wrapped it, which put it at a different
+ * screen position on every page depending on how tall that page's own chrome happened to be —
+ * exactly the "spinner jumps around" problem this replaces. Being removed from flow also means
+ * the content area it stands in for contributes no placeholder height of its own while loading,
+ * so nothing partially-sized or empty is visible underneath it — just this, over the page's own
+ * background — until the real content is ready to swap in all at once.
  *
- * `message` used to be required, and each of those three call sites passed its own wording
- * ("Loading your questions…", "Loading your assessment…", "Scoring your assessment…") — same
- * component, same styling, but different text depending on which page happened to render it.
- * Optional now, defaulting to the same "Loading…" every caller gets unless it deliberately opts
- * into something else, so this one shared pattern reads identically everywhere by default
- * instead of relying on every call site remembering to pass the same string.
+ * No text: every one of this component's 8 call sites rendered the same bare "Loading…" beneath
+ * it, which said nothing a spinner alone doesn't. `aria-label`/`sr-only` keep it announced to
+ * assistive tech without putting the word back on screen.
+ *
+ * `pointer-events-none` so it never traps a click meant for something already on screen behind
+ * it (the header, a back button) purely because the content area happens to be loading.
+ * Transparent background so the app's own gradient stays visible underneath — no dark overlay,
+ * no blank screen.
  */
-export function LoadingState({ message = DEFAULT_MESSAGE }: { message?: string }) {
+export function LoadingState() {
   return (
-    <div className="flex min-h-[280px] flex-col items-center justify-center gap-3 text-center">
-      <Spinner className="size-7 text-brand" />
-      <p className="font-display text-lg text-muted-foreground">{message}</p>
+    <div
+      role="status"
+      aria-label="Loading"
+      className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center"
+    >
+      <Spinner className="size-9 text-brand" />
+      <span className="sr-only">Loading</span>
     </div>
   );
 }

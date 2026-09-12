@@ -7,8 +7,11 @@ import { ApiRequestError } from "@/lib/api-client";
 import { queryClient } from "@/lib/query-client";
 import {
   getStoredAssessmentRunId,
+  getStoredExploreGatingContext,
+  getStoredProfileSnapshotId,
   setStoredAssessmentRunId,
   setStoredJourneySessionId,
+  setStoredProfileSnapshotId,
   setStoredUserId,
 } from "@/lib/storage";
 import { RiasecAssessmentPage, SessionProvider } from "@/features/assessment";
@@ -18,6 +21,7 @@ const { startAssessmentRun, getNextAssessmentBatch, submitAssessmentResponse } =
   getNextAssessmentBatch: vi.fn(),
   submitAssessmentResponse: vi.fn(),
 }));
+const { createAssessmentSnapshot } = vi.hoisted(() => ({ createAssessmentSnapshot: vi.fn() }));
 
 vi.mock("@/features/assessment/api/assessment", () => ({
   startAssessmentRun,
@@ -25,6 +29,8 @@ vi.mock("@/features/assessment/api/assessment", () => ({
   submitAssessmentResponse,
   scoreAssessmentRun: vi.fn(),
 }));
+
+vi.mock("@/features/assessment/api/assessment-snapshot", () => ({ createAssessmentSnapshot }));
 
 const RUN = {
   id: "run-1",
@@ -85,6 +91,7 @@ function renderAt(initialPath: string) {
             <Route path="/" element={<div>Onboarding screen</div>} />
             <Route path="/riasec-assessment" element={<RiasecAssessmentPage />} />
             <Route path="/riasec-results" element={<div>RIASEC results screen</div>} />
+            <Route path="/explore-path" element={<div>Explore Path screen</div>} />
           </Routes>
         </MemoryRouter>
       </SessionProvider>
@@ -216,6 +223,80 @@ describe("RiasecAssessmentPage", () => {
     await user.click(screen.getByRole("button", { name: "Dislike" }));
 
     expect(await screen.findByText("RIASEC results screen")).toBeInTheDocument();
+  });
+
+  /**
+   * A student who finished everything before (possibly in an earlier session entirely) and is
+   * only reaching this page now because IntakeQuestionsPage's own resume redirect sent them
+   * here — never having answered anything in *this* page instance — should not have to look at
+   * the report card again just to click through it. This is the "arrived already complete"
+   * branch, distinct from the test above (which answers the last question and does expect the
+   * report card).
+   */
+  it("silently resumes straight to Explore Path when the run was already complete on arrival, not just answered here", async () => {
+    setStoredUserId("user-id");
+    setStoredJourneySessionId("session-id");
+    setStoredAssessmentRunId("run-1");
+    getNextAssessmentBatch.mockResolvedValue({
+      run: RUN,
+      progress: { answered: 3, total: 3, nextPosition: 3, isComplete: true },
+      items: [],
+      answeredItems: [],
+    });
+    createAssessmentSnapshot.mockResolvedValue({
+      snapshot: {
+        snapshotId: "snapshot-1",
+        segment: "pathfinder",
+        wantsAid: false,
+        intakeSummary: {},
+      },
+    });
+
+    renderAt("/riasec-assessment");
+
+    expect(await screen.findByText("Explore Path screen")).toBeInTheDocument();
+    expect(createAssessmentSnapshot).toHaveBeenCalledWith("session-id", "run-1");
+    expect(getStoredProfileSnapshotId()).toBe("snapshot-1");
+    expect(getStoredExploreGatingContext()).toEqual({
+      segment: "pathfinder",
+      wantsAid: false,
+      currentGoal: undefined,
+    });
+  });
+
+  it("falls back to the report card if the silent-resume snapshot creation fails", async () => {
+    setStoredUserId("user-id");
+    setStoredJourneySessionId("session-id");
+    setStoredAssessmentRunId("run-1");
+    getNextAssessmentBatch.mockResolvedValue({
+      run: RUN,
+      progress: { answered: 3, total: 3, nextPosition: 3, isComplete: true },
+      items: [],
+      answeredItems: [],
+    });
+    createAssessmentSnapshot.mockRejectedValue(new Error("network error"));
+
+    renderAt("/riasec-assessment");
+
+    expect(await screen.findByText("RIASEC results screen")).toBeInTheDocument();
+  });
+
+  it("does not silently jump ahead when a profile snapshot already exists — resume is idempotent", async () => {
+    setStoredUserId("user-id");
+    setStoredJourneySessionId("session-id");
+    setStoredAssessmentRunId("run-1");
+    setStoredProfileSnapshotId("existing-snapshot");
+    getNextAssessmentBatch.mockResolvedValue({
+      run: RUN,
+      progress: { answered: 3, total: 3, nextPosition: 3, isComplete: true },
+      items: [],
+      answeredItems: [],
+    });
+
+    renderAt("/riasec-assessment");
+
+    expect(await screen.findByText("Explore Path screen")).toBeInTheDocument();
+    expect(createAssessmentSnapshot).not.toHaveBeenCalled();
   });
 
   /**

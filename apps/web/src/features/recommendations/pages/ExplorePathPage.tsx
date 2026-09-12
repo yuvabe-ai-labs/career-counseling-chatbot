@@ -36,6 +36,7 @@ const TAB_META: Record<
     title: "Streams",
     description: "Discover recommended streams based on your interests and strengths.",
     icon: BookOpen,
+    href: "/explore-path/stream",
     image: exploreCardStreams,
     imageClassName: "top-[14.09%] left-[-16.42%] h-full w-[149.54%] max-w-none",
   },
@@ -43,11 +44,20 @@ const TAB_META: Record<
     title: "Pathway",
     description: "Compare entry routes, backup options, and how to reach each stream.",
     icon: Route,
+    // Temporarily disabled (no href) — the real screen/route still exists at
+    // /explore-path/pathway, this is just the card's clickability. Pathway recommendations are
+    // both severely slow (scorePathways() returns the full ~500-pathway catalog, and
+    // recommendation-store.ts inserts each stored item in its own sequential round-trip — a
+    // storage-layer bug, ~1-2 minutes per request) and barely differentiated once they do load
+    // (streamAlignment saturates at 1.0 for nearly every pathway, careerAlignment is
+    // structurally tiny even for a real match) — not worth showing until at least the
+    // performance issue is fixed. Restore by adding back `href: "/explore-path/pathway"`.
   },
   college: {
     title: "Colleges",
     description: "See colleges ringed by state, from your home state to nearby options.",
     icon: Building2,
+    href: "/explore-path/college",
   },
   scholarship: {
     title: "Scholarships & Aid",
@@ -58,6 +68,8 @@ const TAB_META: Record<
     title: "Plan",
     description: "Plan your next steps and take action towards your goals.",
     icon: ClipboardList,
+    // Temporarily disabled (no href) alongside Pathway, per request. The real screen/route
+    // still exists at /explore-path/plan; restore by adding back `href: "/explore-path/plan"`.
     image: exploreCardPlan,
     imageClassName: "inset-0 size-full max-w-none object-cover",
   },
@@ -74,9 +86,13 @@ const TAB_ORDER: ExploreTabKey[] = [
 
 /**
  * Figma "career" file node 611:41 ("Explore Path"). Which cards render is entirely driven by
- * `tabsToShow()` (docs/poc/launcher-goal-based-recommendations.md Part 5) — every gated tab
- * renders so the segment/goal logic stays visible and testable, but only Career is clickable
- * for now; the rest render disabled (no screen built for them yet).
+ * `tabsToShow()` (see that function's own doc comment for the current rule; originally ported
+ * from docs/poc/launcher-goal-based-recommendations.md Part 5, since superseded on the
+ * Launcher branch) — every gated tab renders so the segment/goal logic stays visible and
+ * testable. Career/Streams/Colleges are wired to real screens. Scholarships & Aid renders
+ * disabled (no screen built for it yet — out of scope until Launcher's aid-eligible flows are
+ * tackled); Pathway and Plan are also currently disabled — temporarily, per TAB_META's own
+ * comments on each — even though both have real screens/routes already built.
  */
 export function ExplorePathPage() {
   const session = useSession();

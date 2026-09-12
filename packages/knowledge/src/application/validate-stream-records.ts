@@ -9,6 +9,7 @@ export type StreamValidationIssue = {
     | "DUPLICATE_ID"
     | "DUPLICATE_CODE"
     | "DUPLICATE_RANK"
+    | "DUPLICATE_LINK"
     | "ORPHAN_REFERENCE"
     | "DATASET_VERSION_MISMATCH"
     | "INACTIVE_PUBLISHED_REFERENCE";
@@ -23,6 +24,17 @@ export type StreamValidationResult =
 export function validateStreamRecords(
   input: unknown,
   expectedDatasetVersionId: string,
+  // Career IDs are a cross-dataset reference (careers are never part of a stream dataset
+  // batch) — this pure validator has no DB access, so it can only check careerPathways'
+  // pathwayId against this same payload's own pathways array; careerId is checked against
+  // this list only when the caller supplies one (same permissive-by-default pattern as
+  // validate-college-records.ts's knownPathwayIds).
+  knownCareerIds: readonly string[] = [],
+  // Same reasoning for education routes: a pathway promoted from an AI draft commonly
+  // references an education route that already exists (published in an earlier batch) rather
+  // than one newly included in this same batch — permissive-by-default when the caller
+  // doesn't supply a list, exactly like knownCareerIds/knownPathwayIds above.
+  knownEducationRouteIds: readonly string[] = [],
 ): StreamValidationResult {
   const parsed = StreamDatasetRecordsSchema.safeParse(input);
   if (!parsed.success) {
@@ -57,8 +69,12 @@ export function validateStreamRecords(
     );
   });
 
+  const pathwayIds = new Set<string>();
   parsed.data.pathways.forEach((pathway, index) => {
-    if (!routeIds.has(pathway.educationRouteId)) {
+    pathwayIds.add(pathway.id);
+    const routeKnown =
+      routeIds.has(pathway.educationRouteId) || knownEducationRouteIds.includes(pathway.educationRouteId);
+    if (!routeKnown) {
       issues.push({
         code: "ORPHAN_REFERENCE",
         path: `pathways.${index}.educationRouteId`,
@@ -68,6 +84,27 @@ export function validateStreamRecords(
     if (pathway.datasetVersionId !== expectedDatasetVersionId) {
       issues.push(versionIssue(`pathways.${index}.datasetVersionId`));
     }
+  });
+
+  const careerPathwayKeys = new Set<string>();
+  parsed.data.careerPathways.forEach((link, index) => {
+    const careerKnown = knownCareerIds.length === 0 || knownCareerIds.includes(link.careerId);
+    if (!pathwayIds.has(link.pathwayId) || !careerKnown) {
+      issues.push({
+        code: "ORPHAN_REFERENCE",
+        path: `careerPathways.${index}`,
+        message: "Career-pathway link references an unknown pathway or career",
+      });
+    }
+    const key = `${link.careerId}:${link.pathwayId}`;
+    if (careerPathwayKeys.has(key)) {
+      issues.push({
+        code: "DUPLICATE_LINK",
+        path: `careerPathways.${index}`,
+        message: "Duplicate career-pathway link",
+      });
+    }
+    careerPathwayKeys.add(key);
   });
 
   parsed.data.streamOptions.forEach((option, index) => {

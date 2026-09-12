@@ -19,10 +19,12 @@ import { RiasecProgressTrack } from "../components/RiasecProgressTrack";
 import { RiasecSlider } from "../components/RiasecSlider";
 import {
   assessmentNextQueryKey,
+  useCreateAssessmentSnapshot,
   useNextAssessmentBatch,
   useStartAssessmentRun,
   useSubmitAssessmentResponse,
 } from "../hooks/useAssessment";
+import { ensureProfileSnapshot } from "../lib/ensure-profile-snapshot";
 import { useSession } from "../state/session-context";
 
 /**
@@ -88,6 +90,13 @@ export function RiasecAssessmentPage() {
   const startRun = useStartAssessmentRun(sessionId ?? "");
   const nextQuery = useNextAssessmentBatch(runId);
   const submitResponse = useSubmitAssessmentResponse(runId ?? "");
+  const createSnapshot = useCreateAssessmentSnapshot(sessionId ?? "", runId ?? "");
+
+  // Set only inside handleAdvance, when *this page's own* submit is what completes the run —
+  // never on load. That's what the completion effect below uses to tell "just now finished
+  // answering" (show the report card, same as always) apart from "arrived already complete"
+  // (a silent resume — see that effect's own comment).
+  const justCompletedHereRef = useRef(false);
 
   // Guards against React effect double-invocation (StrictMode/dev) firing startRun twice before
   // the first response comes back and setRunId re-renders this effect's own dependency check.
@@ -135,10 +144,28 @@ export function RiasecAssessmentPage() {
     });
   }, [runId, nextQuery.error]);
 
+  // Completing the run leads to two different places depending on *why* it's complete:
+  //   - The student just answered the last question here (justCompletedHereRef, set in
+  //     handleAdvance above) — show the report card, same as always, so they see their result
+  //     right after finishing it.
+  //   - The run was already complete before this page even loaded (a silent resume — e.g.
+  //     signing back in later after finishing everything previously) — skip the report card
+  //     and the extra click and land straight on Explore Path, auto-creating the profile
+  //     snapshot the same way clicking "Explore Path" on the report card would (see
+  //     ensureProfileSnapshot). Falls back to the report card if that fails, where the
+  //     explicit button's own error handling can take over.
   useEffect(() => {
-    if (nextQuery.data?.progress.isComplete) {
+    if (!nextQuery.data?.progress.isComplete) return;
+    if (justCompletedHereRef.current) {
       void navigate("/riasec-results");
+      return;
     }
+    void ensureProfileSnapshot(() => createSnapshot.mutateAsync())
+      .then(() => navigate("/explore-path", { replace: true }))
+      .catch(() => navigate("/riasec-results", { replace: true }));
+    // createSnapshot (a useMutation result) is deliberately not a dependency — only the
+    // completion transition itself should re-run this, not the mutation object's own identity.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nextQuery.data, navigate]);
 
   // Lands on the true frontier (the next unanswered question) the first time data for this run
@@ -201,6 +228,9 @@ export function RiasecAssessmentPage() {
         responseValue: answerIndex + 1,
       });
       queryClient.setQueryData(assessmentNextQueryKey(runId), saved.next);
+      if (saved.next.progress.isComplete) {
+        justCompletedHereRef.current = true;
+      }
 
       if (viewIndex !== null && viewIndex < progress.nextPosition) {
         // Was reviewing a past question — step forward one, back toward (or right up against)

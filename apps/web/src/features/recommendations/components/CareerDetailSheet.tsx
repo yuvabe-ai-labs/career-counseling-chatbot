@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import type { CareerFitExplanation, RecommendationItem, Segment } from "@yuvanext/contracts";
 import { cn } from "@/lib/utils";
@@ -47,11 +47,30 @@ const FIT_ROWS: { key: keyof CareerFitExplanation; label: string }[] = [
 export function CareerDetailSheet({ item, segment, onClose }: CareerDetailSheetProps) {
   const [dragOffset, setDragOffset] = useState(0);
   const dragStartY = useRef<number | null>(null);
+  const sheetRef = useRef<HTMLElement | null>(null);
 
   const isOpen = item !== null;
   const explanation = item && isCareerExplanation(item.explanation) ? item.explanation : null;
   const percent = item?.fitScore !== undefined ? Math.round((item.fitScore ?? 0) * 100) : null;
   const topLetter = explanation?.topMatchingScales[0];
+
+  // Outside-click-to-close, via containment rather than stopPropagation: reliable regardless of
+  // where in the tree a click originates, and doesn't require every other click handler on the
+  // page to cooperate. A click on a ring dot is deliberately excluded — that already reselects
+  // via its own onClick (see RingMap.tsx), so treating it as "outside" would flash the sheet
+  // closed for one frame before the new item reopens it.
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleOutsideMouseDown = (event: MouseEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (sheetRef.current?.contains(target)) return;
+      if (target instanceof Element && target.closest(".dot-node")) return;
+      onClose();
+    };
+    document.addEventListener("mousedown", handleOutsideMouseDown);
+    return () => document.removeEventListener("mousedown", handleOutsideMouseDown);
+  }, [isOpen, onClose]);
 
   const handleTouchStart: React.TouchEventHandler<HTMLDivElement> = (event) => {
     const touch = event.touches[0];
@@ -71,12 +90,17 @@ export function CareerDetailSheet({ item, segment, onClose }: CareerDetailSheetP
 
   return (
     <section
+      ref={sheetRef}
       aria-live="polite"
       className={cn(
         "fixed inset-x-0 bottom-0 z-30 rounded-t-[28px] border-t border-border bg-white px-6 pb-8 pt-3 shadow-[0_-12px_30px_rgba(52,35,130,0.16)] transition-transform duration-300 ease-out sm:mx-auto sm:max-w-xl sm:rounded-[28px] sm:border",
         isOpen ? "translate-y-0" : "translate-y-full",
       )}
-      style={dragOffset ? { transform: `translate3d(0, ${dragOffset}px, 0)`, transition: "none" } : undefined}
+      style={
+        dragOffset
+          ? { transform: `translate3d(0, ${dragOffset}px, 0)`, transition: "none" }
+          : undefined
+      }
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -107,7 +131,8 @@ export function CareerDetailSheet({ item, segment, onClose }: CareerDetailSheetP
 
           {segment === "explorer" ? (
             <p className="mt-4 font-display text-base leading-relaxed text-foreground/80">
-              This fits because {topLetter ? REASON_BY_LETTER[topLetter] : "it matches your interests"}.
+              This fits because{" "}
+              {topLetter ? REASON_BY_LETTER[topLetter] : "it matches your interests"}.
             </p>
           ) : explanation ? (
             <div className="mt-5 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">

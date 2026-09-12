@@ -47,9 +47,22 @@ export type CollegeValidationReport = Omit<
   status: "validated" | "rejected";
 };
 
+export type ImportCollegeDatasetOptions = {
+  /**
+   * Already-published entity ids a program/pathway-discipline mapping in this batch is
+   * allowed to reference without also including that entity in the same batch — see
+   * validateCollegeRecords()'s own comment. Used by the AI-catalog promotion script
+   * (scripts/ingest/promote-ai-catalog.ts).
+   */
+  knownPathwayIds?: readonly string[];
+  knownDisciplineIds?: readonly string[];
+  knownCollegeIds?: readonly string[];
+};
+
 export async function validateCollegeDataset(
   manifestInput: unknown,
   recordsText: string,
+  options: ImportCollegeDatasetOptions = {},
 ): Promise<CollegeValidationReport> {
   const report = await importCollegeDataset(
     manifestInput,
@@ -57,6 +70,7 @@ export async function validateCollegeDataset(
     {
       publish: () => Promise.resolve("published"),
     },
+    options,
   );
 
   return {
@@ -70,6 +84,7 @@ export async function importCollegeDataset(
   manifestInput: unknown,
   recordsText: string,
   publisher: CollegeDatasetPublisher,
+  options: ImportCollegeDatasetOptions = {},
 ): Promise<CollegeImportReport> {
   const checksumSha256 = createHash("sha256")
     .update(recordsText)
@@ -111,6 +126,9 @@ export async function importCollegeDataset(
   const validation = validateCollegeRecords(
     recordsInput,
     manifest.datasetVersionId,
+    options.knownPathwayIds ?? [],
+    options.knownDisciplineIds ?? [],
+    options.knownCollegeIds ?? [],
   );
   const recordCounts = validation.success
     ? {

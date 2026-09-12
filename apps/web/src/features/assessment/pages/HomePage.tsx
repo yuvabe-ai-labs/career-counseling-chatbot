@@ -2,6 +2,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import heroIllustration from "@/assets/hero-illustration.png";
 import { AppHeader } from "@/components/AppHeader";
 import { Button } from "@/components/ui/button";
+import { getStoredExploreGatingContext, getStoredProfileSnapshotId } from "@/lib/storage";
 import { useSession } from "../state/session-context";
 
 /**
@@ -11,11 +12,21 @@ import { useSession } from "../state/session-context";
  * Deliberately static/presentational: the Figma design carries no per-user copy (no "Welcome,
  * {name}" section, no segment badge) — just the hero card and a single Explore CTA — so there's
  * nothing here to invent beyond what's designed. Explore itself doesn't need the student's
- * segment client-side either: it navigates to /intake-questions, and that screen's own
- * GET .../intake/questions call re-derives the segment from the authenticated profile
- * server-side (see IntakeService.getQuestions, packages/assessment) — the existing
+ * segment client-side either: for someone starting fresh it navigates to /intake-questions, and
+ * that screen's own GET .../intake/questions call re-derives the segment from the authenticated
+ * profile server-side (see IntakeService.getQuestions, packages/assessment) — the existing
  * x-yuvanext-user-id + journeySessionId auth model already establishes who's asking, so this
  * page never re-fetches or re-computes the segment itself.
+ *
+ * Explore's target does depend on one purely local check, though: a student who has already
+ * been through the whole flow before (intake -> RIASEC assessment -> results -> "Explore Path"
+ * on that results page, which is what actually creates profileSnapshotId/exploreGatingContext —
+ * see RiasecResultsPage's handleExplorePath) shouldn't be sent all the way back through intake
+ * and land on their old report card again just to click through once more. If both are already
+ * stored, Explore goes straight to /explore-path; otherwise it's the normal
+ * /intake-questions entry point, which already knows how to resume a partially-finished attempt
+ * (IntakeQuestionsPage's own resume effect) or land on the report card for someone who finished
+ * scoring but never made it to Explore Path yet.
  */
 export function HomePage() {
   const navigate = useNavigate();
@@ -24,6 +35,12 @@ export function HomePage() {
   if (!session.userId || !session.journeySessionId) {
     return <Navigate to="/" replace />;
   }
+
+  const handleExplore = () => {
+    const alreadyExploredBefore =
+      getStoredProfileSnapshotId() !== null && getStoredExploreGatingContext() !== null;
+    void navigate(alreadyExploredBefore ? "/explore-path" : "/intake-questions");
+  };
 
   return (
     // bg-auth-hero-gradient is the same fill the sign-in/sign-up hero-card uses (index.css) —
@@ -67,7 +84,7 @@ export function HomePage() {
                 Discover your strengths, interests, and career path.
               </p>
             </div>
-            <Button onClick={() => void navigate("/intake-questions")} className="w-[126px]">
+            <Button onClick={handleExplore} className="w-[126px]">
               Explore
             </Button>
           </div>

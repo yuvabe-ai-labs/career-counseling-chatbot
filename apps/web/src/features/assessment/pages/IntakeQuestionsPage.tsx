@@ -214,7 +214,7 @@ export function IntakeQuestionsPage() {
             (questionsQuery.isLoading || questionsQuery.isError) && "items-center justify-center",
           )}
         >
-          {questionsQuery.isLoading ? (
+          {questionsQuery.isPending ? (
             <LoadingState />
           ) : questionsQuery.isError ? (
             <ErrorState

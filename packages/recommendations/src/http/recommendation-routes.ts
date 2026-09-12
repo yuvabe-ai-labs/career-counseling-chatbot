@@ -26,6 +26,7 @@ import {
   type StreamRecommendationRouteRequest,
 } from "@yuvanext/contracts";
 import type { Express, Request, Response } from "express";
+import { resolveGeoScope } from "../domain/geo-scope.js";
 import type { RecommendationDataSource } from "../application/recommendation-data-source.js";
 import type { RecommendationStore } from "../application/recommendation-store.js";
 import { createRecommendationService } from "../application/recommendation-service.js";
@@ -155,6 +156,16 @@ export const registerRecommendationRoutes = (
       const targetPathwayId =
         body.targetPathwayId ??
         (await requireDataSource(options.dataSource).loadLatestRankedEntityIds(profile.profileSnapshotId, "pathway"))[0];
+      // The caller may supply selectedState/neighboringStates directly (e.g. a test, or a
+      // future admin tool); otherwise derive them deterministically from the student's own
+      // location_preference intake answer + home state — see
+      // packages/recommendations/src/domain/geo-scope.ts. Never computed by Gemini/AI.
+      const geoScope =
+        body.selectedState || body.neighboringStates || !profile.state
+          ? undefined
+          : resolveGeoScope(profile.locationPreference, profile.state);
+      const selectedState = body.selectedState ?? geoScope?.selectedState;
+      const neighboringStates = body.neighboringStates ?? geoScope?.neighboringStates;
       return service.recommendColleges({
         recommendationId: resolveRecommendationId(body.recommendationId),
         profile,
@@ -162,8 +173,8 @@ export const registerRecommendationRoutes = (
         targetDisciplineIds:
           body.targetDisciplineIds ??
           (await requireDataSource(options.dataSource).loadTargetDisciplineIds(targetPathwayId)),
-        ...(body.selectedState ? { selectedState: body.selectedState } : {}),
-        ...(body.neighboringStates ? { neighboringStates: body.neighboringStates } : {}),
+        ...(selectedState ? { selectedState } : {}),
+        ...(neighboringStates ? { neighboringStates } : {}),
         config: await resolveConfig(body, options.dataSource, "college_rank"),
         createdAt: resolveCreatedAt(body.createdAt),
       });

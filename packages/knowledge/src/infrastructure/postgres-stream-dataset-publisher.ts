@@ -137,6 +137,23 @@ export class PostgresStreamDatasetPublisher
         );
       }
 
+      for (const link of input.records.careerPathways) {
+        await client.query(
+          `insert into knowledge.career_pathways
+            (career_id, pathway_id, relationship_type, display_order)
+           values ($1,$2,$3,$4)
+           on conflict (career_id, pathway_id) do update set
+             relationship_type=excluded.relationship_type,
+             display_order=excluded.display_order`,
+          [
+            link.careerId,
+            link.pathwayId,
+            link.relationshipType,
+            link.displayOrder,
+          ],
+        );
+      }
+
       for (const option of input.records.streamOptions) {
         await client.query(
           `insert into knowledge.stream_options

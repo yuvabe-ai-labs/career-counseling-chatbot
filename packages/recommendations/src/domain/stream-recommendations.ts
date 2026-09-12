@@ -55,6 +55,7 @@ export function scoreStreams(input: StreamRecommendationInput): ScoredStream[] {
           catalogPriority: stream.priority,
           topStudentLetters,
           matchedLetters,
+          ...(stream.description ? { description: stream.description } : {}),
         },
         entityDatasetVersion: stream.datasetVersion,
       };

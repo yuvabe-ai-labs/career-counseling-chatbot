@@ -62,7 +62,7 @@ export function CareerPage() {
             composition stays balanced as the viewport changes. The map itself is already
             horizontally centred by its own `items-center` column. */}
         <div className="flex w-full max-w-[1090px] min-h-0 flex-1 flex-col justify-center py-4">
-          {recommendationQuery.isLoading ? (
+          {recommendationQuery.isPending ? (
             <LoadingState />
           ) : recommendationQuery.isError ? (
             <ErrorState

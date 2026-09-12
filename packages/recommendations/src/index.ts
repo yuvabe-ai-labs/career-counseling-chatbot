@@ -1,6 +1,9 @@
 import type { ModuleDescriptor } from "@yuvanext/contracts";
 export { createRecommendationService } from "./application/recommendation-service.js";
-export { createPostgresRecommendationDataSource } from "./application/recommendation-data-source.js";
+export {
+  canonicalizeRiasecPair,
+  createPostgresRecommendationDataSource,
+} from "./application/recommendation-data-source.js";
 export {
   createInMemoryRecommendationStore,
   createPostgresRecommendationStore,
@@ -22,6 +25,9 @@ export {
 export { buildPathwayRecommendationSet, scorePathways } from "./domain/pathway-recommendations.js";
 export { buildPlanRecommendationSet, generatePlan } from "./domain/plan-generation.js";
 export { buildStreamRecommendationSet, scoreStreams } from "./domain/stream-recommendations.js";
+export { resolveGeoScope } from "./domain/geo-scope.js";
+export type { GeoScope } from "./domain/geo-scope.js";
+export { ALL_INDIAN_STATES, STATE_ADJACENCY, neighboringStatesOf } from "./domain/state-adjacency.js";
 export { registerRecommendationRoutes } from "./http/recommendation-routes.js";
 export type {
   AidRecommendationRequest,

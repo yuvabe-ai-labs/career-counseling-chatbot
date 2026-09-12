@@ -1,0 +1,428 @@
+{
+  "educationRoutes": [
+    {
+      "id": "ae2413f2-2c71-4bb3-8031-7e06694dc33e",
+      "routeCode": "certificate",
+      "title": "Certificate Route",
+      "routeLevel": "certificate",
+      "description": "A short-term certificate course, typically a few months to a year.",
+      "publicationStatus": "published"
+    },
+    {
+      "id": "28f23934-97ed-493d-8bc4-aeb1a4046f21",
+      "routeCode": "open",
+      "title": "Open/Distance Learning Route",
+      "routeLevel": "open",
+      "description": "A flexible route completed through open or distance learning.",
+      "publicationStatus": "published"
+    },
+    {
+      "id": "ad23c3e3-859b-40a7-8170-b6b2111c14f6",
+      "routeCode": "postgraduate",
+      "title": "Postgraduate Route",
+      "routeLevel": "postgraduate",
+      "description": "An advanced route pursued after an undergraduate degree.",
+      "publicationStatus": "published"
+    },
+    {
+      "id": "737fc28c-41d1-400d-974a-c1b6ebad800d",
+      "routeCode": "school_stream",
+      "title": "School Stream",
+      "routeLevel": "school_stream",
+      "description": "The subject group chosen after class 10, before higher secondary board exams.",
+      "publicationStatus": "published"
+    }
+  ],
+  "pathways": [],
+  "careerPathways": [],
+  "streamOptions": [
+    {
+      "id": "cf6fb718-7a4f-4b00-9495-b79c8192a996",
+      "streamCode": "agriculture",
+      "title": "Agriculture",
+      "description": "Agriculture, crop science and practical farm studies.",
+      "status": "active"
+    },
+    {
+      "id": "4aa6acec-c59f-43ea-a0d4-90b2962534e6",
+      "streamCode": "commerce",
+      "title": "Commerce",
+      "description": "Commerce, accounting, economics and business studies.",
+      "status": "active"
+    },
+    {
+      "id": "d73d57d1-1ae3-4676-b727-d7e6d65407f7",
+      "streamCode": "commerce-mathematics",
+      "title": "Commerce with Mathematics",
+      "description": "Commerce, accounting and economics alongside mathematics — keeps quantitative options open.",
+      "status": "active"
+    },
+    {
+      "id": "ab5d242d-9861-4286-beeb-75937abbe828",
+      "streamCode": "creative-arts-design",
+      "title": "Creative Arts & Design",
+      "description": "Visual communication, creative practice and design foundations.",
+      "status": "active"
+    },
+    {
+      "id": "a3a07424-756f-418b-99ec-ff8039b93b89",
+      "streamCode": "humanities",
+      "title": "Humanities",
+      "description": "Languages, history, political science and other social-science subjects.",
+      "status": "active"
+    },
+    {
+      "id": "af67e177-c481-4c19-a395-b1a243694580",
+      "streamCode": "physical-education",
+      "title": "Physical Education & Sports",
+      "description": "Sports science, coaching and physical-education foundations.",
+      "status": "active"
+    },
+    {
+      "id": "d6c5524f-b5c5-40aa-8f75-8f64a737b6e3",
+      "streamCode": "science-pcb",
+      "title": "Science with Biology (PCB)",
+      "description": "Physics, Chemistry and Biology — the usual foundation for medicine and life-science fields.",
+      "status": "active"
+    },
+    {
+      "id": "c7d71267-45a0-4f0e-b2bf-750d691bd934",
+      "streamCode": "science-pcm",
+      "title": "Science with Mathematics (PCM)",
+      "description": "Physics, Chemistry and Mathematics — the usual foundation for engineering and quantitative fields.",
+      "status": "active"
+    },
+    {
+      "id": "383abd95-8525-429c-8320-995c6121e049",
+      "streamCode": "vocational-electrical",
+      "title": "Vocational: Electrical & Electronics",
+      "description": "Applied electrical/electronics installation and maintenance skills.",
+      "status": "active"
+    },
+    {
+      "id": "f3fda93c-0fe1-4193-9f7b-3a5b74e199c9",
+      "streamCode": "vocational-healthcare",
+      "title": "Vocational: Healthcare Support",
+      "description": "Foundational patient-care and healthcare-support skills.",
+      "status": "active"
+    },
+    {
+      "id": "b063df68-fe6f-4a9d-bf84-b97193437818",
+      "streamCode": "vocational-hospitality",
+      "title": "Vocational: Hospitality & Tourism",
+      "description": "Applied hospitality, tourism and guest-service skills.",
+      "status": "active"
+    },
+    {
+      "id": "0c5f6071-8e36-4605-80e3-94d5f7920b2f",
+      "streamCode": "vocational-it",
+      "title": "Vocational: Information Technology",
+      "description": "Applied computing and entry-level IT skills.",
+      "status": "active"
+    }
+  ],
+  "streamMaps": [
+    {
+      "id": "cbc1039d-b0a3-4503-ba4d-c5198785dc15",
+      "topTwoCode": "AC",
+      "segment": null,
+      "version": "curated-2026-09-11",
+      "datasetVersionId": "e912e356-b0ef-40b6-8232-bee51eaae173",
+      "status": "published"
+    },
+    {
+      "id": "b7e58482-eb4a-4e56-b638-9697ffab13ab",
+      "topTwoCode": "AE",
+      "segment": null,
+      "version": "curated-2026-09-11",
+      "datasetVersionId": "e912e356-b0ef-40b6-8232-bee51eaae173",
+      "status": "published"
+    },
+    {
+      "id": "0264f955-d4b7-4b36-843e-1d134a99831b",
+      "topTwoCode": "AS",
+      "segment": null,
+      "version": "curated-2026-09-11",
+      "datasetVersionId": "e912e356-b0ef-40b6-8232-bee51eaae173",
+      "status": "published"
+    },
+    {
+      "id": "beb4e260-0ff4-4eff-9425-6e3a2ce31f3e",
+      "topTwoCode": "EC",
+      "segment": null,
+      "version": "curated-2026-09-11",
+      "datasetVersionId": "e912e356-b0ef-40b6-8232-bee51eaae173",
+      "status": "published"
+    },
+    {
+      "id": "988bc503-68e3-40d6-b6a6-9a45c4842d52",
+      "topTwoCode": "IA",
+      "segment": null,
+      "version": "curated-2026-09-11",
+      "datasetVersionId": "e912e356-b0ef-40b6-8232-bee51eaae173",
+      "status": "published"
+    },
+    {
+      "id": "d13a256f-9fab-41ca-b443-53535985b49d",
+      "topTwoCode": "IC",
+      "segment": null,
+      "version": "curated-2026-09-11",
+      "datasetVersionId": "e912e356-b0ef-40b6-8232-bee51eaae173",
+      "status": "published"
+    },
+    {
+      "id": "486e0268-4ee0-4322-ad53-be9b4c1acb55",
+      "topTwoCode": "IE",
+      "segment": null,
+      "version": "curated-2026-09-11",
+      "datasetVersionId": "e912e356-b0ef-40b6-8232-bee51eaae173",
+      "status": "published"
+    },
+    {
+      "id": "79c7716e-df0e-413c-9484-d715bf2bf8cf",
+      "topTwoCode": "IS",
+      "segment": null,
+      "version": "curated-2026-09-11",
+      "datasetVersionId": "e912e356-b0ef-40b6-8232-bee51eaae173",
+      "status": "published"
+    },
+    {
+      "id": "6f895fb7-a9d5-46a0-b3f3-e68300d6747a",
+      "topTwoCode": "RA",
+      "segment": null,
+      "version": "curated-2026-09-11",
+      "datasetVersionId": "e912e356-b0ef-40b6-8232-bee51eaae173",
+      "status": "published"
+    },
+    {
+      "id": "2b082306-3451-4ac1-85f5-2d9357931cef",
+      "topTwoCode": "RC",
+      "segment": null,
+      "version": "curated-2026-09-11",
+      "datasetVersionId": "e912e356-b0ef-40b6-8232-bee51eaae173",
+      "status": "published"
+    },
+    {
+      "id": "433776eb-3d0d-45da-957e-12f4226788e4",
+      "topTwoCode": "RE",
+      "segment": null,
+      "version": "curated-2026-09-11",
+      "datasetVersionId": "e912e356-b0ef-40b6-8232-bee51eaae173",
+      "status": "published"
+    },
+    {
+      "id": "239b6752-0bcb-46d0-9626-50989476662b",
+      "topTwoCode": "RI",
+      "segment": null,
+      "version": "curated-2026-09-11",
+      "datasetVersionId": "e912e356-b0ef-40b6-8232-bee51eaae173",
+      "status": "published"
+    },
+    {
+      "id": "27f921ea-1de3-4e94-9635-aa2f089ed544",
+      "topTwoCode": "RS",
+      "segment": null,
+      "version": "curated-2026-09-11",
+      "datasetVersionId": "e912e356-b0ef-40b6-8232-bee51eaae173",
+      "status": "published"
+    },
+    {
+      "id": "3400d7d5-d13b-4d6b-93d1-531c2b060f6a",
+      "topTwoCode": "SC",
+      "segment": null,
+      "version": "curated-2026-09-11",
+      "datasetVersionId": "e912e356-b0ef-40b6-8232-bee51eaae173",
+      "status": "published"
+    },
+    {
+      "id": "f0453980-c4b2-4741-9ce8-c59354852357",
+      "topTwoCode": "SE",
+      "segment": null,
+      "version": "curated-2026-09-11",
+      "datasetVersionId": "e912e356-b0ef-40b6-8232-bee51eaae173",
+      "status": "published"
+    }
+  ],
+  "streamMapItems": [
+    {
+      "mapId": "0264f955-d4b7-4b36-843e-1d134a99831b",
+      "streamOptionId": "a3a07424-756f-418b-99ec-ff8039b93b89",
+      "rank": 1,
+      "reasonKey": "curated_as_1"
+    },
+    {
+      "mapId": "0264f955-d4b7-4b36-843e-1d134a99831b",
+      "streamOptionId": "ab5d242d-9861-4286-beeb-75937abbe828",
+      "rank": 2,
+      "reasonKey": "curated_as_2"
+    },
+    {
+      "mapId": "239b6752-0bcb-46d0-9626-50989476662b",
+      "streamOptionId": "0c5f6071-8e36-4605-80e3-94d5f7920b2f",
+      "rank": 1,
+      "reasonKey": "curated_ri_1"
+    },
+    {
+      "mapId": "239b6752-0bcb-46d0-9626-50989476662b",
+      "streamOptionId": "c7d71267-45a0-4f0e-b2bf-750d691bd934",
+      "rank": 2,
+      "reasonKey": "curated_ri_2"
+    },
+    {
+      "mapId": "27f921ea-1de3-4e94-9635-aa2f089ed544",
+      "streamOptionId": "f3fda93c-0fe1-4193-9f7b-3a5b74e199c9",
+      "rank": 1,
+      "reasonKey": "curated_rs_1"
+    },
+    {
+      "mapId": "27f921ea-1de3-4e94-9635-aa2f089ed544",
+      "streamOptionId": "af67e177-c481-4c19-a395-b1a243694580",
+      "rank": 2,
+      "reasonKey": "curated_rs_2"
+    },
+    {
+      "mapId": "2b082306-3451-4ac1-85f5-2d9357931cef",
+      "streamOptionId": "0c5f6071-8e36-4605-80e3-94d5f7920b2f",
+      "rank": 1,
+      "reasonKey": "curated_rc_1"
+    },
+    {
+      "mapId": "2b082306-3451-4ac1-85f5-2d9357931cef",
+      "streamOptionId": "4aa6acec-c59f-43ea-a0d4-90b2962534e6",
+      "rank": 2,
+      "reasonKey": "curated_rc_2"
+    },
+    {
+      "mapId": "3400d7d5-d13b-4d6b-93d1-531c2b060f6a",
+      "streamOptionId": "a3a07424-756f-418b-99ec-ff8039b93b89",
+      "rank": 1,
+      "reasonKey": "curated_sc_1"
+    },
+    {
+      "mapId": "3400d7d5-d13b-4d6b-93d1-531c2b060f6a",
+      "streamOptionId": "4aa6acec-c59f-43ea-a0d4-90b2962534e6",
+      "rank": 2,
+      "reasonKey": "curated_sc_2"
+    },
+    {
+      "mapId": "433776eb-3d0d-45da-957e-12f4226788e4",
+      "streamOptionId": "383abd95-8525-429c-8320-995c6121e049",
+      "rank": 1,
+      "reasonKey": "curated_re_1"
+    },
+    {
+      "mapId": "433776eb-3d0d-45da-957e-12f4226788e4",
+      "streamOptionId": "cf6fb718-7a4f-4b00-9495-b79c8192a996",
+      "rank": 2,
+      "reasonKey": "curated_re_2"
+    },
+    {
+      "mapId": "486e0268-4ee0-4322-ad53-be9b4c1acb55",
+      "streamOptionId": "c7d71267-45a0-4f0e-b2bf-750d691bd934",
+      "rank": 1,
+      "reasonKey": "curated_ie_1"
+    },
+    {
+      "mapId": "486e0268-4ee0-4322-ad53-be9b4c1acb55",
+      "streamOptionId": "d73d57d1-1ae3-4676-b727-d7e6d65407f7",
+      "rank": 2,
+      "reasonKey": "curated_ie_2"
+    },
+    {
+      "mapId": "6f895fb7-a9d5-46a0-b3f3-e68300d6747a",
+      "streamOptionId": "ab5d242d-9861-4286-beeb-75937abbe828",
+      "rank": 1,
+      "reasonKey": "curated_ra_1"
+    },
+    {
+      "mapId": "6f895fb7-a9d5-46a0-b3f3-e68300d6747a",
+      "streamOptionId": "c7d71267-45a0-4f0e-b2bf-750d691bd934",
+      "rank": 2,
+      "reasonKey": "curated_ra_2"
+    },
+    {
+      "mapId": "79c7716e-df0e-413c-9484-d715bf2bf8cf",
+      "streamOptionId": "d6c5524f-b5c5-40aa-8f75-8f64a737b6e3",
+      "rank": 1,
+      "reasonKey": "curated_is_1"
+    },
+    {
+      "mapId": "79c7716e-df0e-413c-9484-d715bf2bf8cf",
+      "streamOptionId": "f3fda93c-0fe1-4193-9f7b-3a5b74e199c9",
+      "rank": 2,
+      "reasonKey": "curated_is_2"
+    },
+    {
+      "mapId": "988bc503-68e3-40d6-b6a6-9a45c4842d52",
+      "streamOptionId": "c7d71267-45a0-4f0e-b2bf-750d691bd934",
+      "rank": 1,
+      "reasonKey": "curated_ia_1"
+    },
+    {
+      "mapId": "988bc503-68e3-40d6-b6a6-9a45c4842d52",
+      "streamOptionId": "ab5d242d-9861-4286-beeb-75937abbe828",
+      "rank": 2,
+      "reasonKey": "curated_ia_2"
+    },
+    {
+      "mapId": "b7e58482-eb4a-4e56-b638-9697ffab13ab",
+      "streamOptionId": "ab5d242d-9861-4286-beeb-75937abbe828",
+      "rank": 1,
+      "reasonKey": "curated_ae_1"
+    },
+    {
+      "mapId": "b7e58482-eb4a-4e56-b638-9697ffab13ab",
+      "streamOptionId": "4aa6acec-c59f-43ea-a0d4-90b2962534e6",
+      "rank": 2,
+      "reasonKey": "curated_ae_2"
+    },
+    {
+      "mapId": "beb4e260-0ff4-4eff-9425-6e3a2ce31f3e",
+      "streamOptionId": "4aa6acec-c59f-43ea-a0d4-90b2962534e6",
+      "rank": 1,
+      "reasonKey": "curated_ec_1"
+    },
+    {
+      "mapId": "beb4e260-0ff4-4eff-9425-6e3a2ce31f3e",
+      "streamOptionId": "d73d57d1-1ae3-4676-b727-d7e6d65407f7",
+      "rank": 2,
+      "reasonKey": "curated_ec_2"
+    },
+    {
+      "mapId": "cbc1039d-b0a3-4503-ba4d-c5198785dc15",
+      "streamOptionId": "ab5d242d-9861-4286-beeb-75937abbe828",
+      "rank": 1,
+      "reasonKey": "curated_ac_1"
+    },
+    {
+      "mapId": "cbc1039d-b0a3-4503-ba4d-c5198785dc15",
+      "streamOptionId": "4aa6acec-c59f-43ea-a0d4-90b2962534e6",
+      "rank": 2,
+      "reasonKey": "curated_ac_2"
+    },
+    {
+      "mapId": "d13a256f-9fab-41ca-b443-53535985b49d",
+      "streamOptionId": "c7d71267-45a0-4f0e-b2bf-750d691bd934",
+      "rank": 1,
+      "reasonKey": "curated_ic_1"
+    },
+    {
+      "mapId": "d13a256f-9fab-41ca-b443-53535985b49d",
+      "streamOptionId": "4aa6acec-c59f-43ea-a0d4-90b2962534e6",
+      "rank": 2,
+      "reasonKey": "curated_ic_2"
+    },
+    {
+      "mapId": "f0453980-c4b2-4741-9ce8-c59354852357",
+      "streamOptionId": "b063df68-fe6f-4a9d-bf84-b97193437818",
+      "rank": 1,
+      "reasonKey": "curated_se_1"
+    },
+    {
+      "mapId": "f0453980-c4b2-4741-9ce8-c59354852357",
+      "streamOptionId": "a3a07424-756f-418b-99ec-ff8039b93b89",
+      "rank": 2,
+      "reasonKey": "curated_se_2"
+    }
+  ]
+}

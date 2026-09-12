@@ -1,0 +1,212 @@
+[
+  {
+    "mapId": "0264f955-d4b7-4b36-843e-1d134a99831b",
+    "streamOptionId": "a3a07424-756f-418b-99ec-ff8039b93b89",
+    "rank": 1,
+    "reasonKey": "curated_as_1",
+    "reasonText": "Combines interest in people and society with communication and expression."
+  },
+  {
+    "mapId": "0264f955-d4b7-4b36-843e-1d134a99831b",
+    "streamOptionId": "ab5d242d-9861-4286-beeb-75937abbe828",
+    "rank": 2,
+    "reasonKey": "curated_as_2",
+    "reasonText": "Creative work with a strong social or community dimension, e.g. education or community arts."
+  },
+  {
+    "mapId": "239b6752-0bcb-46d0-9626-50989476662b",
+    "streamOptionId": "0c5f6071-8e36-4605-80e3-94d5f7920b2f",
+    "rank": 1,
+    "reasonKey": "curated_ri_1",
+    "reasonText": "PCM-style hands-on, investigative work suits applied technical fields."
+  },
+  {
+    "mapId": "239b6752-0bcb-46d0-9626-50989476662b",
+    "streamOptionId": "c7d71267-45a0-4f0e-b2bf-750d691bd934",
+    "rank": 2,
+    "reasonKey": "curated_ri_2",
+    "reasonText": "A strong base in mathematics and physical sciences supports realistic-investigative interests."
+  },
+  {
+    "mapId": "27f921ea-1de3-4e94-9635-aa2f089ed544",
+    "streamOptionId": "f3fda93c-0fe1-4193-9f7b-3a5b74e199c9",
+    "rank": 1,
+    "reasonKey": "curated_rs_1",
+    "reasonText": "Hands-on care work suits a realistic-social interest pattern."
+  },
+  {
+    "mapId": "27f921ea-1de3-4e94-9635-aa2f089ed544",
+    "streamOptionId": "af67e177-c481-4c19-a395-b1a243694580",
+    "rank": 2,
+    "reasonKey": "curated_rs_2",
+    "reasonText": "Combines physical activity with helping/coaching others."
+  },
+  {
+    "mapId": "2b082306-3451-4ac1-85f5-2d9357931cef",
+    "streamOptionId": "0c5f6071-8e36-4605-80e3-94d5f7920b2f",
+    "rank": 1,
+    "reasonKey": "curated_rc_1",
+    "reasonText": "Structured, practical technical work suits a realistic-conventional pattern."
+  },
+  {
+    "mapId": "2b082306-3451-4ac1-85f5-2d9357931cef",
+    "streamOptionId": "4aa6acec-c59f-43ea-a0d4-90b2962534e6",
+    "rank": 2,
+    "reasonKey": "curated_rc_2",
+    "reasonText": "Organized, rule-based work in a business setting."
+  },
+  {
+    "mapId": "3400d7d5-d13b-4d6b-93d1-531c2b060f6a",
+    "streamOptionId": "a3a07424-756f-418b-99ec-ff8039b93b89",
+    "rank": 1,
+    "reasonKey": "curated_sc_1",
+    "reasonText": "Structured, people-facing work such as education administration or public service."
+  },
+  {
+    "mapId": "3400d7d5-d13b-4d6b-93d1-531c2b060f6a",
+    "streamOptionId": "4aa6acec-c59f-43ea-a0d4-90b2962534e6",
+    "rank": 2,
+    "reasonKey": "curated_sc_2",
+    "reasonText": "Organized business or office-based work with a people focus."
+  },
+  {
+    "mapId": "433776eb-3d0d-45da-957e-12f4226788e4",
+    "streamOptionId": "383abd95-8525-429c-8320-995c6121e049",
+    "rank": 1,
+    "reasonKey": "curated_re_1",
+    "reasonText": "Practical trade skills paired with an interest in running or growing a business."
+  },
+  {
+    "mapId": "433776eb-3d0d-45da-957e-12f4226788e4",
+    "streamOptionId": "cf6fb718-7a4f-4b00-9495-b79c8192a996",
+    "rank": 2,
+    "reasonKey": "curated_re_2",
+    "reasonText": "Hands-on agricultural work often leads toward enterprise and ownership."
+  },
+  {
+    "mapId": "486e0268-4ee0-4322-ad53-be9b4c1acb55",
+    "streamOptionId": "c7d71267-45a0-4f0e-b2bf-750d691bd934",
+    "rank": 1,
+    "reasonKey": "curated_ie_1",
+    "reasonText": "A strong technical foundation for engineering and technology entrepreneurship."
+  },
+  {
+    "mapId": "486e0268-4ee0-4322-ad53-be9b4c1acb55",
+    "streamOptionId": "d73d57d1-1ae3-4676-b727-d7e6d65407f7",
+    "rank": 2,
+    "reasonKey": "curated_ie_2",
+    "reasonText": "Analytical and business-minded — suits finance, analytics and business strategy."
+  },
+  {
+    "mapId": "6f895fb7-a9d5-46a0-b3f3-e68300d6747a",
+    "streamOptionId": "ab5d242d-9861-4286-beeb-75937abbe828",
+    "rank": 1,
+    "reasonKey": "curated_ra_1",
+    "reasonText": "Combines hands-on making with visual/creative expression."
+  },
+  {
+    "mapId": "6f895fb7-a9d5-46a0-b3f3-e68300d6747a",
+    "streamOptionId": "c7d71267-45a0-4f0e-b2bf-750d691bd934",
+    "rank": 2,
+    "reasonKey": "curated_ra_2",
+    "reasonText": "Design and applied-engineering routes both draw on this combination."
+  },
+  {
+    "mapId": "79c7716e-df0e-413c-9484-d715bf2bf8cf",
+    "streamOptionId": "d6c5524f-b5c5-40aa-8f75-8f64a737b6e3",
+    "rank": 1,
+    "reasonKey": "curated_is_1",
+    "reasonText": "The standard route toward medicine and other helping, science-based professions."
+  },
+  {
+    "mapId": "79c7716e-df0e-413c-9484-d715bf2bf8cf",
+    "streamOptionId": "f3fda93c-0fe1-4193-9f7b-3a5b74e199c9",
+    "rank": 2,
+    "reasonKey": "curated_is_2",
+    "reasonText": "A shorter, more applied route into caring, science-adjacent work."
+  },
+  {
+    "mapId": "988bc503-68e3-40d6-b6a6-9a45c4842d52",
+    "streamOptionId": "c7d71267-45a0-4f0e-b2bf-750d691bd934",
+    "rank": 1,
+    "reasonKey": "curated_ia_1",
+    "reasonText": "Analytical thinking paired with creative/visual interests fits design-adjacent technical fields."
+  },
+  {
+    "mapId": "988bc503-68e3-40d6-b6a6-9a45c4842d52",
+    "streamOptionId": "ab5d242d-9861-4286-beeb-75937abbe828",
+    "rank": 2,
+    "reasonKey": "curated_ia_2",
+    "reasonText": "Research-minded creative work, e.g. design research or user research."
+  },
+  {
+    "mapId": "b7e58482-eb4a-4e56-b638-9697ffab13ab",
+    "streamOptionId": "ab5d242d-9861-4286-beeb-75937abbe828",
+    "rank": 1,
+    "reasonKey": "curated_ae_1",
+    "reasonText": "Creative work paired with business ambition, e.g. media, branding or entrepreneurship."
+  },
+  {
+    "mapId": "b7e58482-eb4a-4e56-b638-9697ffab13ab",
+    "streamOptionId": "4aa6acec-c59f-43ea-a0d4-90b2962534e6",
+    "rank": 2,
+    "reasonKey": "curated_ae_2",
+    "reasonText": "A business foundation for creative or media ventures."
+  },
+  {
+    "mapId": "beb4e260-0ff4-4eff-9425-6e3a2ce31f3e",
+    "streamOptionId": "4aa6acec-c59f-43ea-a0d4-90b2962534e6",
+    "rank": 1,
+    "reasonKey": "curated_ec_1",
+    "reasonText": "The standard foundation for structured business and finance careers."
+  },
+  {
+    "mapId": "beb4e260-0ff4-4eff-9425-6e3a2ce31f3e",
+    "streamOptionId": "d73d57d1-1ae3-4676-b727-d7e6d65407f7",
+    "rank": 2,
+    "reasonKey": "curated_ec_2",
+    "reasonText": "Adds quantitative depth for finance-oriented business paths."
+  },
+  {
+    "mapId": "cbc1039d-b0a3-4503-ba4d-c5198785dc15",
+    "streamOptionId": "ab5d242d-9861-4286-beeb-75937abbe828",
+    "rank": 1,
+    "reasonKey": "curated_ac_1",
+    "reasonText": "Structured creative work, e.g. production design or design operations."
+  },
+  {
+    "mapId": "cbc1039d-b0a3-4503-ba4d-c5198785dc15",
+    "streamOptionId": "4aa6acec-c59f-43ea-a0d4-90b2962534e6",
+    "rank": 2,
+    "reasonKey": "curated_ac_2",
+    "reasonText": "Business/administrative skills alongside a creative interest."
+  },
+  {
+    "mapId": "d13a256f-9fab-41ca-b443-53535985b49d",
+    "streamOptionId": "c7d71267-45a0-4f0e-b2bf-750d691bd934",
+    "rank": 1,
+    "reasonKey": "curated_ic_1",
+    "reasonText": "Analytical, structured technical work such as data and analytics."
+  },
+  {
+    "mapId": "d13a256f-9fab-41ca-b443-53535985b49d",
+    "streamOptionId": "4aa6acec-c59f-43ea-a0d4-90b2962534e6",
+    "rank": 2,
+    "reasonKey": "curated_ic_2",
+    "reasonText": "Structured, detail-oriented business and accounting work."
+  },
+  {
+    "mapId": "f0453980-c4b2-4741-9ce8-c59354852357",
+    "streamOptionId": "b063df68-fe6f-4a9d-bf84-b97193437818",
+    "rank": 1,
+    "reasonKey": "curated_se_1",
+    "reasonText": "People-facing, leadership-oriented service work."
+  },
+  {
+    "mapId": "f0453980-c4b2-4741-9ce8-c59354852357",
+    "streamOptionId": "a3a07424-756f-418b-99ec-ff8039b93b89",
+    "rank": 2,
+    "reasonKey": "curated_se_2",
+    "reasonText": "Communication- and people-focused study that supports leadership roles."
+  }
+]

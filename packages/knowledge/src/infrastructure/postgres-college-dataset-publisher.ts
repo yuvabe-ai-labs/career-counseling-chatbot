@@ -132,14 +132,17 @@ export class PostgresCollegeDatasetPublisher
               dataset_version_id, created_at, updated_at
             )
             values (
-              $1, null, $2, $3, $4, $5, null, null, null, $6,
-              $7, $8, $9, now(), now()
+              $1, $2, $3, $4, $5, $6, null, $7, $8, $9,
+              $10, $11, $12, now(), now()
             )
             on conflict (id) do update set
+              external_code = excluded.external_code,
               name = excluded.name,
               city = excluded.city,
               state = excluded.state,
               institution_type = excluded.institution_type,
+              admission_route = excluded.admission_route,
+              fees_band = excluded.fees_band,
               website_url = excluded.website_url,
               verification_status = excluded.verification_status,
               last_verified_at = excluded.last_verified_at,
@@ -148,10 +151,13 @@ export class PostgresCollegeDatasetPublisher
           `,
           [
             college.id,
+            college.externalCode ?? null,
             college.name,
             college.city,
             college.state,
             college.institutionType,
+            college.admissionRoute ?? null,
+            college.feesBand ?? null,
             college.websiteUrl,
             college.verificationStatus,
             college.lastVerifiedAt,
