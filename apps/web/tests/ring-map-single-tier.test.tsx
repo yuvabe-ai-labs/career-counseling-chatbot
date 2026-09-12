@@ -45,7 +45,7 @@ describe("RingMap — singleTier", () => {
     expect(document.querySelector(".ring-inner")).not.toBeNull();
   });
 
-  it("renders every item from the flat list on the one ring and reports selection on click", async () => {
+  it("renders every item from the flat list on the one ring and reports selection on click", () => {
     const onSelectItem = vi.fn();
     render(
       <RingMap

@@ -10,6 +10,7 @@ export default tseslint.config(
       "**/node_modules/**",
       "**/dist/**",
       "**/dist-lambda/**",
+      ".deploy/**",
       "coverage/**",
       "docs/**",
       "packages/database/src/database.types.ts",

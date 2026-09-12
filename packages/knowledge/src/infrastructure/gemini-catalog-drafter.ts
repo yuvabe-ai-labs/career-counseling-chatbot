@@ -272,7 +272,10 @@ function assembleCollegeDraftBatch(wire: z.infer<typeof GeminiCollegeDraftWireSc
       institutionType: college.institutionType,
       programs: wire.programs
         .filter((program) => program.collegeName === college.name)
-        .map(({ collegeName: _collegeName, ...program }) => program),
+        .map(({ collegeName: _collegeName, ...program }) => {
+          void _collegeName;
+          return program;
+        }),
     })),
   };
 }
