@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { StaffQueueActionResponseSchema, type ResolvedStaffQueueActionRequest } from "@yuvanext/contracts";
+import { StaffQueueActionResponseSchema, type ResolvedStaffQueueActionRequest } from "@yuvapath/contracts";
 import { createSyntheticQueueAction } from "../src/index.js";
 
 const uuid = "11111111-1111-4111-8111-111111111111";

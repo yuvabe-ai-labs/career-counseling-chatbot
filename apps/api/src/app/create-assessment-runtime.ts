@@ -2,7 +2,7 @@ import {
   GetAssessmentSnapshotService,
   PostgresAssessmentSnapshotReader,
   type AssessmentHttpDependencies,
-} from "@yuvanext/assessment";
+} from "@yuvapath/assessment";
 import {
   createSupabaseUserResolver,
   type SupabaseAuthClient,

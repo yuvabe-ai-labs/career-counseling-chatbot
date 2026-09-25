@@ -1,4 +1,4 @@
-import { RecommendationSetSchema, type RecommendationSet } from "@yuvanext/contracts";
+import { RecommendationSetSchema, type RecommendationSet } from "@yuvapath/contracts";
 import type { ReadRecommendationInput, RecommendationReader } from "../../application/index.js";
 
 export class FixtureRecommendationReader implements RecommendationReader {

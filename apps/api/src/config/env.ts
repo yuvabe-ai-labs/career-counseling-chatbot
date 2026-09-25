@@ -42,7 +42,7 @@ const EnvSchema = z
     // Email delivery for both the student identity-OTP and guardian consent (Module 1) — no
     // SMS/phone delivery, and no dev-echo/no-op fallback, exists anywhere in the app. Without
     // these configured, OTP requests fail with a clear 503 (UnavailableEmailProvider in
-    // @yuvanext/assessment) rather than a silent fake send — required in production (below),
+    // @yuvapath/assessment) rather than a silent fake send — required in production (below),
     // optional otherwise so tests/local dev without real SMTP still boot.
     SMTP_HOST: optionalString(z.string().min(1)),
     SMTP_PORT: z.coerce.number().int().positive().max(65535).default(587),

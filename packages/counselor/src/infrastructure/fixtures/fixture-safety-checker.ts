@@ -3,7 +3,7 @@ import {
   SafetyDecisionSchema,
   type HandoffPacket,
   type SafetyDecision,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import type {
   RequestHandoffInput,
   SafetyChecker,

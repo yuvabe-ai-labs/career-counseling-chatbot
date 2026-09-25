@@ -4,7 +4,7 @@ import {
   validSendConversationMessageRequest,
   validStartConversationRequest,
   validProfileSnapshot,
-} from "@yuvanext/test-fixtures";
+} from "@yuvapath/test-fixtures";
 import {
   ConversationHistoryResponseSchema,
   CreateJourneyEventResponseSchema,
@@ -13,7 +13,7 @@ import {
   JourneyResponseSchema,
   ReportResponseSchema,
   StartConversationResponseSchema,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { describe, expect, it } from "vitest";
 import request from "supertest";
 import { createApp } from "../src/app/create-app.js";

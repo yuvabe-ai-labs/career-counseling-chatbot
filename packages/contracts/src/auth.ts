@@ -4,9 +4,9 @@ import { DateOnlySchema, IsoTimestampSchema, UuidSchema } from "./common.js";
 /**
  * Custom identity-bootstrap contract (Module 1, Gap 1): a short-lived anonymous session
  * created before email verification, followed by our own OTP request/verify pair (delivered
- * via SMTP — see @yuvanext/assessment's EmailProvider). Verifying successfully returns a real
+ * via SMTP — see @yuvapath/assessment's EmailProvider). Verifying successfully returns a real
  * userId (backed by a Supabase Auth `auth.users` row created on first verification) that the
- * frontend then uses as the `x-yuvanext-user-id` header for every other Module 1 route — no
+ * frontend then uses as the `x-yuvapath-user-id` header for every other Module 1 route — no
  * change to those routes' auth model. Guardian consent (see guardian-consent.ts) also moved to
  * email/SMTP, delivered through the same EmailProvider — no SMS/phone delivery remains anywhere.
  */
@@ -100,7 +100,7 @@ export type CheckEmailAvailabilityResponse = z.infer<typeof CheckEmailAvailabili
  *
  * Response mirrors SignUpWithPasswordResponseSchema (`{ userId }`) rather than issuing a
  * Supabase JWT session: every other Module 1 route still authenticates via the plain
- * `x-yuvanext-user-id` header (see apps/web/src/lib/api-client.ts), not a bearer token, so this
+ * `x-yuvapath-user-id` header (see apps/web/src/lib/api-client.ts), not a bearer token, so this
  * keeps the same auth model signup already established instead of introducing a second one.
  */
 export const SignInWithPasswordRequestSchema = z.object({
@@ -113,3 +113,101 @@ export const SignInWithPasswordResponseSchema = z.object({
   userId: UuidSchema,
 });
 export type SignInWithPasswordResponse = z.infer<typeof SignInWithPasswordResponseSchema>;
+
+/**
+ * Counselor (staff) auth — a separate flow from the student one above, though it shares the
+ * same underlying identity store (Supabase Auth `auth.users`) and the same
+ * `{ userId }`-only response shape/auth model (no bearer session — see
+ * SignInWithPasswordResponseSchema's own comment). A "counselor" is an auth.users row that also
+ * has an active `operations.staff_profiles` row and a non-revoked, non-expired
+ * `operations.staff_role_assignments` row with role='counselor' — verified server-side on every
+ * sign-in, never inferred from the response alone. See
+ * docs/architecture/counselor-auth-landing-page-plan.md.
+ */
+export const CounselorSignInRequestSchema = z.object({
+  email: z.string().trim().min(3).max(254).email(),
+  password: z.string().min(1).max(72),
+});
+export type CounselorSignInRequest = z.infer<typeof CounselorSignInRequestSchema>;
+
+/**
+ * requiresPasswordReset is true when the password just verified was a temporary one set by
+ * scripts/create-counselor.ts, not chosen by the counselor themselves
+ * (operations.staff_profiles.must_reset_password) — sign-in does NOT complete in that case;
+ * resetToken is populated instead (same short-lived, single-use token
+ * VerifyCounselorPasswordResetOtpResponseSchema issues) so the frontend can send the counselor
+ * straight into the existing "Create New Password" screen, reusing SetCounselorPasswordRequestSchema
+ * below rather than a separate first-login flow. userId is always present either way.
+ *
+ * displayName is operations.staff_profiles.display_name (required on every counselor row) — used
+ * client-side only to render the account-avatar initials (see apps/web's Avatar component), same
+ * source the dashboard's own "Welcome" copy could draw from. Present even when
+ * requiresPasswordReset is true for schema simplicity, though the frontend only stores it once
+ * sign-in actually completes.
+ */
+export const CounselorSignInResponseSchema = z.object({
+  userId: UuidSchema,
+  requiresPasswordReset: z.boolean(),
+  resetToken: z.string().min(1).optional(),
+  displayName: z.string().min(1),
+});
+export type CounselorSignInResponse = z.infer<typeof CounselorSignInResponseSchema>;
+
+/**
+ * Counselor forgot-password, OTP-based (Figma node 706:439): request a 4-digit code by email,
+ * verify it, then set a new password with the short-lived token verification returns. Distinct
+ * from the student identity/guardian OTP flows (6-digit, keyed by pendingSessionId) — this one
+ * is keyed by email directly (no prior session exists to key off before a counselor is even
+ * signed in) and uses a 4-digit code, matching the Figma spec exactly rather than reusing the
+ * student flow's 6-digit convention.
+ */
+export const RequestCounselorPasswordResetOtpRequestSchema = z.object({
+  email: z.string().trim().min(3).max(254).email(),
+});
+export type RequestCounselorPasswordResetOtpRequest = z.infer<
+  typeof RequestCounselorPasswordResetOtpRequestSchema
+>;
+
+export const RequestCounselorPasswordResetOtpResponseSchema = z.object({
+  sent: z.literal(true),
+});
+export type RequestCounselorPasswordResetOtpResponse = z.infer<
+  typeof RequestCounselorPasswordResetOtpResponseSchema
+>;
+
+export const VerifyCounselorPasswordResetOtpRequestSchema = z.object({
+  email: z.string().trim().min(3).max(254).email(),
+  code: z.string().regex(/^\d{4}$/),
+});
+export type VerifyCounselorPasswordResetOtpRequest = z.infer<
+  typeof VerifyCounselorPasswordResetOtpRequestSchema
+>;
+
+/** resetToken is opaque, single-use, short-lived — carried by the frontend as page state into
+ *  the "Create New Password" step, never shown to the counselor. */
+export const VerifyCounselorPasswordResetOtpResponseSchema = z.object({
+  resetToken: z.string().min(1),
+});
+export type VerifyCounselorPasswordResetOtpResponse = z.infer<
+  typeof VerifyCounselorPasswordResetOtpResponseSchema
+>;
+
+export const SetCounselorPasswordRequestSchema = z.object({
+  resetToken: z.string().min(1),
+  // Same policy as SignUpWithPasswordRequestSchema (Figma node 706:520 specs the identical
+  // checklist: lowercase, uppercase, number, special character, 8-character minimum).
+  newPassword: z
+    .string()
+    .min(8, "Password must be at least 8 characters.")
+    .max(72, "Password must be at most 72 characters.")
+    .regex(/[a-z]/, "Password must include a lowercase letter.")
+    .regex(/[A-Z]/, "Password must include an uppercase letter.")
+    .regex(/[0-9]/, "Password must include a number.")
+    .regex(/[^A-Za-z0-9]/, "Password must include a special character."),
+});
+export type SetCounselorPasswordRequest = z.infer<typeof SetCounselorPasswordRequestSchema>;
+
+export const SetCounselorPasswordResponseSchema = z.object({
+  success: z.literal(true),
+});
+export type SetCounselorPasswordResponse = z.infer<typeof SetCounselorPasswordResponseSchema>;

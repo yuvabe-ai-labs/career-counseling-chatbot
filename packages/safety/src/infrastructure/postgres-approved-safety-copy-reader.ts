@@ -1,4 +1,4 @@
-import type { createDatabasePool } from "@yuvanext/database";
+import type { createDatabasePool } from "@yuvapath/database";
 
 type DatabasePool = ReturnType<typeof createDatabasePool>;
 

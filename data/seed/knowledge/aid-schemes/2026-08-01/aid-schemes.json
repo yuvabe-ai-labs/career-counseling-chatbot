@@ -4,7 +4,7 @@
     "aidCode": "TN-UG-DEMO",
     "name": "Tamil Nadu Undergraduate Support Demo",
     "providerType": "state",
-    "provider": "YuvaNext synthetic fixture",
+    "provider": "YuvaPath synthetic fixture",
     "level": "ug",
     "states": ["Tamil Nadu"],
     "eligibilitySummary": "Students should confirm current requirements on the official portal.",

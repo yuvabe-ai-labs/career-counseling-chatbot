@@ -36,7 +36,7 @@ type SeedItem = {
 
 const instrument = {
   code: "ip_60",
-  name: "YuvaNext Interest Profiler 60",
+  name: "YuvaPath Interest Profiler 60",
   construct: "interest",
   // v2.0 reduces the item bank from 60 items (10 waves x 6 scales) to 30 (5 waves x 6 scales).
   // Item selection is a stratified sample across waves 1, 3, 5, 7, 9 (every other wave) rather
@@ -57,7 +57,7 @@ const instrument = {
   ageMax: 99,
   batchSize: 10,
   scoringAlgorithmVersion: "riasec-deterministic-v1",
-  contentLicenseRef: "yuvanext-mock-content-v1",
+  contentLicenseRef: "yuvapath-mock-content-v1",
   reviewStatus: "mock",
 } as const;
 

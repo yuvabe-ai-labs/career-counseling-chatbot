@@ -1,12 +1,12 @@
 import process from "node:process";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { StreamDatasetManifestSchema } from "@yuvanext/contracts";
-import { createDatabasePool } from "@yuvanext/database";
+import { StreamDatasetManifestSchema } from "@yuvapath/contracts";
+import { createDatabasePool } from "@yuvapath/database";
 import {
   importStreamDataset,
   PostgresStreamDatasetPublisher,
-} from "@yuvanext/knowledge";
+} from "@yuvapath/knowledge";
 
 const directory = "data/seed/knowledge/streams/2026-07-31";
 

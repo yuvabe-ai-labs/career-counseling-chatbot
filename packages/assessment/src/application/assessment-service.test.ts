@@ -7,7 +7,7 @@ import type {
   JourneySession,
   ProfileSnapshot,
   UserProfile,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { AssessmentService } from "./assessment-service.js";
 import type {
   AssessmentRepository,
@@ -190,6 +190,10 @@ class MemoryAssessmentRepository implements AssessmentRepository {
     return Promise.resolve(this.result?.instrumentCode === "wip" ? this.result : null);
   }
 
+  findLatestRiasecResultForUser(): Promise<AssessmentResult | null> {
+    return Promise.resolve(this.result?.instrumentCode !== "wip" ? (this.result ?? null) : null);
+  }
+
   getIntakeSummary(): Promise<Record<string, unknown>> {
     return Promise.resolve({ current_goal: { value: "job" } });
   }
@@ -208,7 +212,6 @@ class MemoryAssessmentRepository implements AssessmentRepository {
       city: input.profile.city,
       state: input.profile.state,
       selfStage: input.profile.selfStage,
-      wantsAid: input.profile.wantsAid,
       intakeSummary: input.intakeSummary,
       riasec: (input.resultSummary as { riasec: ProfileSnapshot["riasec"] }).riasec,
       values: (input.resultSummary as { values: ProfileSnapshot["values"] }).values,
@@ -241,8 +244,7 @@ const profile: UserProfile = {
   state: "Tamil Nadu",
   countryCode: "IN",
   segment: "launcher",
-  selfStage: "working",
-  wantsAid: false,
+  selfStage: "graduate",
   profileStatus: "active",
   createdAt: "2026-07-30T09:00:00.000Z",
   updatedAt: "2026-07-30T09:00:00.000Z",

@@ -2,7 +2,7 @@ import {
   validProfileSnapshot,
   validRecommendationSet,
   validRetrievedEvidence,
-} from "@yuvanext/test-fixtures";
+} from "@yuvapath/test-fixtures";
 import { describe, expect, it, vi } from "vitest";
 import { GeminiAiProvider } from "../src/index.js";
 

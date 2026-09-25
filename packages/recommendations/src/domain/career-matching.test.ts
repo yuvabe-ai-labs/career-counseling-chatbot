@@ -3,7 +3,7 @@ import type {
   CareerCatalogRecord,
   MatchingConfig,
   ProfileSnapshotForRecommendations,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import {
   buildCareerRecommendationSet,
   normalizeRiasecVector,

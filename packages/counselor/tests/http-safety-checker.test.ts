@@ -1,4 +1,4 @@
-import { validHandoffPacket, validSafetyDecision } from "@yuvanext/test-fixtures";
+import { validHandoffPacket, validSafetyDecision } from "@yuvapath/test-fixtures";
 import { describe, expect, it, vi } from "vitest";
 import { CounselorDependencyUnavailableError, HttpSafetyChecker } from "../src/index.js";
 

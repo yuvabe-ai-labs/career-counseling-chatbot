@@ -3,7 +3,7 @@ import {
   HealthResponseSchema,
   type HealthResponse,
   type ModuleDescriptor,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import type { Express } from "express";
 
 export const registerHealthRoute = (
@@ -44,7 +44,7 @@ export const registerHealthRoute = (
     const healthy = databaseStatus === "connected" || databaseStatus === "not_required";
     const body: HealthResponse = {
       status: healthy ? "ok" : "degraded",
-      service: "yuvanext-api",
+      service: "yuvapath-api",
       timestamp: new Date().toISOString(),
       database: { status: databaseStatus },
       modules,

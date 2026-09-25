@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import type { AssessmentAnsweredItem, AssessmentNextResponse } from "@yuvanext/contracts";
+import type { AssessmentAnsweredItem, AssessmentNextResponse } from "@yuvapath/contracts";
 import { AppHeader } from "@/components/AppHeader";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";

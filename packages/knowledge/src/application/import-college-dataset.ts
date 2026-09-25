@@ -3,7 +3,7 @@ import {
   CollegeDatasetManifestSchema,
   type CollegeDatasetManifest,
   type CollegeDatasetRecords,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import {
   validateCollegeRecords,
   type CollegeValidationIssue,

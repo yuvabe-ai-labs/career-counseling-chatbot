@@ -23,6 +23,14 @@ supabase/.temp/
 *.log
 .DS_Store
 Thumbs.db
+desktop.ini
+*.tsbuildinfo
+*.bak
+*.swp
+*.swo
+.vite/
+.cache/
+.idea/
 .vscode/settings.json
 
 # Downloaded source snapshots and local data-processing inputs.
@@ -45,3 +53,8 @@ docs/module-3-swagger-demo-catalog.html
 ~$*
 *.tmp
 *.temp
+
+# Local working files kept at the repo root — not meant to be pushed to GitHub.
+/Career_Counselling_Chatbot_Test_Cases.xlsx
+/tamil_nadu_colleges.xlsx
+/tamil_nadu_pathways.xlsx

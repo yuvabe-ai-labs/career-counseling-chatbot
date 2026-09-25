@@ -2,7 +2,7 @@
  * Port onto the real identity store (Supabase Auth's `auth.users`, via the service-role
  * admin API — implemented in apps/api, e.g. apps/api/src/auth/supabase-identity-directory.ts).
  * This is the piece that resolves Gap 1's FK-violation problem: every other Module 1 route
- * requires x-yuvanext-user-id to already exist in auth.users, and nothing previously created
+ * requires x-yuvapath-user-id to already exist in auth.users, and nothing previously created
  * that row. findOrCreateUserIdByEmail is what creates it, on first successful OTP verification.
  */
 export type IdentityUserDirectory = {

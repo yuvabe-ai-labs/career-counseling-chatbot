@@ -3,7 +3,7 @@ import {
   CollegeSchema,
   type College,
   type CollegeDatasetRecords,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 
 export type CollegeValidationIssueCode =
   | "INVALID_RECORD"

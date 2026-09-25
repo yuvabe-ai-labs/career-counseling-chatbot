@@ -1,6 +1,6 @@
-import { GetAssessmentSnapshotService, type AssessmentHttpDependencies } from "@yuvanext/assessment";
-import { FixtureProfileReader } from "@yuvanext/counselor";
-import { validProfileSnapshot } from "@yuvanext/test-fixtures";
+import { GetAssessmentSnapshotService, type AssessmentHttpDependencies } from "@yuvapath/assessment";
+import { FixtureProfileReader } from "@yuvapath/counselor";
+import { validProfileSnapshot } from "@yuvapath/test-fixtures";
 
 export const createAssessmentFixtureRuntime = (
   bearerToken: string,

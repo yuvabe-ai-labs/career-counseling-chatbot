@@ -1,7 +1,7 @@
 import type {
   AidSchemeListQuery,
   AidSchemeListResponse,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import type { AidSchemeRepository } from "../domain/aid-scheme.js";
 
 export async function getAidSchemes(

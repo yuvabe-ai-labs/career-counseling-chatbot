@@ -15,7 +15,7 @@ import { useSession } from "../state/session-context";
  * segment client-side either: for someone starting fresh it navigates to /intake-questions, and
  * that screen's own GET .../intake/questions call re-derives the segment from the authenticated
  * profile server-side (see IntakeService.getQuestions, packages/assessment) — the existing
- * x-yuvanext-user-id + journeySessionId auth model already establishes who's asking, so this
+ * x-yuvapath-user-id + journeySessionId auth model already establishes who's asking, so this
  * page never re-fetches or re-computes the segment itself.
  *
  * Explore's target does depend on one purely local check, though: a student who has already

@@ -9,7 +9,7 @@ import {
   type ProfileSnapshot,
   type RecommendationSet,
   type RetrievedEvidence,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { CounselorAccessError, CounselorContractError, CounselorNotFoundError } from "./errors.js";
 import type {
   AiProvider,

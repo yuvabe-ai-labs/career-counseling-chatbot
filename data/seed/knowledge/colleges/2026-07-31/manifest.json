@@ -16,10 +16,10 @@
   "createdAt": "2026-07-31T00:00:00.000Z",
   "source": {
     "id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
-    "sourceKey": "yuvanext-synthetic-colleges-poc",
-    "name": "YuvaNext synthetic college fixtures",
+    "sourceKey": "yuvapath-synthetic-colleges-poc",
+    "name": "YuvaPath synthetic college fixtures",
     "sourceType": "manual_review",
-    "publisher": "YuvaNext POC team",
+    "publisher": "YuvaPath POC team",
     "trustLevel": "project_reviewed",
     "status": "active",
     "baseUrl": null,

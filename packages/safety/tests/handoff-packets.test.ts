@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   ResolvedCreateHandoffRequestSchema as CreateHandoffRequestSchema,
   CreateHandoffResponseSchema,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { createSyntheticHandoffPacket } from "../src/index.js";
 
 const uuid = "11111111-1111-4111-8111-111111111111";

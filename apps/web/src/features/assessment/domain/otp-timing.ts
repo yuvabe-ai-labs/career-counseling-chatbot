@@ -1,4 +1,4 @@
-import type { GuardianOtpTiming } from "@yuvanext/contracts";
+import type { GuardianOtpTiming } from "@yuvapath/contracts";
 
 /**
  * Purely derived from the backend's own `GuardianOtpTiming` (packages/contracts) plus the

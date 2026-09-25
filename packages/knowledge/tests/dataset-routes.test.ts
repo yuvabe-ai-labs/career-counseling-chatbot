@@ -3,7 +3,7 @@ import {
   CatalogImportResponseSchema,
   PublishedDatasetListResponseSchema,
   PublishedDatasetSchema,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import express from "express";
 import request from "supertest";
 import { describe, expect, it } from "vitest";
@@ -26,9 +26,9 @@ const dataset = PublishedDatasetSchema.parse({
   recordCount: 3,
   publishedAt: "2026-08-03T00:00:00.000Z",
   source: {
-    sourceKey: "yuvanext-synthetic-aid-poc",
-    name: "YuvaNext synthetic aid fixtures",
-    publisher: "YuvaNext POC team",
+    sourceKey: "yuvapath-synthetic-aid-poc",
+    name: "YuvaPath synthetic aid fixtures",
+    publisher: "YuvaPath POC team",
     trustLevel: "project_reviewed",
   },
 });

@@ -39,9 +39,12 @@ function renderSignIn() {
 
 describe("SignInPage", () => {
   // Mock call histories otherwise leak across tests in this file (no `test.globals`/auto-reset
-  // configured — see onboarding-email-uniqueness.test.tsx for the same pattern).
+  // configured — see onboarding-email-uniqueness.test.tsx for the same pattern). Also clears
+  // localStorage — SignInPage now redirects an already-signed-in visitor straight to /home, so a
+  // userId/journeySessionId left over from another test file's own setup must not leak in here.
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
   });
 
   it("signs in with email + password and lands on /home via a fresh journey session", async () => {
@@ -96,6 +99,23 @@ describe("SignInPage", () => {
 
     expect(await screen.findByText(/please enter your email address/i)).toBeInTheDocument();
     expect(screen.getByText(/please enter your password/i)).toBeInTheDocument();
+    expect(signInWithPassword).not.toHaveBeenCalled();
+  });
+
+  it("toggles password visibility on click without moving focus or submitting the form", async () => {
+    const user = userEvent.setup();
+    renderSignIn();
+
+    const passwordField = screen.getByLabelText(/^password/i);
+    await user.type(passwordField, "Str0ng!Pass");
+    await user.click(passwordField);
+    expect(passwordField).toHaveFocus();
+
+    await user.click(screen.getByRole("button", { name: "Show password" }));
+
+    expect(passwordField).toHaveAttribute("type", "text");
+    expect(passwordField).toHaveValue("Str0ng!Pass");
+    expect(passwordField).toHaveFocus();
     expect(signInWithPassword).not.toHaveBeenCalled();
   });
 });

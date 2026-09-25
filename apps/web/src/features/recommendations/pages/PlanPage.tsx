@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Navigate, useNavigate } from "react-router-dom";
-import type { PlanFitExplanation } from "@yuvanext/contracts";
+import type { PlanFitExplanation } from "@yuvapath/contracts";
 import planCardArts from "@/assets/plan-card-arts.png";
 import planCardCommerce from "@/assets/plan-card-commerce.png";
 import planCardScience from "@/assets/plan-card-science.png";

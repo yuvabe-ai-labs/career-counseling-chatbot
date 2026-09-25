@@ -21,7 +21,7 @@ import {
   StreamListResponseSchema,
   UuidSchema,
   type OpenAPIRegistry,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import type { Express } from "express";
 import { getCareer } from "../application/get-career.js";
 import { getAidSchemes } from "../application/get-aid-schemes.js";

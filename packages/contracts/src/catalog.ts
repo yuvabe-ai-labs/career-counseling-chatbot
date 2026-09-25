@@ -516,6 +516,40 @@ export const CareerPathwayLinkSchema = z.object({
 
 export type CareerPathwayLink = z.infer<typeof CareerPathwayLinkSchema>;
 
+// knowledge.career_streams — Iteration 1 of the Career → Stream mapping layer (see
+// docs/architecture/career-stream-mapping-iteration-1-plan.md). Same reasoning as
+// career_pathways above: a career's linked stream(s) are inherent to describing the career,
+// bundled into the stream dataset rather than a separate manifest type. Unlike career_pathways,
+// this link carries a numeric `weight` (not just relationshipType + displayOrder) because
+// stream-recommendation scoring needs a real magnitude to blend against its existing RIASEC
+// factors, not just a tiebreak order.
+export const CareerStreamRelationshipTypeSchema = z.enum(["primary", "alternative", "cross_disciplinary"]);
+
+export const CareerStreamLinkSchema = z.object({
+  careerId: UuidSchema,
+  streamOptionId: UuidSchema,
+  relationshipType: CareerStreamRelationshipTypeSchema,
+  weight: z.number().min(0).max(1),
+  source: z.string().trim().min(1).max(80),
+  displayOrder: z.number().int().positive().default(1),
+});
+
+export type CareerStreamLink = z.infer<typeof CareerStreamLinkSchema>;
+
+// knowledge.stream_pathways — Iteration 2 of the Stream → Pathway mapping layer (see
+// docs/architecture/stream-pathway-mapping-iteration-2-plan.md). Same shape/reasoning as
+// CareerStreamLinkSchema above, linking the other direction.
+export const StreamPathwayLinkSchema = z.object({
+  streamOptionId: UuidSchema,
+  pathwayId: UuidSchema,
+  relationshipType: CareerStreamRelationshipTypeSchema,
+  weight: z.number().min(0).max(1),
+  source: z.string().trim().min(1).max(80),
+  displayOrder: z.number().int().positive().default(1),
+});
+
+export type StreamPathwayLink = z.infer<typeof StreamPathwayLinkSchema>;
+
 export const StreamOptionSchema = z.object({
   id: UuidSchema,
   streamCode: z.string().trim().min(1).max(80),
@@ -587,6 +621,10 @@ export const StreamDatasetRecordsSchema = z.object({
   pathways: z.array(PathwaySchema),
   // Optional + defaulted: existing published stream datasets predate this field.
   careerPathways: z.array(CareerPathwayLinkSchema).optional().default([]),
+  // Optional + defaulted, same reasoning as careerPathways above.
+  careerStreams: z.array(CareerStreamLinkSchema).optional().default([]),
+  // Optional + defaulted, same reasoning again (Iteration 2).
+  streamPathways: z.array(StreamPathwayLinkSchema).optional().default([]),
   streamOptions: z.array(StreamOptionSchema),
   streamMaps: z.array(StreamMapSchema),
   streamMapItems: z.array(StreamMapItemSchema),
@@ -608,6 +646,8 @@ export const StreamDatasetManifestSchema = z.object({
     educationRoutes: z.number().int().nonnegative(),
     pathways: z.number().int().nonnegative(),
     careerPathways: z.number().int().nonnegative().optional(),
+    careerStreams: z.number().int().nonnegative().optional(),
+    streamPathways: z.number().int().nonnegative().optional(),
     streamOptions: z.number().int().nonnegative(),
     streamMaps: z.number().int().nonnegative(),
     streamMapItems: z.number().int().nonnegative(),

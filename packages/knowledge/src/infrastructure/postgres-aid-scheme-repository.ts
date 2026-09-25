@@ -1,4 +1,4 @@
-import { AidSchemeSchema, type AidScheme } from "@yuvanext/contracts";
+import { AidSchemeSchema, type AidScheme } from "@yuvapath/contracts";
 import type { AidSchemeFilters, AidSchemeRepository } from "../domain/aid-scheme.js";
 
 type QueryExecutor = {

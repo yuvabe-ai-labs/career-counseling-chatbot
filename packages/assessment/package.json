@@ -1,13 +1,13 @@
 {
-  "name": "@yuvanext/assessment",
+  "name": "@yuvapath/assessment",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "exports": "./src/index.ts",
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^9.1.0",
-    "@yuvanext/contracts": "workspace:*",
-    "@yuvanext/database": "workspace:*",
+    "@yuvapath/contracts": "workspace:*",
+    "@yuvapath/database": "workspace:*",
     "express": "^5.2.1",
     "nodemailer": "^9.1.1",
     "pg": "^8.22.0",

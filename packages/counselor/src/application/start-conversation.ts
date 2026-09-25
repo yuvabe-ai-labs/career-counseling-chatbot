@@ -6,7 +6,7 @@ import {
   type ConversationMessage,
   type JourneyState,
   type StartConversationResponse,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { CounselorContractError, CounselorNotFoundError } from "./errors.js";
 import type {
   ApprovedCopyReader,

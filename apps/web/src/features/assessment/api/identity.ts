@@ -9,7 +9,7 @@ import {
   type CheckEmailAvailabilityRequest,
   type SignInWithPasswordRequest,
   type SignUpWithPasswordRequest,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { apiRequest } from "@/lib/api-client";
 
 /** POST /api/v1/sessions/anonymous — starts the registration flow, before any userId exists. */

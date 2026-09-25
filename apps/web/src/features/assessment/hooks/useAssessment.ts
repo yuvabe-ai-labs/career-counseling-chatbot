@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import type { SubmitAssessmentResponseRequest } from "@yuvanext/contracts";
+import type { SubmitAssessmentResponseRequest } from "@yuvapath/contracts";
 import { createAssessmentSnapshot } from "../api/assessment-snapshot";
 import {
   getNextAssessmentBatch,

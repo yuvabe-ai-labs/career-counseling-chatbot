@@ -42,7 +42,7 @@ type SeedItem = {
 
 const instrument = {
   code: "wip",
-  name: "YuvaNext Work Importance Profiler",
+  name: "YuvaPath Work Importance Profiler",
   construct: "work_values",
   version: "1.0",
   language: "en",
@@ -50,7 +50,7 @@ const instrument = {
   ageMax: 99,
   batchSize: 10,
   scoringAlgorithmVersion: "wip-deterministic-v1",
-  contentLicenseRef: "yuvanext-mock-content-v1",
+  contentLicenseRef: "yuvapath-mock-content-v1",
   reviewStatus: "mock",
 } as const;
 

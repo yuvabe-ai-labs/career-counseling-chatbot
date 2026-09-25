@@ -56,57 +56,57 @@ describe("ExplorePathPage — cards follow the user's segment", () => {
   });
 
   it("explorer sees three options, not the full set", () => {
-    renderFor({ segment: "explorer", wantsAid: false, currentGoal: undefined });
+    renderFor({ segment: "explorer", seeksAid: false, currentGoal: undefined });
     expect(visibleCards()).toEqual(["Career map", "Streams", "Plan"]);
   });
 
   it("pathfinder asking for aid sees all six", () => {
-    renderFor({ segment: "pathfinder", wantsAid: true, currentGoal: undefined });
+    renderFor({ segment: "pathfinder", seeksAid: true, currentGoal: undefined });
     expect(visibleCards()).toEqual([...ALL_CARDS]);
   });
 
   it("pathfinder not asking for aid drops only Scholarships", () => {
-    renderFor({ segment: "pathfinder", wantsAid: false, currentGoal: undefined });
+    renderFor({ segment: "pathfinder", seeksAid: false, currentGoal: undefined });
     expect(visibleCards()).toEqual(["Career map", "Streams", "Pathway", "Colleges", "Plan"]);
   });
 
   it("launcher building skills gets Colleges but not Streams/Pathway", () => {
-    renderFor({ segment: "launcher", wantsAid: false, currentGoal: "skill_building" });
+    renderFor({ segment: "launcher", seeksAid: false, currentGoal: "skill_building" });
     expect(visibleCards()).toEqual(["Career map", "Colleges", "Plan"]);
   });
 
   it("launcher heading to higher studies gets Colleges but not Streams/Pathway", () => {
-    renderFor({ segment: "launcher", wantsAid: false, currentGoal: "higher_studies" });
+    renderFor({ segment: "launcher", seeksAid: false, currentGoal: "higher_studies" });
     expect(visibleCards()).toEqual(["Career map", "Colleges", "Plan"]);
   });
 
   it("launcher with an open goal (not_sure) matches higher_studies/skill_building exactly", () => {
-    renderFor({ segment: "launcher", wantsAid: false, currentGoal: "not_sure" });
+    renderFor({ segment: "launcher", seeksAid: false, currentGoal: "not_sure" });
     expect(visibleCards()).toEqual(["Career map", "Colleges", "Plan"]);
   });
 
   it("launcher not enrolling anywhere (job/career_switch/business) gets only Career and Plan", () => {
-    renderFor({ segment: "launcher", wantsAid: false, currentGoal: "job" });
+    renderFor({ segment: "launcher", seeksAid: false, currentGoal: "job" });
     expect(visibleCards()).toEqual(["Career map", "Plan"]);
   });
 
-  it("keeps Career/Streams/Colleges navigable; Pathway and Plan (temporarily) and Scholarships & Aid (not yet built) are non-navigable", () => {
-    renderFor({ segment: "pathfinder", wantsAid: true, currentGoal: undefined });
+  it("keeps Career/Streams/Pathway/Colleges navigable and Scholarships & Aid (now built) navigable; Plan is (temporarily) non-navigable", () => {
+    renderFor({ segment: "pathfinder", seeksAid: true, currentGoal: undefined });
 
     expect(screen.getByText("Career map").closest("button")).toBeEnabled();
     expect(screen.getByText("Streams").closest("button")).toBeEnabled();
-    expect(screen.getByText("Pathway").closest("button")).toBeDisabled();
+    expect(screen.getByText("Pathway").closest("button")).toBeEnabled();
     expect(screen.getByText("Colleges").closest("button")).toBeEnabled();
     expect(screen.getByText("Plan").closest("button")).toBeDisabled();
-    expect(screen.getByText("Scholarships & Aid").closest("button")).toBeDisabled();
+    expect(screen.getByText("Scholarships & Aid").closest("button")).toBeEnabled();
   });
 
-  it("offers a real route back to the results screen it was opened from", () => {
-    renderFor({ segment: "explorer", wantsAid: false, currentGoal: undefined });
+  it("offers a real route back to the results screen's Report Card segment specifically, not its Score default", () => {
+    renderFor({ segment: "explorer", seeksAid: false, currentGoal: undefined });
 
     expect(screen.getByRole("link", { name: /report card/i })).toHaveAttribute(
       "href",
-      "/riasec-results",
+      "/riasec-results?tab=reportCard",
     );
   });
 });

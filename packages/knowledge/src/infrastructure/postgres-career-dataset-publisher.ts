@@ -1,7 +1,7 @@
 import {
   withTransaction,
   type createDatabasePool,
-} from "@yuvanext/database";
+} from "@yuvapath/database";
 import type {
   CareerDatasetPublisher,
   PublishCareerDatasetInput,

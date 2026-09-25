@@ -2,9 +2,10 @@ import { describe, expect, it } from "vitest";
 import request from "supertest";
 import {
   CareerRecommendationSetResponseSchema,
+  CollegeRecommendationSetResponseSchema,
   RecommendationSetSchema,
-} from "@yuvanext/contracts";
-import { createInMemoryRecommendationStore } from "@yuvanext/recommendations";
+} from "@yuvapath/contracts";
+import { createInMemoryRecommendationStore } from "@yuvapath/recommendations";
 import { z } from "zod";
 import { createApp } from "../src/app/create-app.js";
 
@@ -181,6 +182,109 @@ describe("recommendation routes", () => {
     expect(JSON.parse(response.text)).toMatchObject({
       code: "invalid_recommendation_id",
     });
+  });
+
+  it("ranks colleges by location proximity to an explicit homeDistrict override, independent of any stored profile", async () => {
+    const disciplineId = "00000000-0000-4000-8000-000000006401";
+    const colleges = [
+      {
+        collegeId: "00000000-0000-4000-8000-000000006402",
+        title: "Chennai College",
+        state: "Tamil Nadu",
+        district: "Chennai",
+        instituteKind: "Arts & Science College",
+        ownership: "government",
+        tier: 1,
+        programs: [{ disciplineId, programType: "B.Sc", admissionRoute: "Direct application to the college" }],
+        datasetVersion: "colleges-2026-a",
+        verified: true,
+      },
+      {
+        collegeId: "00000000-0000-4000-8000-000000006403",
+        title: "Coimbatore College",
+        state: "Tamil Nadu",
+        district: "Coimbatore",
+        instituteKind: "Arts & Science College",
+        ownership: "government",
+        tier: 1,
+        programs: [{ disciplineId, programType: "B.Sc", admissionRoute: "Direct application to the college" }],
+        datasetVersion: "colleges-2026-a",
+        verified: true,
+      },
+    ];
+
+    const response = await request(createTestApp())
+      .post("/api/v1/recommendations/colleges")
+      .send({
+        recommendationId: "00000000-0000-4000-8000-000000006404",
+        profile, // no homeDistrict on the shared fixture profile — the override below must still win.
+        config,
+        createdAt,
+        colleges,
+        targetDisciplineIds: [disciplineId],
+        homeDistrict: "Coimbatore",
+      });
+
+    expect(response.status).toBe(200);
+    const body = CollegeRecommendationSetResponseSchema.parse(JSON.parse(response.text) as unknown);
+    expect(body.items[0]?.title).toBe("Coimbatore College");
+    expect(body.items[0]?.fitScore).toBe(1);
+    expect(body.items[0]?.explanation).toMatchObject({ locationProximityTier: "same_district" });
+    // The far-away college still appears — ranking, not filtering.
+    expect(body.items.map((item) => item.title)).toContain("Chennai College");
+  });
+
+  it("composes homeDistrict (ranking) with district (hard filter) as independent mechanisms", async () => {
+    const disciplineId = "00000000-0000-4000-8000-000000006501";
+    const colleges = [
+      {
+        collegeId: "00000000-0000-4000-8000-000000006502",
+        title: "Chennai College",
+        state: "Tamil Nadu",
+        district: "Chennai",
+        instituteKind: "Arts & Science College",
+        ownership: "government",
+        tier: 1,
+        programs: [{ disciplineId, programType: "B.Sc", admissionRoute: "Direct application to the college" }],
+        datasetVersion: "colleges-2026-a",
+        verified: true,
+      },
+      {
+        collegeId: "00000000-0000-4000-8000-000000006503",
+        title: "Coimbatore College",
+        state: "Tamil Nadu",
+        district: "Coimbatore",
+        instituteKind: "Arts & Science College",
+        ownership: "government",
+        tier: 1,
+        programs: [{ disciplineId, programType: "B.Sc", admissionRoute: "Direct application to the college" }],
+        datasetVersion: "colleges-2026-a",
+        verified: true,
+      },
+    ];
+
+    // Hard-filtered to Chennai only, while "ranking near Coimbatore" — the filter still excludes
+    // Coimbatore College entirely; homeDistrict has nothing left to reorder among.
+    const response = await request(createTestApp())
+      .post("/api/v1/recommendations/colleges")
+      .send({
+        recommendationId: "00000000-0000-4000-8000-000000006504",
+        profile,
+        config,
+        createdAt,
+        colleges,
+        targetDisciplineIds: [disciplineId],
+        district: "Chennai",
+        homeDistrict: "Coimbatore",
+      });
+
+    expect(response.status).toBe(200);
+    const body = CollegeRecommendationSetResponseSchema.parse(JSON.parse(response.text) as unknown);
+    expect(body.items.map((item) => item.title)).toEqual(["Chennai College"]);
+    // Still ranked correctly against the homeDistrict override (rest_of_tamil_nadu relative to
+    // Coimbatore), confirming the ranking signal was applied, not ignored, even though it had no
+    // same-district match left to promote.
+    expect(body.items[0]?.explanation).toMatchObject({ locationProximityTier: "rest_of_tamil_nadu" });
   });
 
   it("publishes OpenAPI paths for MVP recommendation endpoints", async () => {

@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { createDatabasePool } from "@yuvanext/database";
+import { createDatabasePool } from "@yuvapath/database";
 const connectionString = process.env.DATABASE_URL;
 
 if (!connectionString) {

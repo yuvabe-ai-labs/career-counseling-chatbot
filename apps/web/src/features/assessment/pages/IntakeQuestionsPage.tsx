@@ -7,6 +7,11 @@ import { LoadingState } from "@/components/LoadingState";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { getErrorMessage } from "@/lib/error-messages";
+import {
+  clearStoredProfileSnapshotId,
+  getStoredExploreGatingContext,
+  getStoredProfileSnapshotId,
+} from "@/lib/storage";
 import { cn } from "@/lib/utils";
 import { IntakeQuestionField } from "../components/IntakeQuestionField";
 import { useIntakeQuestions, useUpsertIntakeAnswer } from "../hooks/useIntake";
@@ -175,6 +180,17 @@ export function IntakeQuestionsPage() {
         // Sequential, not Promise.all: (userId, sessionId, questionId) upserts share no
         // ordering guarantee server-side worth risking, and this is a handful of answers.
         await upsertAnswer.mutateAsync({ questionId: question.id, answer: { value } });
+      }
+      // A stored profile snapshot (and its gating context) predates this answer, so it can't
+      // reflect a changed `seeks_aid` — drop the snapshot id so the next visit to results/Explore
+      // Path builds a fresh one (ensureProfileSnapshot only creates one when none is stored).
+      const seeksAidQuestion = questions.find((question) => question.questionKey === "seeks_aid");
+      const seeksAidAnswer = seeksAidQuestion ? answers[seeksAidQuestion.id] : undefined;
+      if (seeksAidQuestion && getStoredProfileSnapshotId()) {
+        const answeredYes = seeksAidAnswer === "yes";
+        if ((getStoredExploreGatingContext()?.seeksAid ?? false) !== answeredYes) {
+          clearStoredProfileSnapshotId();
+        }
       }
       setSubmitted(true);
       void navigate("/riasec-assessment");

@@ -1,4 +1,4 @@
-import type { AgeBand, EducationStage, Segment } from "@yuvanext/contracts";
+import type { AgeBand, EducationStage, Segment } from "@yuvapath/contracts";
 import { invalidDateOfBirth } from "../application/errors.js";
 
 export const calculateAgeAtOnboarding = (dateOfBirth: string, now: Date): number => {
@@ -50,7 +50,6 @@ export const deriveSegment = (input: { age: number; selfStage: EducationStage })
       return "pathfinder";
     case "college":
     case "graduate":
-    case "working":
       return "launcher";
   }
 };

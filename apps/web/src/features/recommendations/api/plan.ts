@@ -1,4 +1,4 @@
-import { PlanRecommendationSetResponseSchema } from "@yuvanext/contracts";
+import { PlanRecommendationSetResponseSchema } from "@yuvapath/contracts";
 import { apiRequest } from "@/lib/api-client";
 
 /**

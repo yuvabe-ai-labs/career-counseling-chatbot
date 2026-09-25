@@ -33,7 +33,6 @@ type ProfileSnapshot = {
   city: string;
   stateCode: string;
   selfStage: string;
-  wantsAid: boolean;
   intakeSummary: Record<string, unknown>;
   riasec?: {
     rawScores: Record<"R" | "I" | "A" | "S" | "E" | "C", number>;
@@ -101,7 +100,6 @@ Application profile keyed to Supabase Auth. It contains no duplicate student pho
 | `country_code`      | `char(2)`     | Default `IN`                                                                |
 | `segment`           | `text`        | `explorer`, `pathfinder`, `launcher`                                        |
 | `self_stage`        | `text`        | Approved education-stage code                                               |
-| `wants_aid`         | `boolean`     | Default false                                                               |
 | `profile_status`    | `text`        | `active`, `deletion_pending`, `deleted`                                     |
 | `created_at`        | `timestamptz` | Required                                                                    |
 | `updated_at`        | `timestamptz` | Required                                                                    |
@@ -376,7 +374,6 @@ Immutable handoff object aggregating the student's completed intake/results at a
 | `city`                    | `text`        | Required                                                   |
 | `state`                   | `text`        | Required full-text state/UT value captured in the snapshot |
 | `self_stage`              | `text`        | Required                                                   |
-| `wants_aid`               | `boolean`     | Required                                                   |
 | `intake_summary_json`     | `jsonb`       | Versioned DTO                                              |
 | `result_summary_json`     | `jsonb`       | Versioned DTO                                              |
 | `algorithm_version`       | `text`        | Required                                                   |

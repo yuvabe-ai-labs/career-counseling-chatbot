@@ -49,7 +49,7 @@ export const SelectField = React.forwardRef<HTMLSelectElement, SelectFieldProps>
           disabled={disabled}
           onChange={(event) => onValueChange(event.target.value)}
           className={cn(
-            "h-12 w-full cursor-pointer appearance-none rounded-[8px] border border-input bg-transparent py-2 pr-11 text-sm outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+            "h-12 w-full cursor-pointer appearance-none rounded-[8px] border border-input bg-transparent py-2 pr-11 text-sm outline-none transition-[border-color,box-shadow] duration-150 hover:border-brand/40 focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
             icon ? "pl-[46px]" : "pl-4",
             !value && "text-muted-foreground",
           )}

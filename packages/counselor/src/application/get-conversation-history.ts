@@ -2,7 +2,7 @@ import {
   ConversationHistoryResponseSchema,
   UuidSchema,
   type ConversationHistoryResponse,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { CounselorAccessError } from "./errors.js";
 import type { CounselorRepository } from "./ports/index.js";
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { JourneySession } from "@yuvanext/contracts";
+import type { JourneySession } from "@yuvapath/contracts";
 import { JourneySessionService } from "./journey-session-service.js";
 import type { JourneySessionRepository, NewJourneySession } from "./journey-session-repository.js";
 

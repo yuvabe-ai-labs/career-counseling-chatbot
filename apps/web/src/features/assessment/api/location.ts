@@ -1,9 +1,9 @@
-import { CityListResponseSchema, StateListResponseSchema } from "@yuvanext/contracts";
+import { CityListResponseSchema, StateListResponseSchema } from "@yuvapath/contracts";
 import { apiRequest } from "@/lib/api-client";
 
 /**
  * GET /api/v1/catalog/states — searches `reference.states` (Supabase). Public
- * catalog data, no x-yuvanext-user-id needed, same as the other /catalog/* routes.
+ * catalog data, no x-yuvapath-user-id needed, same as the other /catalog/* routes.
  */
 export function searchStates(query: string) {
   return apiRequest("/api/v1/catalog/states", StateListResponseSchema, {

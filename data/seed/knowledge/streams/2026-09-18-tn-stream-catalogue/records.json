@@ -1,0 +1,980 @@
+{
+  "educationRoutes": [],
+  "pathways": [],
+  "careerPathways": [],
+  "streamOptions": [
+    {
+      "id": "20dd73ed-70cd-4e63-b559-5937372ac981",
+      "streamCode": "school-science-pcm",
+      "title": "Science with Mathematics (PCM)",
+      "description": "Physics, Chemistry and Mathematics after Class 10 — the standard foundation for engineering, architecture and other quantitative degrees.",
+      "status": "active"
+    },
+    {
+      "id": "afb994ba-9372-4479-bf70-1d1b922e58bb",
+      "streamCode": "school-science-pcb",
+      "title": "Science with Biology (PCB)",
+      "description": "Physics, Chemistry and Biology after Class 10 — the standard foundation for medicine, nursing, pharmacy and other life-science degrees.",
+      "status": "active"
+    },
+    {
+      "id": "0d239200-1f9c-45da-934a-9d0ff507bdad",
+      "streamCode": "school-science-cs",
+      "title": "Science with Computer Science",
+      "description": "Physics, Chemistry, Mathematics plus Computer Science after Class 10 — for students aiming at a computing-heavy engineering or computer-applications degree.",
+      "status": "active"
+    },
+    {
+      "id": "c31a2c7b-249f-4215-b01d-637870920de8",
+      "streamCode": "school-commerce",
+      "title": "Commerce",
+      "description": "Accountancy, Commerce and Economics after Class 10 — the standard route into B.Com, BBA and other business degrees.",
+      "status": "active"
+    },
+    {
+      "id": "8c801997-b683-481c-abd0-34521355ada3",
+      "streamCode": "school-commerce-maths",
+      "title": "Commerce with Mathematics",
+      "description": "Commerce and Economics alongside Mathematics after Class 10 — keeps quantitative options such as BBA, analytics and actuarial science open alongside commerce degrees.",
+      "status": "active"
+    },
+    {
+      "id": "d5ec426f-d646-443b-9ac2-e3ff8cb0018d",
+      "streamCode": "school-humanities",
+      "title": "Humanities / Arts",
+      "description": "History, Political Science, Economics and language subjects after Class 10 — the standard route into BA, law and civil-services-oriented degrees.",
+      "status": "active"
+    },
+    {
+      "id": "f1f6dc86-72b0-4820-b0fc-cf45d4b343a4",
+      "streamCode": "school-fine-arts",
+      "title": "Fine Arts & Visual Arts",
+      "description": "Drawing, painting and applied-art subjects offered after Class 10 in schools with a fine-arts stream — a foundation for design and visual-arts degrees.",
+      "status": "active"
+    },
+    {
+      "id": "8378772d-89f1-4f84-b9e2-af5f9adfae53",
+      "streamCode": "vocational-it",
+      "title": "Vocational: Information Technology",
+      "description": "NSQF-aligned vocational Information Technology subject after Class 10 — applied computing and entry-level IT skills alongside regular academics.",
+      "status": "active"
+    },
+    {
+      "id": "bb545975-ed9b-43b5-a867-792347c6f920",
+      "streamCode": "vocational-healthcare",
+      "title": "Vocational: Healthcare",
+      "description": "NSQF-aligned vocational Healthcare subject after Class 10 — foundational patient-care and health-support skills.",
+      "status": "active"
+    },
+    {
+      "id": "4f51248f-c700-4ba6-bce4-2a204e81369a",
+      "streamCode": "vocational-electrical",
+      "title": "Vocational: Electrical & Electronics",
+      "description": "NSQF-aligned vocational Electrical & Electronics Technology subject after Class 10 — applied wiring, installation and maintenance skills.",
+      "status": "active"
+    },
+    {
+      "id": "bb7ad97d-7fd2-4b47-852e-91177173718e",
+      "streamCode": "vocational-agriculture",
+      "title": "Vocational: Agriculture",
+      "description": "NSQF-aligned vocational Agriculture subject after Class 10 — practical crop, soil and farm-management skills.",
+      "status": "active"
+    },
+    {
+      "id": "37581117-9bcb-4e26-8628-3d6150a3403a",
+      "streamCode": "school-physical-education",
+      "title": "Physical Education & Sports",
+      "description": "Physical Education as a main subject after Class 10 — for students aiming at sports science, coaching or physical-education degrees.",
+      "status": "active"
+    },
+    {
+      "id": "22472a48-86f0-45d7-aebf-021f42eeea6c",
+      "streamCode": "engineering-technology",
+      "title": "Engineering & Technology (B.E./B.Tech)",
+      "description": "Undergraduate engineering degrees — Computer Science, Mechanical, Civil, Electrical, Electronics and allied branches — usually entered through TNEA counselling after PCM in Class 12.",
+      "status": "active"
+    },
+    {
+      "id": "2a645a13-3c55-4ee6-ae85-0dcd7726d499",
+      "streamCode": "computer-applications-it",
+      "title": "Computer Applications & IT (BCA/B.Sc)",
+      "description": "Undergraduate computing degrees such as BCA and B.Sc Computer Science/IT, focused on software development and applications rather than core engineering.",
+      "status": "active"
+    },
+    {
+      "id": "43b81932-329f-4b85-92e7-c8fe1f8629d3",
+      "streamCode": "medicine-allied-health",
+      "title": "Medicine & Allied Health Sciences",
+      "description": "MBBS, BDS, Nursing, Pharmacy, Physiotherapy and other health-science degrees, usually entered through NEET after PCB in Class 12.",
+      "status": "active"
+    },
+    {
+      "id": "b3909c0b-f5c2-4297-ac58-2e99937c901d",
+      "streamCode": "pure-applied-sciences",
+      "title": "Pure & Applied Sciences (B.Sc)",
+      "description": "B.Sc degrees in Physics, Chemistry, Mathematics, Botany, Zoology and related subjects — a foundation for research, teaching or further specialisation.",
+      "status": "active"
+    },
+    {
+      "id": "fcdbab4b-ce09-4521-b684-f99d4eeaec47",
+      "streamCode": "agriculture-allied-sciences",
+      "title": "Agriculture & Allied Sciences",
+      "description": "B.Sc Agriculture, Horticulture, Forestry and Fisheries Science degrees, usually entered through TNAU/TNJFU counselling.",
+      "status": "active"
+    },
+    {
+      "id": "1da28d9a-90e5-4f2f-a938-60d2f574427e",
+      "streamCode": "commerce-accounting",
+      "title": "Commerce & Accounting (B.Com)",
+      "description": "B.Com and related accounting/finance degrees, usually entered after the Commerce stream in Class 12.",
+      "status": "active"
+    },
+    {
+      "id": "455f819e-956b-454f-9d41-e11fabfd2e73",
+      "streamCode": "business-administration",
+      "title": "Business Administration & Management (BBA)",
+      "description": "BBA and other management-focused undergraduate degrees, building toward business, operations and management roles.",
+      "status": "active"
+    },
+    {
+      "id": "46529113-2d94-4825-9d4e-87713fedeaf2",
+      "streamCode": "law",
+      "title": "Law (BA LLB / BBA LLB)",
+      "description": "Integrated 5-year law degrees taken directly after Class 12, usually entered through CLAT or a college's own law entrance test.",
+      "status": "active"
+    },
+    {
+      "id": "3bc43aef-f570-4f89-8436-4bb51b9264ba",
+      "streamCode": "arts-humanities-social-sciences",
+      "title": "Arts, Humanities & Social Sciences (BA)",
+      "description": "BA degrees in History, Economics, Political Science, Literature and other humanities and social-science subjects.",
+      "status": "active"
+    },
+    {
+      "id": "8991af90-a4f3-47a8-9cfc-443d6cafdfaa",
+      "streamCode": "design-creative-arts",
+      "title": "Design & Creative Arts",
+      "description": "Visual Communication, Fashion Design, Fine Arts and other creative-arts undergraduate degrees.",
+      "status": "active"
+    },
+    {
+      "id": "209401af-9a2b-4556-9f8e-b24f9d5a533b",
+      "streamCode": "education-teacher-training",
+      "title": "Education & Teacher Training",
+      "description": "Elementary Education and other teacher-training undergraduate routes, building toward a teaching career.",
+      "status": "active"
+    },
+    {
+      "id": "447cc886-ed5a-4e40-99bf-32a84e59dbf8",
+      "streamCode": "hotel-management-hospitality",
+      "title": "Hotel Management & Hospitality",
+      "description": "Hotel Management and Catering Technology degrees, building toward hospitality, tourism and guest-service careers.",
+      "status": "active"
+    },
+    {
+      "id": "cba388ad-12b8-4773-874b-0efc13badb9b",
+      "streamCode": "architecture-planning",
+      "title": "Architecture & Planning (B.Arch)",
+      "description": "The 5-year B.Arch degree, usually entered through NATA after PCM in Class 12.",
+      "status": "active"
+    },
+    {
+      "id": "0e11852f-bbaa-4883-b85e-a40de7064d50",
+      "streamCode": "veterinary-animal-sciences",
+      "title": "Veterinary & Animal Sciences",
+      "description": "B.V.Sc & AH and related animal-science degrees, usually entered through ICAR/state counselling after PCB in Class 12.",
+      "status": "active"
+    },
+    {
+      "id": "2e8e6ccc-edca-4777-9255-9d7fc9ec3204",
+      "streamCode": "physical-education-sports-sciences",
+      "title": "Physical Education & Sports Sciences",
+      "description": "B.P.Ed and related sports-science undergraduate degrees.",
+      "status": "active"
+    }
+  ],
+  "streamMaps": [
+    {
+      "id": "c984f427-8acb-462d-bc98-d8361bb962b4",
+      "topTwoCode": "RI",
+      "segment": "explorer",
+      "version": "2026-09-18-explorer",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "540d8aea-6063-49b2-a7e0-4e401f50fab8",
+      "topTwoCode": "RA",
+      "segment": "explorer",
+      "version": "2026-09-18-explorer",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "17de7953-c92a-40a5-9ee2-822e9fe29bbb",
+      "topTwoCode": "RS",
+      "segment": "explorer",
+      "version": "2026-09-18-explorer",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "413aad15-eb2c-4f85-90e6-3def2cdec0d4",
+      "topTwoCode": "RE",
+      "segment": "explorer",
+      "version": "2026-09-18-explorer",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "f885ce34-3447-4a8e-8b1d-2e9048f9d331",
+      "topTwoCode": "RC",
+      "segment": "explorer",
+      "version": "2026-09-18-explorer",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "6802caab-0d61-4c4a-927f-178cf73c1b74",
+      "topTwoCode": "IA",
+      "segment": "explorer",
+      "version": "2026-09-18-explorer",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "5d40f92b-cca0-4389-9de5-f53b19a2e6d8",
+      "topTwoCode": "IS",
+      "segment": "explorer",
+      "version": "2026-09-18-explorer",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "9b32bb44-a638-4216-af59-e1670bb6b76c",
+      "topTwoCode": "IE",
+      "segment": "explorer",
+      "version": "2026-09-18-explorer",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "22487bab-b8a4-4f3c-81d8-9814c85e42e4",
+      "topTwoCode": "IC",
+      "segment": "explorer",
+      "version": "2026-09-18-explorer",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "1446a724-eac8-4d4d-8619-8c8ba5a6917e",
+      "topTwoCode": "AS",
+      "segment": "explorer",
+      "version": "2026-09-18-explorer",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "f1314bd7-1e21-423b-ac2d-981ea96ca1e0",
+      "topTwoCode": "AE",
+      "segment": "explorer",
+      "version": "2026-09-18-explorer",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "541fe013-2bfe-402d-9c81-289400eee0d4",
+      "topTwoCode": "AC",
+      "segment": "explorer",
+      "version": "2026-09-18-explorer",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "61f8b2e5-6d53-49f5-ae07-f63dede5c3b5",
+      "topTwoCode": "SE",
+      "segment": "explorer",
+      "version": "2026-09-18-explorer",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "5c9fc2e0-ba8b-409d-bb62-62ae7c1b0c93",
+      "topTwoCode": "SC",
+      "segment": "explorer",
+      "version": "2026-09-18-explorer",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "593f7967-9e4b-473e-a1f7-1faf9238f17e",
+      "topTwoCode": "EC",
+      "segment": "explorer",
+      "version": "2026-09-18-explorer",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "7030e90d-43a5-44ea-8e9d-824d49d99bc9",
+      "topTwoCode": "RI",
+      "segment": null,
+      "version": "2026-09-18-general",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "798980c0-f3d1-4db2-ba65-ccb656f240cd",
+      "topTwoCode": "RA",
+      "segment": null,
+      "version": "2026-09-18-general",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "8bd3a541-754d-4856-b8c4-e05a8ef91118",
+      "topTwoCode": "RS",
+      "segment": null,
+      "version": "2026-09-18-general",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "f41cc42b-253e-47cb-a82d-04f7aef2af65",
+      "topTwoCode": "RE",
+      "segment": null,
+      "version": "2026-09-18-general",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "55e8d656-8834-4ad1-bb5f-4ec27b441c9d",
+      "topTwoCode": "RC",
+      "segment": null,
+      "version": "2026-09-18-general",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "09e0d604-7b72-471b-9c57-ebeaaf01189f",
+      "topTwoCode": "IA",
+      "segment": null,
+      "version": "2026-09-18-general",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "e63e4271-3784-4201-96f6-56c74d32dc12",
+      "topTwoCode": "IS",
+      "segment": null,
+      "version": "2026-09-18-general",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "158dd746-88e4-438c-b5c8-45c1974348e2",
+      "topTwoCode": "IE",
+      "segment": null,
+      "version": "2026-09-18-general",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "703981be-3376-4805-bba5-54e1f3c88a50",
+      "topTwoCode": "IC",
+      "segment": null,
+      "version": "2026-09-18-general",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "2b71f8e5-dfaf-47bf-b8ac-c67c3b815905",
+      "topTwoCode": "AS",
+      "segment": null,
+      "version": "2026-09-18-general",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "8b119010-243c-4d37-a68c-1a102d6a64c6",
+      "topTwoCode": "AE",
+      "segment": null,
+      "version": "2026-09-18-general",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "8c80920f-0e16-4cc1-90d1-648f99c62b84",
+      "topTwoCode": "AC",
+      "segment": null,
+      "version": "2026-09-18-general",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "8e016985-8c73-4dc0-9c00-7ba70f300261",
+      "topTwoCode": "SE",
+      "segment": null,
+      "version": "2026-09-18-general",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "37731455-922b-4271-96ba-d3f30a03a217",
+      "topTwoCode": "SC",
+      "segment": null,
+      "version": "2026-09-18-general",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    },
+    {
+      "id": "402a5e8b-2496-4fb7-a2f5-24b3178e8bf6",
+      "topTwoCode": "EC",
+      "segment": null,
+      "version": "2026-09-18-general",
+      "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+      "status": "published"
+    }
+  ],
+  "streamMapItems": [
+    {
+      "mapId": "c984f427-8acb-462d-bc98-d8361bb962b4",
+      "streamOptionId": "20dd73ed-70cd-4e63-b559-5937372ac981",
+      "rank": 1,
+      "reasonKey": "post10_ri_1"
+    },
+    {
+      "mapId": "c984f427-8acb-462d-bc98-d8361bb962b4",
+      "streamOptionId": "4f51248f-c700-4ba6-bce4-2a204e81369a",
+      "rank": 2,
+      "reasonKey": "post10_ri_2"
+    },
+    {
+      "mapId": "c984f427-8acb-462d-bc98-d8361bb962b4",
+      "streamOptionId": "bb7ad97d-7fd2-4b47-852e-91177173718e",
+      "rank": 3,
+      "reasonKey": "post10_ri_3"
+    },
+    {
+      "mapId": "540d8aea-6063-49b2-a7e0-4e401f50fab8",
+      "streamOptionId": "4f51248f-c700-4ba6-bce4-2a204e81369a",
+      "rank": 1,
+      "reasonKey": "post10_ra_1"
+    },
+    {
+      "mapId": "540d8aea-6063-49b2-a7e0-4e401f50fab8",
+      "streamOptionId": "f1f6dc86-72b0-4820-b0fc-cf45d4b343a4",
+      "rank": 2,
+      "reasonKey": "post10_ra_2"
+    },
+    {
+      "mapId": "540d8aea-6063-49b2-a7e0-4e401f50fab8",
+      "streamOptionId": "20dd73ed-70cd-4e63-b559-5937372ac981",
+      "rank": 3,
+      "reasonKey": "post10_ra_3"
+    },
+    {
+      "mapId": "17de7953-c92a-40a5-9ee2-822e9fe29bbb",
+      "streamOptionId": "bb545975-ed9b-43b5-a867-792347c6f920",
+      "rank": 1,
+      "reasonKey": "post10_rs_1"
+    },
+    {
+      "mapId": "17de7953-c92a-40a5-9ee2-822e9fe29bbb",
+      "streamOptionId": "37581117-9bcb-4e26-8628-3d6150a3403a",
+      "rank": 2,
+      "reasonKey": "post10_rs_2"
+    },
+    {
+      "mapId": "17de7953-c92a-40a5-9ee2-822e9fe29bbb",
+      "streamOptionId": "bb7ad97d-7fd2-4b47-852e-91177173718e",
+      "rank": 3,
+      "reasonKey": "post10_rs_3"
+    },
+    {
+      "mapId": "413aad15-eb2c-4f85-90e6-3def2cdec0d4",
+      "streamOptionId": "bb7ad97d-7fd2-4b47-852e-91177173718e",
+      "rank": 1,
+      "reasonKey": "post10_re_1"
+    },
+    {
+      "mapId": "413aad15-eb2c-4f85-90e6-3def2cdec0d4",
+      "streamOptionId": "4f51248f-c700-4ba6-bce4-2a204e81369a",
+      "rank": 2,
+      "reasonKey": "post10_re_2"
+    },
+    {
+      "mapId": "413aad15-eb2c-4f85-90e6-3def2cdec0d4",
+      "streamOptionId": "c31a2c7b-249f-4215-b01d-637870920de8",
+      "rank": 3,
+      "reasonKey": "post10_re_3"
+    },
+    {
+      "mapId": "f885ce34-3447-4a8e-8b1d-2e9048f9d331",
+      "streamOptionId": "8378772d-89f1-4f84-b9e2-af5f9adfae53",
+      "rank": 1,
+      "reasonKey": "post10_rc_1"
+    },
+    {
+      "mapId": "f885ce34-3447-4a8e-8b1d-2e9048f9d331",
+      "streamOptionId": "0d239200-1f9c-45da-934a-9d0ff507bdad",
+      "rank": 2,
+      "reasonKey": "post10_rc_2"
+    },
+    {
+      "mapId": "f885ce34-3447-4a8e-8b1d-2e9048f9d331",
+      "streamOptionId": "4f51248f-c700-4ba6-bce4-2a204e81369a",
+      "rank": 3,
+      "reasonKey": "post10_rc_3"
+    },
+    {
+      "mapId": "6802caab-0d61-4c4a-927f-178cf73c1b74",
+      "streamOptionId": "f1f6dc86-72b0-4820-b0fc-cf45d4b343a4",
+      "rank": 1,
+      "reasonKey": "post10_ia_1"
+    },
+    {
+      "mapId": "6802caab-0d61-4c4a-927f-178cf73c1b74",
+      "streamOptionId": "d5ec426f-d646-443b-9ac2-e3ff8cb0018d",
+      "rank": 2,
+      "reasonKey": "post10_ia_2"
+    },
+    {
+      "mapId": "6802caab-0d61-4c4a-927f-178cf73c1b74",
+      "streamOptionId": "afb994ba-9372-4479-bf70-1d1b922e58bb",
+      "rank": 3,
+      "reasonKey": "post10_ia_3"
+    },
+    {
+      "mapId": "5d40f92b-cca0-4389-9de5-f53b19a2e6d8",
+      "streamOptionId": "afb994ba-9372-4479-bf70-1d1b922e58bb",
+      "rank": 1,
+      "reasonKey": "post10_is_1"
+    },
+    {
+      "mapId": "5d40f92b-cca0-4389-9de5-f53b19a2e6d8",
+      "streamOptionId": "bb545975-ed9b-43b5-a867-792347c6f920",
+      "rank": 2,
+      "reasonKey": "post10_is_2"
+    },
+    {
+      "mapId": "5d40f92b-cca0-4389-9de5-f53b19a2e6d8",
+      "streamOptionId": "d5ec426f-d646-443b-9ac2-e3ff8cb0018d",
+      "rank": 3,
+      "reasonKey": "post10_is_3"
+    },
+    {
+      "mapId": "9b32bb44-a638-4216-af59-e1670bb6b76c",
+      "streamOptionId": "8c801997-b683-481c-abd0-34521355ada3",
+      "rank": 1,
+      "reasonKey": "post10_ie_1"
+    },
+    {
+      "mapId": "9b32bb44-a638-4216-af59-e1670bb6b76c",
+      "streamOptionId": "0d239200-1f9c-45da-934a-9d0ff507bdad",
+      "rank": 2,
+      "reasonKey": "post10_ie_2"
+    },
+    {
+      "mapId": "9b32bb44-a638-4216-af59-e1670bb6b76c",
+      "streamOptionId": "c31a2c7b-249f-4215-b01d-637870920de8",
+      "rank": 3,
+      "reasonKey": "post10_ie_3"
+    },
+    {
+      "mapId": "22487bab-b8a4-4f3c-81d8-9814c85e42e4",
+      "streamOptionId": "0d239200-1f9c-45da-934a-9d0ff507bdad",
+      "rank": 1,
+      "reasonKey": "post10_ic_1"
+    },
+    {
+      "mapId": "22487bab-b8a4-4f3c-81d8-9814c85e42e4",
+      "streamOptionId": "8c801997-b683-481c-abd0-34521355ada3",
+      "rank": 2,
+      "reasonKey": "post10_ic_2"
+    },
+    {
+      "mapId": "22487bab-b8a4-4f3c-81d8-9814c85e42e4",
+      "streamOptionId": "20dd73ed-70cd-4e63-b559-5937372ac981",
+      "rank": 3,
+      "reasonKey": "post10_ic_3"
+    },
+    {
+      "mapId": "1446a724-eac8-4d4d-8619-8c8ba5a6917e",
+      "streamOptionId": "d5ec426f-d646-443b-9ac2-e3ff8cb0018d",
+      "rank": 1,
+      "reasonKey": "post10_as_1"
+    },
+    {
+      "mapId": "1446a724-eac8-4d4d-8619-8c8ba5a6917e",
+      "streamOptionId": "f1f6dc86-72b0-4820-b0fc-cf45d4b343a4",
+      "rank": 2,
+      "reasonKey": "post10_as_2"
+    },
+    {
+      "mapId": "1446a724-eac8-4d4d-8619-8c8ba5a6917e",
+      "streamOptionId": "37581117-9bcb-4e26-8628-3d6150a3403a",
+      "rank": 3,
+      "reasonKey": "post10_as_3"
+    },
+    {
+      "mapId": "f1314bd7-1e21-423b-ac2d-981ea96ca1e0",
+      "streamOptionId": "f1f6dc86-72b0-4820-b0fc-cf45d4b343a4",
+      "rank": 1,
+      "reasonKey": "post10_ae_1"
+    },
+    {
+      "mapId": "f1314bd7-1e21-423b-ac2d-981ea96ca1e0",
+      "streamOptionId": "d5ec426f-d646-443b-9ac2-e3ff8cb0018d",
+      "rank": 2,
+      "reasonKey": "post10_ae_2"
+    },
+    {
+      "mapId": "f1314bd7-1e21-423b-ac2d-981ea96ca1e0",
+      "streamOptionId": "c31a2c7b-249f-4215-b01d-637870920de8",
+      "rank": 3,
+      "reasonKey": "post10_ae_3"
+    },
+    {
+      "mapId": "541fe013-2bfe-402d-9c81-289400eee0d4",
+      "streamOptionId": "f1f6dc86-72b0-4820-b0fc-cf45d4b343a4",
+      "rank": 1,
+      "reasonKey": "post10_ac_1"
+    },
+    {
+      "mapId": "541fe013-2bfe-402d-9c81-289400eee0d4",
+      "streamOptionId": "8c801997-b683-481c-abd0-34521355ada3",
+      "rank": 2,
+      "reasonKey": "post10_ac_2"
+    },
+    {
+      "mapId": "541fe013-2bfe-402d-9c81-289400eee0d4",
+      "streamOptionId": "d5ec426f-d646-443b-9ac2-e3ff8cb0018d",
+      "rank": 3,
+      "reasonKey": "post10_ac_3"
+    },
+    {
+      "mapId": "61f8b2e5-6d53-49f5-ae07-f63dede5c3b5",
+      "streamOptionId": "37581117-9bcb-4e26-8628-3d6150a3403a",
+      "rank": 1,
+      "reasonKey": "post10_se_1"
+    },
+    {
+      "mapId": "61f8b2e5-6d53-49f5-ae07-f63dede5c3b5",
+      "streamOptionId": "d5ec426f-d646-443b-9ac2-e3ff8cb0018d",
+      "rank": 2,
+      "reasonKey": "post10_se_2"
+    },
+    {
+      "mapId": "61f8b2e5-6d53-49f5-ae07-f63dede5c3b5",
+      "streamOptionId": "c31a2c7b-249f-4215-b01d-637870920de8",
+      "rank": 3,
+      "reasonKey": "post10_se_3"
+    },
+    {
+      "mapId": "5c9fc2e0-ba8b-409d-bb62-62ae7c1b0c93",
+      "streamOptionId": "d5ec426f-d646-443b-9ac2-e3ff8cb0018d",
+      "rank": 1,
+      "reasonKey": "post10_sc_1"
+    },
+    {
+      "mapId": "5c9fc2e0-ba8b-409d-bb62-62ae7c1b0c93",
+      "streamOptionId": "c31a2c7b-249f-4215-b01d-637870920de8",
+      "rank": 2,
+      "reasonKey": "post10_sc_2"
+    },
+    {
+      "mapId": "5c9fc2e0-ba8b-409d-bb62-62ae7c1b0c93",
+      "streamOptionId": "bb545975-ed9b-43b5-a867-792347c6f920",
+      "rank": 3,
+      "reasonKey": "post10_sc_3"
+    },
+    {
+      "mapId": "593f7967-9e4b-473e-a1f7-1faf9238f17e",
+      "streamOptionId": "c31a2c7b-249f-4215-b01d-637870920de8",
+      "rank": 1,
+      "reasonKey": "post10_ec_1"
+    },
+    {
+      "mapId": "593f7967-9e4b-473e-a1f7-1faf9238f17e",
+      "streamOptionId": "8c801997-b683-481c-abd0-34521355ada3",
+      "rank": 2,
+      "reasonKey": "post10_ec_2"
+    },
+    {
+      "mapId": "593f7967-9e4b-473e-a1f7-1faf9238f17e",
+      "streamOptionId": "8378772d-89f1-4f84-b9e2-af5f9adfae53",
+      "rank": 3,
+      "reasonKey": "post10_ec_3"
+    },
+    {
+      "mapId": "7030e90d-43a5-44ea-8e9d-824d49d99bc9",
+      "streamOptionId": "22472a48-86f0-45d7-aebf-021f42eeea6c",
+      "rank": 1,
+      "reasonKey": "post12_ri_1"
+    },
+    {
+      "mapId": "7030e90d-43a5-44ea-8e9d-824d49d99bc9",
+      "streamOptionId": "fcdbab4b-ce09-4521-b684-f99d4eeaec47",
+      "rank": 2,
+      "reasonKey": "post12_ri_2"
+    },
+    {
+      "mapId": "7030e90d-43a5-44ea-8e9d-824d49d99bc9",
+      "streamOptionId": "0e11852f-bbaa-4883-b85e-a40de7064d50",
+      "rank": 3,
+      "reasonKey": "post12_ri_3"
+    },
+    {
+      "mapId": "798980c0-f3d1-4db2-ba65-ccb656f240cd",
+      "streamOptionId": "cba388ad-12b8-4773-874b-0efc13badb9b",
+      "rank": 1,
+      "reasonKey": "post12_ra_1"
+    },
+    {
+      "mapId": "798980c0-f3d1-4db2-ba65-ccb656f240cd",
+      "streamOptionId": "22472a48-86f0-45d7-aebf-021f42eeea6c",
+      "rank": 2,
+      "reasonKey": "post12_ra_2"
+    },
+    {
+      "mapId": "798980c0-f3d1-4db2-ba65-ccb656f240cd",
+      "streamOptionId": "8991af90-a4f3-47a8-9cfc-443d6cafdfaa",
+      "rank": 3,
+      "reasonKey": "post12_ra_3"
+    },
+    {
+      "mapId": "8bd3a541-754d-4856-b8c4-e05a8ef91118",
+      "streamOptionId": "2e8e6ccc-edca-4777-9255-9d7fc9ec3204",
+      "rank": 1,
+      "reasonKey": "post12_rs_1"
+    },
+    {
+      "mapId": "8bd3a541-754d-4856-b8c4-e05a8ef91118",
+      "streamOptionId": "0e11852f-bbaa-4883-b85e-a40de7064d50",
+      "rank": 2,
+      "reasonKey": "post12_rs_2"
+    },
+    {
+      "mapId": "8bd3a541-754d-4856-b8c4-e05a8ef91118",
+      "streamOptionId": "fcdbab4b-ce09-4521-b684-f99d4eeaec47",
+      "rank": 3,
+      "reasonKey": "post12_rs_3"
+    },
+    {
+      "mapId": "f41cc42b-253e-47cb-a82d-04f7aef2af65",
+      "streamOptionId": "fcdbab4b-ce09-4521-b684-f99d4eeaec47",
+      "rank": 1,
+      "reasonKey": "post12_re_1"
+    },
+    {
+      "mapId": "f41cc42b-253e-47cb-a82d-04f7aef2af65",
+      "streamOptionId": "447cc886-ed5a-4e40-99bf-32a84e59dbf8",
+      "rank": 2,
+      "reasonKey": "post12_re_2"
+    },
+    {
+      "mapId": "f41cc42b-253e-47cb-a82d-04f7aef2af65",
+      "streamOptionId": "455f819e-956b-454f-9d41-e11fabfd2e73",
+      "rank": 3,
+      "reasonKey": "post12_re_3"
+    },
+    {
+      "mapId": "55e8d656-8834-4ad1-bb5f-4ec27b441c9d",
+      "streamOptionId": "22472a48-86f0-45d7-aebf-021f42eeea6c",
+      "rank": 1,
+      "reasonKey": "post12_rc_1"
+    },
+    {
+      "mapId": "55e8d656-8834-4ad1-bb5f-4ec27b441c9d",
+      "streamOptionId": "2a645a13-3c55-4ee6-ae85-0dcd7726d499",
+      "rank": 2,
+      "reasonKey": "post12_rc_2"
+    },
+    {
+      "mapId": "55e8d656-8834-4ad1-bb5f-4ec27b441c9d",
+      "streamOptionId": "fcdbab4b-ce09-4521-b684-f99d4eeaec47",
+      "rank": 3,
+      "reasonKey": "post12_rc_3"
+    },
+    {
+      "mapId": "09e0d604-7b72-471b-9c57-ebeaaf01189f",
+      "streamOptionId": "cba388ad-12b8-4773-874b-0efc13badb9b",
+      "rank": 1,
+      "reasonKey": "post12_ia_1"
+    },
+    {
+      "mapId": "09e0d604-7b72-471b-9c57-ebeaaf01189f",
+      "streamOptionId": "8991af90-a4f3-47a8-9cfc-443d6cafdfaa",
+      "rank": 2,
+      "reasonKey": "post12_ia_2"
+    },
+    {
+      "mapId": "09e0d604-7b72-471b-9c57-ebeaaf01189f",
+      "streamOptionId": "b3909c0b-f5c2-4297-ac58-2e99937c901d",
+      "rank": 3,
+      "reasonKey": "post12_ia_3"
+    },
+    {
+      "mapId": "e63e4271-3784-4201-96f6-56c74d32dc12",
+      "streamOptionId": "43b81932-329f-4b85-92e7-c8fe1f8629d3",
+      "rank": 1,
+      "reasonKey": "post12_is_1"
+    },
+    {
+      "mapId": "e63e4271-3784-4201-96f6-56c74d32dc12",
+      "streamOptionId": "b3909c0b-f5c2-4297-ac58-2e99937c901d",
+      "rank": 2,
+      "reasonKey": "post12_is_2"
+    },
+    {
+      "mapId": "e63e4271-3784-4201-96f6-56c74d32dc12",
+      "streamOptionId": "209401af-9a2b-4556-9f8e-b24f9d5a533b",
+      "rank": 3,
+      "reasonKey": "post12_is_3"
+    },
+    {
+      "mapId": "158dd746-88e4-438c-b5c8-45c1974348e2",
+      "streamOptionId": "455f819e-956b-454f-9d41-e11fabfd2e73",
+      "rank": 1,
+      "reasonKey": "post12_ie_1"
+    },
+    {
+      "mapId": "158dd746-88e4-438c-b5c8-45c1974348e2",
+      "streamOptionId": "2a645a13-3c55-4ee6-ae85-0dcd7726d499",
+      "rank": 2,
+      "reasonKey": "post12_ie_2"
+    },
+    {
+      "mapId": "158dd746-88e4-438c-b5c8-45c1974348e2",
+      "streamOptionId": "22472a48-86f0-45d7-aebf-021f42eeea6c",
+      "rank": 3,
+      "reasonKey": "post12_ie_3"
+    },
+    {
+      "mapId": "703981be-3376-4805-bba5-54e1f3c88a50",
+      "streamOptionId": "2a645a13-3c55-4ee6-ae85-0dcd7726d499",
+      "rank": 1,
+      "reasonKey": "post12_ic_1"
+    },
+    {
+      "mapId": "703981be-3376-4805-bba5-54e1f3c88a50",
+      "streamOptionId": "b3909c0b-f5c2-4297-ac58-2e99937c901d",
+      "rank": 2,
+      "reasonKey": "post12_ic_2"
+    },
+    {
+      "mapId": "703981be-3376-4805-bba5-54e1f3c88a50",
+      "streamOptionId": "1da28d9a-90e5-4f2f-a938-60d2f574427e",
+      "rank": 3,
+      "reasonKey": "post12_ic_3"
+    },
+    {
+      "mapId": "2b71f8e5-dfaf-47bf-b8ac-c67c3b815905",
+      "streamOptionId": "3bc43aef-f570-4f89-8436-4bb51b9264ba",
+      "rank": 1,
+      "reasonKey": "post12_as_1"
+    },
+    {
+      "mapId": "2b71f8e5-dfaf-47bf-b8ac-c67c3b815905",
+      "streamOptionId": "8991af90-a4f3-47a8-9cfc-443d6cafdfaa",
+      "rank": 2,
+      "reasonKey": "post12_as_2"
+    },
+    {
+      "mapId": "2b71f8e5-dfaf-47bf-b8ac-c67c3b815905",
+      "streamOptionId": "209401af-9a2b-4556-9f8e-b24f9d5a533b",
+      "rank": 3,
+      "reasonKey": "post12_as_3"
+    },
+    {
+      "mapId": "8b119010-243c-4d37-a68c-1a102d6a64c6",
+      "streamOptionId": "8991af90-a4f3-47a8-9cfc-443d6cafdfaa",
+      "rank": 1,
+      "reasonKey": "post12_ae_1"
+    },
+    {
+      "mapId": "8b119010-243c-4d37-a68c-1a102d6a64c6",
+      "streamOptionId": "3bc43aef-f570-4f89-8436-4bb51b9264ba",
+      "rank": 2,
+      "reasonKey": "post12_ae_2"
+    },
+    {
+      "mapId": "8b119010-243c-4d37-a68c-1a102d6a64c6",
+      "streamOptionId": "455f819e-956b-454f-9d41-e11fabfd2e73",
+      "rank": 3,
+      "reasonKey": "post12_ae_3"
+    },
+    {
+      "mapId": "8c80920f-0e16-4cc1-90d1-648f99c62b84",
+      "streamOptionId": "8991af90-a4f3-47a8-9cfc-443d6cafdfaa",
+      "rank": 1,
+      "reasonKey": "post12_ac_1"
+    },
+    {
+      "mapId": "8c80920f-0e16-4cc1-90d1-648f99c62b84",
+      "streamOptionId": "1da28d9a-90e5-4f2f-a938-60d2f574427e",
+      "rank": 2,
+      "reasonKey": "post12_ac_2"
+    },
+    {
+      "mapId": "8c80920f-0e16-4cc1-90d1-648f99c62b84",
+      "streamOptionId": "3bc43aef-f570-4f89-8436-4bb51b9264ba",
+      "rank": 3,
+      "reasonKey": "post12_ac_3"
+    },
+    {
+      "mapId": "8e016985-8c73-4dc0-9c00-7ba70f300261",
+      "streamOptionId": "46529113-2d94-4825-9d4e-87713fedeaf2",
+      "rank": 1,
+      "reasonKey": "post12_se_1"
+    },
+    {
+      "mapId": "8e016985-8c73-4dc0-9c00-7ba70f300261",
+      "streamOptionId": "447cc886-ed5a-4e40-99bf-32a84e59dbf8",
+      "rank": 2,
+      "reasonKey": "post12_se_2"
+    },
+    {
+      "mapId": "8e016985-8c73-4dc0-9c00-7ba70f300261",
+      "streamOptionId": "455f819e-956b-454f-9d41-e11fabfd2e73",
+      "rank": 3,
+      "reasonKey": "post12_se_3"
+    },
+    {
+      "mapId": "37731455-922b-4271-96ba-d3f30a03a217",
+      "streamOptionId": "209401af-9a2b-4556-9f8e-b24f9d5a533b",
+      "rank": 1,
+      "reasonKey": "post12_sc_1"
+    },
+    {
+      "mapId": "37731455-922b-4271-96ba-d3f30a03a217",
+      "streamOptionId": "3bc43aef-f570-4f89-8436-4bb51b9264ba",
+      "rank": 2,
+      "reasonKey": "post12_sc_2"
+    },
+    {
+      "mapId": "37731455-922b-4271-96ba-d3f30a03a217",
+      "streamOptionId": "1da28d9a-90e5-4f2f-a938-60d2f574427e",
+      "rank": 3,
+      "reasonKey": "post12_sc_3"
+    },
+    {
+      "mapId": "402a5e8b-2496-4fb7-a2f5-24b3178e8bf6",
+      "streamOptionId": "455f819e-956b-454f-9d41-e11fabfd2e73",
+      "rank": 1,
+      "reasonKey": "post12_ec_1"
+    },
+    {
+      "mapId": "402a5e8b-2496-4fb7-a2f5-24b3178e8bf6",
+      "streamOptionId": "1da28d9a-90e5-4f2f-a938-60d2f574427e",
+      "rank": 2,
+      "reasonKey": "post12_ec_2"
+    },
+    {
+      "mapId": "402a5e8b-2496-4fb7-a2f5-24b3178e8bf6",
+      "streamOptionId": "46529113-2d94-4825-9d4e-87713fedeaf2",
+      "rank": 3,
+      "reasonKey": "post12_ec_3"
+    }
+  ]
+}

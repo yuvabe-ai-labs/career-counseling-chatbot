@@ -2,7 +2,7 @@ import {
   GetRecommendationSetService,
   PostgresRecommendationSetReader,
   type RecommendationHttpDependencies,
-} from "@yuvanext/recommendations";
+} from "@yuvapath/recommendations";
 import {
   createSupabaseUserResolver,
   type SupabaseAuthClient,

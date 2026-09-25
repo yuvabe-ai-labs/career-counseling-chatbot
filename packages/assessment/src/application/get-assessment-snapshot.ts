@@ -2,7 +2,7 @@ import {
   ProfileSnapshotResponseSchema,
   UuidSchema,
   type ProfileSnapshotResponse,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import type { AssessmentSnapshotReader } from "./assessment-snapshot-reader.js";
 
 export class AssessmentSnapshotNotFoundError extends Error {

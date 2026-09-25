@@ -1,15 +1,15 @@
-# YuvaNext Data Model
+# YuvaPath Data Model
 
 ## Purpose
 
-This directory is the canonical design source for the single Supabase PostgreSQL database used by YuvaNext. The database is divided into module-owned PostgreSQL schemas; it is not divided into five Supabase projects.
+This directory is the canonical design source for the single Supabase PostgreSQL database used by YuvaPath. The database is divided into module-owned PostgreSQL schemas; it is not divided into five Supabase projects.
 
 ## Documents
 
 | Document                                                                                  | Purpose                                                                | Owner                               |
 | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------- |
 | [Phase A MVP data model](phase-a-mvp-data-model.md)                                       | Target-compatible 69-table implementation subset and deferral rules    | Integration owner and module owners |
-| [Phase A MVP DBML](yuvanext-phase-a-mvp.dbml)                                             | Complete 69-table field-level ERD for cross-module review              | Integration owner                   |
+| [Phase A MVP DBML](yuvapath-phase-a-mvp.dbml)                                             | Complete 69-table field-level ERD for cross-module review              | Integration owner                   |
 | [Module 1 Assessment MVP DBML](module-1-assessment-mvp.dbml)                              | Complete Assessment fields, documented rules and relationships         | Module 1                            |
 | [Module 1 prototype-to-storage flow](module-1-prototype-storage-flow.md)                  | Step-by-step prototype journey, example records and table writes       | Module 1 and frontend integration   |
 | [Module 2 Recommendation MVP DBML](module-2-recommendation-mvp.dbml)                      | Complete Recommendation fields, documented rules and relationships     | Module 2                            |

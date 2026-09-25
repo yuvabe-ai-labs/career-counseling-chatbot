@@ -1,5 +1,5 @@
 import { ChevronRight, type LucideIcon } from "lucide-react";
-import type { RecommendationItem, StreamFitExplanation } from "@yuvanext/contracts";
+import type { RecommendationItem, StreamFitExplanation } from "@yuvapath/contracts";
 import { cn } from "@/lib/utils";
 
 export type StreamOptionCardProps = {
@@ -7,7 +7,6 @@ export type StreamOptionCardProps = {
   icon: LucideIcon;
   image: string;
   imageClassName: string;
-  hideMatchPercent: boolean;
   onSelect: (item: RecommendationItem) => void;
 };
 
@@ -23,11 +22,8 @@ function isStreamExplanation(
  * text-lg/xl title) rather than that frame's own larger 64px ring / 32px title, per the brief:
  * reuse the Explore Path cards' type scale instead of this frame's own.
  *
- * The overview card is title + fit line only — no description. That's a summary/preview by
- * design: the full description still exists (StreamDetailSheet renders it), it's just reserved
- * for after a tap rather than repeated on every card. Dropping it also means there's no longer a
- * min-height to hold — the card sizes to its (now much shorter, and title-length-independent)
- * content, and the grid's own default row-stretch is what keeps every card in a row the same
+ * The overview card is the title plus a short (clamped) description — no scores. The card sizes
+ * to its content, and the grid's own default row-stretch keeps every card in a row the same
  * height, not a hardcoded pixel value here.
  *
  * Unlike ExploreOptionCard, every card here is always "enabled" — it opens StreamDetailSheet
@@ -38,20 +34,9 @@ export function StreamOptionCard({
   icon: Icon,
   image,
   imageClassName,
-  hideMatchPercent,
   onSelect,
 }: StreamOptionCardProps) {
   const explanation = isStreamExplanation(item.explanation) ? item.explanation : null;
-  const percent = item.fitScore !== undefined ? Math.round((item.fitScore ?? 0) * 100) : null;
-  const matched =
-    explanation && explanation.matchedLetters.length > 0
-      ? explanation.matchedLetters.join(" + ")
-      : null;
-  const fitLine = matched
-    ? !hideMatchPercent && percent !== null
-      ? `Fit: ${percent}% | ${matched} matched`
-      : `${matched} matched`
-    : null;
 
   return (
     <button
@@ -81,12 +66,12 @@ export function StreamOptionCard({
         {item.title}
       </p>
 
-      {/* Overview card is title + fit line only — the full description is reserved for
-          StreamDetailSheet after a tap, not repeated here. See this component's own doc
-          comment. */}
-      {fitLine ? (
-        <p className="relative font-display text-sm font-medium text-foreground lg:text-base">
-          {fitLine}
+      {/* MVP: no fit %, interest/segment/marks match or matched letters on the card (all still
+          in the API for a later scoring phase) — the card is the stream itself plus a short
+          description. */}
+      {explanation?.description ? (
+        <p className="relative line-clamp-3 font-display text-sm text-foreground/80 lg:text-base">
+          {explanation.description}
         </p>
       ) : null}
     </button>

@@ -1,4 +1,4 @@
-import { validReportSnapshot } from "@yuvanext/test-fixtures";
+import { validReportSnapshot } from "@yuvapath/test-fixtures";
 import { describe, expect, it, vi } from "vitest";
 import { SupabaseReportRenderer, type AssetStorageClient } from "../src/index.js";
 

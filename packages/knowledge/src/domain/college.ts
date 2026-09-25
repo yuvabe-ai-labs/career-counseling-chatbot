@@ -1,4 +1,4 @@
-import type { College } from "@yuvanext/contracts";
+import type { College } from "@yuvapath/contracts";
 
 export type CollegeFilters = {
   state?: string;

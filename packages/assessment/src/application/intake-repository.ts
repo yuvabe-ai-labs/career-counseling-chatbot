@@ -1,4 +1,4 @@
-import type { IntakeAnswer, IntakeQuestion, Segment } from "@yuvanext/contracts";
+import type { IntakeAnswer, IntakeQuestion, Segment } from "@yuvapath/contracts";
 
 export type IntakeQuestionSet = {
   id: string;

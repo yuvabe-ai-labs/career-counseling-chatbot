@@ -1,4 +1,4 @@
-import type { ModuleDescriptor } from "@yuvanext/contracts";
+import type { ModuleDescriptor } from "@yuvapath/contracts";
 export { registerEvaluationRoutes } from "./http/evaluation-routes.js";
 export {
   getSyntheticEvaluationRun,
@@ -13,6 +13,6 @@ export {
 export const evaluationModule: ModuleDescriptor = {
   code: "m5-evaluation",
   name: "Evaluation",
-  packageName: "@yuvanext/evaluation",
+  packageName: "@yuvapath/evaluation",
   status: "in_progress",
 };

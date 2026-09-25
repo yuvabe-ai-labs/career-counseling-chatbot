@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Sparkles } from "lucide-react";
-import type { RecommendationItem } from "@yuvanext/contracts";
+import type { RecommendationItem } from "@yuvapath/contracts";
 import { cn } from "@/lib/utils";
 
 export type RingMapTierKey = "outer" | "middle" | "inner";
@@ -12,16 +12,20 @@ type RingMapProps = {
   /** Stage-tab labels, one per zoom level (1 = outermost/least-refined, 3 = innermost). */
   zoomLabels: Record<1 | 2 | 3, string>;
   hideMatchPercent: boolean;
+  /** MVP: replaces `fitScore` as the number shown on each dot (0..1). Pathway passes College
+   *  Availability here; Career passes nothing and hides the number entirely. */
+  dotMetric?: (item: RecommendationItem) => number | undefined;
   selectedItemId: string | null;
   onSelectItem: (item: RecommendationItem) => void;
   ariaLabel: string;
   /** The center hub's short label under "YOU" — defaults to the active stage's first word. */
   hubLabel?: (zoomLabel: string) => string;
   /**
-   * Streams/Pathways aren't ring-partitioned by the backend (only career/college produce
-   * inner/middle/outer tiers) — pass the full ranked list as `rings.inner` with the other two
-   * tiers empty, and this locks the map on that one ring: no stage tabs, no empty outer/middle
-   * circles implying tiers that don't exist.
+   * Streams aren't ring-partitioned by the backend (career/pathway produce real inner/middle/
+   * outer tiers; streams don't, and neither does college — colleges are an eligibility list, see
+   * CollegePage, which doesn't use RingMap at all) — pass the full ranked list as `rings.inner`
+   * with the other two tiers empty, and this locks the map on that one ring: no stage tabs, no
+   * empty outer/middle circles implying tiers that don't exist.
    */
   singleTier?: boolean;
 };
@@ -54,16 +58,17 @@ export function truncateLabel(title: string, maxWords = 3): string {
 
 /**
  * The radial ring-map visualization, generalized from the career-specific prototype
- * (see CareerRingMap.tsx, now a thin wrapper around this) so College — which also produces
- * real inner/middle/outer tiers (home state / neighboring states / other) — gets the identical
- * treatment, and Stream/Pathway (flat ranked lists, no tiers) get the same visual language via
- * `singleTier` instead of a plain list that would look and feel inconsistent with the rest of
- * Explore Path.
+ * (see CareerRingMap.tsx, now a thin wrapper around this) so Pathway — which also produces real
+ * inner/middle/outer tiers — gets the identical treatment, and Stream (flat ranked list, no
+ * tiers) gets the same visual language via `singleTier` instead of a plain list that would look
+ * and feel inconsistent with the rest of Explore Path. College doesn't use RingMap at all — see
+ * CollegePage.
  */
 export function RingMap({
   rings,
   zoomLabels,
   hideMatchPercent,
+  dotMetric,
   selectedItemId,
   onSelectItem,
   ariaLabel,
@@ -190,7 +195,8 @@ export function RingMap({
         </div>
 
         {activeItems.map((item, index) => {
-          const percent = item.fitScore !== undefined ? Math.round(item.fitScore * 100) : null;
+          const metric = dotMetric ? dotMetric(item) : item.fitScore;
+          const percent = metric !== undefined ? Math.round(metric * 100) : null;
           return (
             <button
               key={item.itemId}

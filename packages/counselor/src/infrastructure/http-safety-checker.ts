@@ -3,7 +3,7 @@ import {
   SafetyDecisionSchema,
   type HandoffPacket,
   type SafetyDecision,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { z } from "zod";
 import { CounselorDependencyUnavailableError } from "../application/errors.js";
 import type {

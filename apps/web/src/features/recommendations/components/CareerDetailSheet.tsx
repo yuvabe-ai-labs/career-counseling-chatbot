@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
-import type { CareerFitExplanation, RecommendationItem, Segment } from "@yuvanext/contracts";
+import type { CareerFitExplanation, RecommendationItem, Segment } from "@yuvapath/contracts";
 import { cn } from "@/lib/utils";
 
 type CareerDetailSheetProps = {
@@ -30,12 +30,18 @@ function isCareerExplanation(
   return typeof explanation === "object" && explanation !== null && "interestFit" in explanation;
 }
 
-const FIT_ROWS: { key: keyof CareerFitExplanation; label: string }[] = [
-  { key: "interestFit", label: "Interest Fit" },
-  { key: "valuesFit", label: "Values Fit" },
-  { key: "feasibility", label: "Feasibility" },
-  { key: "contextBoost", label: "Boost" },
-];
+/**
+ * MVP: "Interest Fit" is shown as a plain-language reason (built from the career's top matching
+ * scales), never as a number. Career match %, Values Fit, Feasibility and Boost (fitScore and
+ * CareerFitExplanation's numeric fields) stay in the API and may return in a later scoring phase.
+ */
+function interestFitReason(scales: string[]): string {
+  const reasons = scales
+    .slice(0, 2)
+    .map((letter) => REASON_BY_LETTER[letter])
+    .filter((reason): reason is string => reason !== undefined);
+  return reasons.length > 0 ? reasons.join(" and ") : "it matches your interests";
+}
 
 /**
  * The ring map's bottom sheet — content is segment-conditional per Part 2 of
@@ -51,7 +57,6 @@ export function CareerDetailSheet({ item, segment, onClose }: CareerDetailSheetP
 
   const isOpen = item !== null;
   const explanation = item && isCareerExplanation(item.explanation) ? item.explanation : null;
-  const percent = item?.fitScore !== undefined ? Math.round((item.fitScore ?? 0) * 100) : null;
   const topLetter = explanation?.topMatchingScales[0];
 
   // Outside-click-to-close, via containment rather than stopPropagation: reliable regardless of
@@ -115,7 +120,6 @@ export function CareerDetailSheet({ item, segment, onClose }: CareerDetailSheetP
               {item.ring ? (
                 <span className="mt-1 inline-block rounded-lg bg-[#DDF6EE] px-2 py-1 font-display text-xs font-bold text-[#148765]">
                   {RING_LABEL[item.ring]}
-                  {segment !== "explorer" && percent !== null ? ` · ${percent}%` : ""}
                 </span>
               ) : null}
             </div>
@@ -135,19 +139,12 @@ export function CareerDetailSheet({ item, segment, onClose }: CareerDetailSheetP
               {topLetter ? REASON_BY_LETTER[topLetter] : "it matches your interests"}.
             </p>
           ) : explanation ? (
-            <div className="mt-5 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
-              {FIT_ROWS.map(({ key, label }) => {
-                const value = explanation[key];
-                if (typeof value !== "number") return null;
-                return (
-                  <div key={key}>
-                    <p className="font-display text-xs text-muted-foreground">{label}</p>
-                    <p className="font-display text-lg font-bold text-foreground">
-                      {Math.round(value * 100)}%
-                    </p>
-                  </div>
-                );
-              })}
+            <div className="mt-5">
+              <p className="font-display text-xs text-muted-foreground">Interest Fit</p>
+              <p className="mt-1 font-display text-base leading-relaxed text-foreground/80">
+                This career matches your interests because{" "}
+                {interestFitReason(explanation.topMatchingScales)}.
+              </p>
             </div>
           ) : null}
 

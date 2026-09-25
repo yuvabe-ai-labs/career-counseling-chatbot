@@ -24,12 +24,14 @@ import {
   type PlanRecommendationRouteRequest,
   type RecommendationSet,
   type StreamRecommendationRouteRequest,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import type { Express, Request, Response } from "express";
-import { resolveGeoScope } from "../domain/geo-scope.js";
 import type { RecommendationDataSource } from "../application/recommendation-data-source.js";
 import type { RecommendationStore } from "../application/recommendation-store.js";
-import { createRecommendationService } from "../application/recommendation-service.js";
+import {
+  createRecommendationService,
+  type RecommendationService,
+} from "../application/recommendation-service.js";
 
 type ParseResult<T> =
   | { success: true; data: T }
@@ -108,10 +110,20 @@ export const registerRecommendationRoutes = (
     responseMapper: renameRecommendationId("streamRecommendationId"),
     handler: async (body) => {
       const profile = await resolveProfile(body, options.dataSource);
+      // Same pattern /pathways already uses for rankedCareerIds: default to the student's most
+      // recently STORED Career run, never a live Career computation (see
+      // docs/architecture/career-stream-mapping-iteration-1-plan.md §6 — Stream stays a cheap,
+      // independent read, unlike College's on-demand Career fallback).
+      const rankedCareerIds =
+        body.rankedCareerIds ??
+        (await requireDataSource(options.dataSource).loadLatestRankedEntityIds(profile.profileSnapshotId, "career"));
       return service.recommendStreams({
         recommendationId: resolveRecommendationId(body.recommendationId),
         profile,
-        streams: body.streams ?? (await requireDataSource(options.dataSource).loadStreams(profile, body.limit)),
+        streams:
+          body.streams ??
+          (await requireDataSource(options.dataSource).loadStreams(profile, body.limit, rankedCareerIds)),
+        rankedCareerIds,
         config: await resolveConfig(body, options.dataSource, "stream_rank"),
         createdAt: resolveCreatedAt(body.createdAt),
       });
@@ -152,29 +164,38 @@ export const registerRecommendationRoutes = (
     responseExample: recommendationResponseExample("collegeRecommendationId", "college", "Government Arts College"),
     responseMapper: renameRecommendationId("collegeRecommendationId"),
     handler: async (body) => {
-      const profile = await resolveProfile(body, options.dataSource);
-      const targetPathwayId =
-        body.targetPathwayId ??
-        (await requireDataSource(options.dataSource).loadLatestRankedEntityIds(profile.profileSnapshotId, "pathway"))[0];
-      // The caller may supply selectedState/neighboringStates directly (e.g. a test, or a
-      // future admin tool); otherwise derive them deterministically from the student's own
-      // location_preference intake answer + home state — see
-      // packages/recommendations/src/domain/geo-scope.ts. Never computed by Gemini/AI.
-      const geoScope =
-        body.selectedState || body.neighboringStates || !profile.state
-          ? undefined
-          : resolveGeoScope(profile.locationPreference, profile.state);
-      const selectedState = body.selectedState ?? geoScope?.selectedState;
-      const neighboringStates = body.neighboringStates ?? geoScope?.neighboringStates;
+      const resolvedProfile = await resolveProfile(body, options.dataSource);
+      // A per-request ranking-only override, distinct from body.district below (a hard filter) —
+      // see CollegeRecommendationRouteRequestSchema.homeDistrict's own comment. Applied before
+      // resolveTargetDisciplineIds too, so a pathway/career fallback resolved for this request
+      // sees the same overridden profile service.recommendColleges eventually scores against.
+      const profile = body.homeDistrict ? { ...resolvedProfile, homeDistrict: body.homeDistrict } : resolvedProfile;
+      // Current product phase is Tamil Nadu-only: loadColleges() already returns only Tamil
+      // Nadu colleges, so there is no state/geo scope left to resolve here. See
+      // docs/recommendation-pipeline-explained.md for why. geo-scope.ts / state-adjacency.ts
+      // are kept, unwired, for a future multi-state phase.
+      const resolvedTarget = body.targetDisciplineIds
+        ? { disciplineIds: body.targetDisciplineIds, programType: undefined }
+        : await resolveTargetDisciplineIds(service, options.dataSource, profile, body.targetPathwayId);
       return service.recommendColleges({
         recommendationId: resolveRecommendationId(body.recommendationId),
         profile,
         colleges: body.colleges ?? (await requireDataSource(options.dataSource).loadColleges(body.limit)),
-        targetDisciplineIds:
-          body.targetDisciplineIds ??
-          (await requireDataSource(options.dataSource).loadTargetDisciplineIds(targetPathwayId)),
-        ...(selectedState ? { selectedState } : {}),
-        ...(neighboringStates ? { neighboringStates } : {}),
+        targetDisciplineIds: resolvedTarget.disciplineIds,
+        // Composable, optional eligibility filters — see college-recommendations.ts. Each one
+        // the caller omits is left out of the request entirely rather than passed as undefined,
+        // so it plays no part in the cache's input hash. Iteration 3 Phase A: the resolved
+        // pathway's own qualification is now the DEFAULT programType constraint — an explicit
+        // body.programType (the UI's optional filter override) still wins over it.
+        ...(body.programType
+          ? { programType: body.programType }
+          : resolvedTarget.programType
+            ? { programType: resolvedTarget.programType }
+            : {}),
+        ...(body.instituteKind ? { instituteKind: body.instituteKind } : {}),
+        ...(body.ownership ? { ownership: body.ownership } : {}),
+        ...(body.district ? { district: body.district } : {}),
+        ...(body.admissionRoute ? { admissionRoute: body.admissionRoute } : {}),
         config: await resolveConfig(body, options.dataSource, "college_rank"),
         createdAt: resolveCreatedAt(body.createdAt),
       });
@@ -352,6 +373,64 @@ async function resolveConfig(
 
 function resolveCreatedAt(createdAt: string | undefined): string {
   return createdAt ?? new Date().toISOString();
+}
+
+// A ranked pathway is the primary source (see college-recommendations.ts's eligibility-filter
+// doc comment) — but a student can reach College with no pathway run at all: Launcher's
+// Stream/Pathway tabs are always off (tabsToShow(), apps/web/src/features/recommendations/lib/
+// tabs-to-show.ts — Launcher has already passed the "which pathway" decision in real life), yet
+// its College tab turns on whenever the student's intake goal involves enrolling anywhere. Every
+// segment gets a career recommendation, so the fallback walks the student's top-ranked career to
+// its own single top-priority linked pathway — same "only what fits what they matched with"
+// narrowing, just keyed off career instead of pathway, and (Iteration 3 Phase A) resolving to
+// exactly one real pathway either way, so both branches share the same discipline+programType
+// derivation below instead of the fallback having its own looser, union-of-many-pathways logic.
+//
+// Iteration 3 Phase A (docs/architecture/pathway-college-mapping-iteration-3-plan.md): also
+// returns the resolved pathway's own qualification (its programType, e.g. "B.Sc" vs
+// "B.E./B.Tech.") — previously nothing downstream of pathway resolution read a pathway's
+// qualification at all, so two pathways sharing one discipline at different qualification
+// levels returned the identical, undifferentiated college pool by default.
+async function resolveTargetDisciplineIds(
+  service: RecommendationService,
+  dataSource: RecommendationDataSource | undefined,
+  profile: NonNullable<CareerRecommendationRouteRequest["profile"]>,
+  targetPathwayId: string | undefined,
+): Promise<{ disciplineIds: string[]; programType?: string }> {
+  const source = requireDataSource(dataSource);
+  const pathwayId =
+    targetPathwayId ?? (await source.loadLatestRankedEntityIds(profile.profileSnapshotId, "pathway"))[0];
+  const fromPathway = await source.loadTargetDisciplineIds(pathwayId);
+  if (fromPathway.length > 0) {
+    const programType = await source.loadPathwayProgramType(pathwayId);
+    return { disciplineIds: fromPathway, ...(programType ? { programType } : {}) };
+  }
+
+  let careerId = (await source.loadLatestRankedEntityIds(profile.profileSnapshotId, "career"))[0];
+  if (!careerId) {
+    // No career ranking exists yet for this profile — real, observed case: a student opens
+    // College before ever opening Career (nothing enforces visit order), so this fallback had
+    // nothing to key off and silently returned zero eligible colleges purely because of *when*
+    // the student clicked, not anything about their profile. Computing (and persisting, via
+    // service.recommendCareers -> the store's normal save path) a real career ranking here is
+    // exactly what a direct visit to the Career tab would have produced, so a subsequent Career
+    // visit reuses this same stored run via findByInputHash instead of computing a second one.
+    const careerConfig = await resolveConfig({}, dataSource, "career_match");
+    const careerRec = await service.recommendCareers({
+      recommendationId: randomUUID(),
+      profile,
+      careers: await source.loadCareers(),
+      config: careerConfig,
+      feasibilityRules: await source.loadFeasibilityRules(careerConfig),
+      createdAt: new Date().toISOString(),
+    });
+    careerId = careerRec.items[0]?.entityId;
+  }
+
+  const topPathwayId = await source.loadTopPathwayIdForCareer(careerId);
+  const disciplineIds = await source.loadTargetDisciplineIds(topPathwayId);
+  const programType = await source.loadPathwayProgramType(topPathwayId);
+  return { disciplineIds, ...(programType ? { programType } : {}) };
 }
 
 function requireDataSource(dataSource: RecommendationDataSource | undefined): RecommendationDataSource {

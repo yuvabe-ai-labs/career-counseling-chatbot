@@ -8,7 +8,7 @@ import type {
   RecommendationSet,
   RiasecLetter,
   RiasecVector,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 
 const RIASEC_LETTERS: readonly RiasecLetter[] = ["R", "I", "A", "S", "E", "C"];
 

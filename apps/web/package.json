@@ -1,5 +1,5 @@
 {
-  "name": "@yuvanext/web",
+  "name": "@yuvapath/web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -13,9 +13,11 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.2",
-    "@yuvanext/contracts": "workspace:*",
+    "@yuvapath/contracts": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "html-to-image": "^1.11.13",
+    "jspdf": "^4.2.1",
     "lucide-react": "^1.38.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

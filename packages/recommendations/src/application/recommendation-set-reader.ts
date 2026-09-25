@@ -1,4 +1,4 @@
-import type { RecommendationSet } from "@yuvanext/contracts";
+import type { RecommendationSet } from "@yuvapath/contracts";
 
 export type ReadRecommendationSetInput = {
   userId: string;

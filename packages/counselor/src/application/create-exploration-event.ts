@@ -4,7 +4,7 @@ import {
   ExplorationEventResponseSchema,
   UuidSchema,
   type ExplorationEventResponse,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { CounselorContractError, CounselorNotFoundError } from "./errors.js";
 import type { CounselorRepository, RecommendationReader } from "./ports/index.js";
 

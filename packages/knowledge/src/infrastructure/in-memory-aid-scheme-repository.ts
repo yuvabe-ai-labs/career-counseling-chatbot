@@ -1,4 +1,4 @@
-import type { AidCriterion, AidScheme } from "@yuvanext/contracts";
+import type { AidCriterion, AidScheme } from "@yuvapath/contracts";
 import { matchesAidCriteria, type AidSchemeFilters, type AidSchemeRepository } from "../domain/aid-scheme.js";
 
 export class InMemoryAidSchemeRepository implements AidSchemeRepository {

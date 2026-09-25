@@ -44,6 +44,33 @@ describe("SetPasswordForm — password rules checklist", () => {
     expect(screen.getByText("8 character minimum")).toBeInTheDocument();
   });
 
+  /**
+   * Regression test for a real bug: the checklist's open/closed state used to be tracked by an
+   * onFocus/onBlur pair on the wrapper div around both the password input AND this toggle button
+   * (not the input alone), specifically so toggling visibility mid-typing didn't close the
+   * checklist (see the test above). The side effect was that clicking the toggle button on its
+   * own — before the password field had ever been focused — also moved native DOM focus onto the
+   * button, which bubbled a focus event up into that same wrapper and opened the checklist even
+   * though the user never touched the input. Fixed by having the toggle button cancel its own
+   * default focus-on-click behavior (PasswordVisibilityToggle's onMouseDown) instead of changing
+   * how the wrapper tracks focus, so this scenario and the one above both now resolve correctly.
+   */
+  it("does NOT open when only the show/hide-password button is clicked, without ever focusing the password field", async () => {
+    const user = userEvent.setup();
+    render(<ControlledForm />);
+
+    expect(screen.queryByText("8 character minimum")).not.toBeInTheDocument();
+
+    const [passwordToggle] = screen.getAllByRole("button", { name: "Show password" });
+    await user.click(passwordToggle!);
+
+    // The click still did its one job...
+    expect(screen.getByLabelText("Enter your password")).toHaveAttribute("type", "text");
+    // ...but the checklist — and the password field's own focus/validation UI — never opened.
+    expect(screen.queryByText("8 character minimum")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Enter your password")).not.toHaveFocus();
+  });
+
   it("reopens on a failed submit, so the error naming the requirements can point at them", async () => {
     const user = userEvent.setup();
     render(<ControlledForm />);

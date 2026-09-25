@@ -18,7 +18,7 @@ export const journeySessionNotFound = (): AssessmentApplicationError =>
 export const journeySessionUserNotFound = (): AssessmentApplicationError =>
   new AssessmentApplicationError(
     "journey_session_user_not_found",
-    "x-yuvanext-user-id does not correspond to a verified identity. Complete /auth/otp/verify first.",
+    "x-yuvapath-user-id does not correspond to a verified identity. Complete /auth/otp/verify first.",
     401,
   );
 
@@ -226,3 +226,41 @@ export const guardianEmailAlreadyRegistered = (): AssessmentApplicationError =>
     "This email is already registered as a user and cannot be used as a parent/guardian email.",
     409,
   );
+
+export const invalidCounselorOtp = (): AssessmentApplicationError =>
+  new AssessmentApplicationError(
+    "invalid_counselor_otp",
+    "Verification code is invalid or expired.",
+    400,
+  );
+
+export const counselorOtpResendNotYetAvailable = (): AssessmentApplicationError =>
+  new AssessmentApplicationError(
+    "counselor_otp_resend_not_yet_available",
+    "Please wait before requesting another code.",
+    429,
+  );
+
+export const invalidOrExpiredResetToken = (): AssessmentApplicationError =>
+  new AssessmentApplicationError(
+    "invalid_or_expired_reset_token",
+    "This password reset link has expired. Please start over.",
+    400,
+  );
+
+export const counselorDirectoryUnavailable = (): AssessmentApplicationError =>
+  new AssessmentApplicationError(
+    "counselor_directory_unavailable",
+    "Counselor authentication is not configured (no CounselorDirectory wired up).",
+    503,
+  );
+
+export const counselorNotAuthorized = (): AssessmentApplicationError =>
+  new AssessmentApplicationError(
+    "counselor_not_authorized",
+    "x-yuvapath-counselor-id does not correspond to an active counselor.",
+    401,
+  );
+
+export const counselorStudentNotFound = (): AssessmentApplicationError =>
+  new AssessmentApplicationError("counselor_student_not_found", "Student was not found.", 404);

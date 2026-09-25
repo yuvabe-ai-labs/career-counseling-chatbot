@@ -1,5 +1,5 @@
 {
-  "name": "yuvanext-backend",
+  "name": "yuvapath-backend",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -8,11 +8,11 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "dev": "corepack pnpm --filter @yuvanext/api dev",
-    "web:dev": "corepack pnpm --filter @yuvanext/web dev",
-    "web:build": "corepack pnpm --filter @yuvanext/web build",
-    "web:typecheck": "corepack pnpm --filter @yuvanext/web typecheck",
-    "web:test": "corepack pnpm --filter @yuvanext/web test",
+    "dev": "corepack pnpm --filter @yuvapath/api dev",
+    "web:dev": "corepack pnpm --filter @yuvapath/web dev",
+    "web:build": "corepack pnpm --filter @yuvapath/web build",
+    "web:typecheck": "corepack pnpm --filter @yuvapath/web typecheck",
+    "web:test": "corepack pnpm --filter @yuvapath/web test",
     "build": "tsup apps/api/src/server.ts --format esm --platform node --target node22 --out-dir apps/api/dist --clean --external express --external cors --external helmet --external pino --external swagger-ui-express --external zod --external @asteasolutions/zod-to-openapi --external pg --external nodemailer",
     "start": "node apps/api/dist/server.js",
     "build:lambda": "tsup apps/api/src/lambda.ts --format esm --platform node --target node22 --out-dir apps/api/dist-lambda --clean --external express --external cors --external helmet --external pino --external swagger-ui-express --external zod --external @asteasolutions/zod-to-openapi --external pg --external nodemailer --external serverless-http",
@@ -33,6 +33,7 @@
     "ai-catalog:generate": "tsx scripts/ingest/generate-ai-catalog-drafts.ts",
     "ai-catalog:review": "tsx scripts/ingest/review-ai-catalog.ts",
     "ai-catalog:promote": "tsx scripts/ingest/promote-ai-catalog.ts",
+    "counselor:create": "tsx scripts/create-counselor.ts",
     "db:init": "supabase init",
     "db:login": "supabase login",
     "db:link": "supabase link",

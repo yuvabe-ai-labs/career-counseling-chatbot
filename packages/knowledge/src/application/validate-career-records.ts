@@ -1,7 +1,7 @@
 import {
   CareerDatasetRecordsSchema,
   type CareerDatasetRecords,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 
 export type CareerValidationIssue = {
   code:

@@ -8,7 +8,7 @@ import { tabsToShow } from "@/features/recommendations/lib/tabs-to-show";
 // is still caught, not just the bucket as a whole.
 describe("tabsToShow", () => {
   it("row 1 — Explorer", () => {
-    expect(tabsToShow({ segment: "explorer", wantsAid: false, currentGoal: undefined })).toEqual({
+    expect(tabsToShow({ segment: "explorer", seeksAid: false, currentGoal: undefined })).toEqual({
       career: true,
       stream: true,
       pathway: false,
@@ -18,8 +18,8 @@ describe("tabsToShow", () => {
     });
   });
 
-  it("row 2 — Pathfinder, no aid requested", () => {
-    expect(tabsToShow({ segment: "pathfinder", wantsAid: false, currentGoal: undefined })).toEqual({
+  it("row 2 — Pathfinder, answered No/unanswered to seeks_aid", () => {
+    expect(tabsToShow({ segment: "pathfinder", seeksAid: false, currentGoal: undefined })).toEqual({
       career: true,
       stream: true,
       pathway: true,
@@ -29,8 +29,8 @@ describe("tabsToShow", () => {
     });
   });
 
-  it("row 3 — Pathfinder, aid requested", () => {
-    expect(tabsToShow({ segment: "pathfinder", wantsAid: true, currentGoal: undefined })).toEqual({
+  it("row 3 — Pathfinder, answered Yes to seeks_aid", () => {
+    expect(tabsToShow({ segment: "pathfinder", seeksAid: true, currentGoal: undefined })).toEqual({
       career: true,
       stream: true,
       pathway: true,
@@ -43,7 +43,7 @@ describe("tabsToShow", () => {
   it.each(["job", "career_switch", "business"])(
     "row 4 — Launcher not enrolling anywhere, goal=%s, no aid",
     (currentGoal) => {
-      expect(tabsToShow({ segment: "launcher", wantsAid: false, currentGoal })).toEqual({
+      expect(tabsToShow({ segment: "launcher", seeksAid: false, currentGoal })).toEqual({
         career: true,
         stream: false,
         pathway: false,
@@ -55,14 +55,14 @@ describe("tabsToShow", () => {
   );
 
   it.each(["job", "career_switch", "business"])(
-    "row 5 — Launcher not enrolling anywhere, goal=%s, aid requested",
+    "row 5 — Launcher not enrolling anywhere, goal=%s, seeksAid has no effect yet (Launcher aid is later work)",
     (currentGoal) => {
-      expect(tabsToShow({ segment: "launcher", wantsAid: true, currentGoal })).toEqual({
+      expect(tabsToShow({ segment: "launcher", seeksAid: true, currentGoal })).toEqual({
         career: true,
         stream: false,
         pathway: false,
         college: false,
-        scholarship: true,
+        scholarship: false,
         plan: true,
       });
     },
@@ -71,7 +71,7 @@ describe("tabsToShow", () => {
   it.each(["higher_studies", "not_sure", "skill_building"])(
     "row 6 — Launcher enrolling somewhere, goal=%s, no aid",
     (currentGoal) => {
-      expect(tabsToShow({ segment: "launcher", wantsAid: false, currentGoal })).toEqual({
+      expect(tabsToShow({ segment: "launcher", seeksAid: false, currentGoal })).toEqual({
         career: true,
         stream: false,
         pathway: false,
@@ -83,14 +83,14 @@ describe("tabsToShow", () => {
   );
 
   it.each(["higher_studies", "not_sure", "skill_building"])(
-    "row 7 — Launcher enrolling somewhere, goal=%s, aid requested",
+    "row 7 — Launcher enrolling somewhere, goal=%s, seeksAid has no effect yet (Launcher aid is later work)",
     (currentGoal) => {
-      expect(tabsToShow({ segment: "launcher", wantsAid: true, currentGoal })).toEqual({
+      expect(tabsToShow({ segment: "launcher", seeksAid: true, currentGoal })).toEqual({
         career: true,
         stream: false,
         pathway: false,
         college: true,
-        scholarship: true,
+        scholarship: false,
         plan: true,
       });
     },

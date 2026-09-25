@@ -67,9 +67,12 @@ vi.mock("@/features/assessment/api/profile", () => ({
 }));
 
 // Mock call histories otherwise leak across tests in this file (no `test.globals`/auto-reset
-// configured — see onboarding-email-uniqueness.test.tsx for the same pattern).
+// configured — see onboarding-email-uniqueness.test.tsx for the same pattern). Also clears
+// localStorage — OnboardingPage now redirects an already-signed-in visitor straight to /home, so
+// a userId/journeySessionId left over from another test file's own setup must not leak in here.
 beforeEach(() => {
   vi.clearAllMocks();
+  localStorage.clear();
 });
 
 function renderOnboarding() {

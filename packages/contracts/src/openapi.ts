@@ -25,9 +25,9 @@ export const generateOpenApiDocument = (registry: OpenAPIRegistry): OpenApiDocum
   new OpenApiGeneratorV3(registry.definitions).generateDocument({
     openapi: "3.0.3",
     info: {
-      title: "YuvaNext Backend API",
+      title: "YuvaPath Backend API",
       version: "0.1.0",
-      description: "Shared Phase A backend API for all five YuvaNext modules.",
+      description: "Shared Phase A backend API for all five YuvaPath modules.",
     },
     servers: [{ url: "/", description: "Current server" }],
   });

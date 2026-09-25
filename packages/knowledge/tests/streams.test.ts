@@ -4,7 +4,7 @@ import {
   StreamMapItemSchema,
   StreamMapSchema,
   StreamOptionSchema,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import express from "express";
 import request from "supertest";
 import { describe, expect, it, vi } from "vitest";

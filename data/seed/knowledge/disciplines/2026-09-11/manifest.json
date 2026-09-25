@@ -16,10 +16,10 @@
   "createdAt": "2026-09-11T00:00:00.000Z",
   "source": {
     "id": "6efe45e4-d1d5-4999-8446-bc4503c41373",
-    "sourceKey": "yuvanext-curated-discipline-vocabulary",
-    "name": "YuvaNext curated discipline vocabulary",
+    "sourceKey": "yuvapath-curated-discipline-vocabulary",
+    "name": "YuvaPath curated discipline vocabulary",
     "sourceType": "manual_review",
-    "publisher": "YuvaNext",
+    "publisher": "YuvaPath",
     "trustLevel": "internal_reviewed",
     "status": "active",
     "baseUrl": null,

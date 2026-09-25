@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { GuardianConsent, JourneySession, UserProfile } from "@yuvanext/contracts";
+import type { GuardianConsent, JourneySession, UserProfile } from "@yuvapath/contracts";
 import type { SendEmailInput, SendEmailResult, EmailProvider } from "./email-provider.js";
 import { GuardianConsentService } from "./guardian-consent-service.js";
 import type {
@@ -263,7 +263,6 @@ const minorProfile: UserProfile = {
   countryCode: "IN",
   segment: "explorer",
   selfStage: "school",
-  wantsAid: false,
   profileStatus: "active",
   createdAt: "2026-07-29T10:00:00.000Z",
   updatedAt: "2026-07-29T10:00:00.000Z",

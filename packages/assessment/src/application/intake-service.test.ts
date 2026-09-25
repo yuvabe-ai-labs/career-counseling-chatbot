@@ -5,7 +5,7 @@ import type {
   IntakeQuestion,
   JourneySession,
   UserProfile,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { IntakeService } from "./intake-service.js";
 import type { GuardianConsentRepository } from "./guardian-consent-repository.js";
 import type {
@@ -180,8 +180,7 @@ const adultProfile: UserProfile = {
   state: "Tamil Nadu",
   countryCode: "IN",
   segment: "launcher",
-  selfStage: "working",
-  wantsAid: false,
+  selfStage: "graduate",
   profileStatus: "active",
   createdAt: "2026-07-29T10:00:00.000Z",
   updatedAt: "2026-07-29T10:00:00.000Z",

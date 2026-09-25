@@ -2,7 +2,7 @@ import type {
   StreamMap,
   StreamMapItem,
   StreamOption,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import type {
   StreamLookup,
   StreamRepository,

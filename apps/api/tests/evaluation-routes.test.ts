@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import request from "supertest";
-import { EvaluationRunResponseSchema } from "@yuvanext/contracts";
+import { EvaluationRunResponseSchema } from "@yuvapath/contracts";
 import { z } from "zod";
 import { createApp } from "../src/app/create-app.js";
 

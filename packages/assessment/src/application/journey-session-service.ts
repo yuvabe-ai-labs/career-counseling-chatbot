@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { CreateJourneySessionRequest, JourneySession } from "@yuvanext/contracts";
+import type { CreateJourneySessionRequest, JourneySession } from "@yuvapath/contracts";
 import {
   canResumeJourneySession,
   createJourneySessionExpiration,

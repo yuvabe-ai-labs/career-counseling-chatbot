@@ -3,7 +3,7 @@ import {
   CareerDatasetManifestSchema,
   type CareerDatasetManifest,
   type CareerDatasetRecords,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import {
   validateCareerRecords,
   type CareerValidationIssue,

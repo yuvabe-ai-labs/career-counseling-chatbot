@@ -7,7 +7,7 @@ import {
   SubmitAssessmentResponseRequestSchema,
   type StartAssessmentRunRequest,
   type SubmitAssessmentResponseRequest,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { apiRequest } from "@/lib/api-client";
 
 /**

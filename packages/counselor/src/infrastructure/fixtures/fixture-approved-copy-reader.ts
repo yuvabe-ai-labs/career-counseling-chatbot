@@ -1,4 +1,4 @@
-import type { Segment } from "@yuvanext/contracts";
+import type { Segment } from "@yuvapath/contracts";
 import type { ApprovedCopy, ApprovedCopyReader } from "../../application/index.js";
 
 export type ApprovedWelcomeCopyFixture = ApprovedCopy & {

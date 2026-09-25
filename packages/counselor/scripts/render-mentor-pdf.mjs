@@ -8,10 +8,10 @@ const outputPath = path.join(root, "docs/mentor/module-4-end-to-end-endpoints.pd
 const source = fs.readFileSync(sourcePath, "utf8").replace(/\r\n/g, "\n");
 
 const pdf = await PDFDocument.create();
-pdf.setTitle("YuvaNext Module 4 End-to-End Endpoint and Workflow Guide");
-pdf.setAuthor("YuvaNext Backend Team");
+pdf.setTitle("YuvaPath Module 4 End-to-End Endpoint and Workflow Guide");
+pdf.setAuthor("YuvaPath Backend Team");
 pdf.setSubject("Phase A Module 4 mentor handoff");
-pdf.setKeywords(["YuvaNext", "Module 4", "API", "Swagger", "Supabase", "Counselor"]);
+pdf.setKeywords(["YuvaPath", "Module 4", "API", "Swagger", "Supabase", "Counselor"]);
 
 const regular = await pdf.embedFont(StandardFonts.Helvetica);
 const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
@@ -36,7 +36,7 @@ const addPage = () => {
   page = pdf.addPage(pageSize);
   pageNumber += 1;
   page.drawRectangle({ x: 0, y: pageSize[1] - 26, width: pageSize[0], height: 26, color: navy });
-  page.drawText("YUVANEXT  |  MODULE 4 MENTOR HANDOFF", {
+  page.drawText("YUVAPATH  |  MODULE 4 MENTOR HANDOFF", {
     x: margin,
     y: pageSize[1] - 18,
     size: 8,

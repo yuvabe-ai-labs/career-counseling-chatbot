@@ -6,7 +6,7 @@ import {
   type ExplorationEvent,
   type RecommendationSet,
   type ReportResponse,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { CounselorContractError, CounselorNotFoundError } from "./errors.js";
 import type { CounselorRepository, ProfileReader, RecommendationReader } from "./ports/index.js";
 

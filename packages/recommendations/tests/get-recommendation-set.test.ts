@@ -1,4 +1,4 @@
-import { validProfileSnapshot, validRecommendationSet } from "@yuvanext/test-fixtures";
+import { validProfileSnapshot, validRecommendationSet } from "@yuvapath/test-fixtures";
 import { describe, expect, it } from "vitest";
 import {
   FixtureRecommendationSetReader,

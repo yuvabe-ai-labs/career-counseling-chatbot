@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { EvaluationRunResponseSchema, type ResolvedEvaluationRunRequest } from "@yuvanext/contracts";
+import { EvaluationRunResponseSchema, type ResolvedEvaluationRunRequest } from "@yuvapath/contracts";
 import { getSyntheticEvaluationRun, runSyntheticEvaluation } from "../src/index.js";
 
 const uuid = "11111111-1111-4111-8111-111111111111";

@@ -1,4 +1,4 @@
-import { ReportSnapshotSchema, type ReportSnapshot } from "@yuvanext/contracts";
+import { ReportSnapshotSchema, type ReportSnapshot } from "@yuvapath/contracts";
 import type { RenderedReportAsset, ReportRenderer } from "../../application/index.js";
 
 export class FixtureReportRenderer implements ReportRenderer {

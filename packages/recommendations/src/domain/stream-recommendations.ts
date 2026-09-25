@@ -6,13 +6,19 @@ import type {
   RiasecLetter,
   StreamCatalogRecord,
   StreamFitExplanation,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { stableHash } from "./career-matching.js";
 
 export type StreamRecommendationInput = {
   recommendationId: string;
   profile: ProfileSnapshotForRecommendations;
   streams: StreamCatalogRecord[];
+  // Student's most recently stored Career ranking, best rank first — same shape/source as
+  // PathwayRecommendationInput.rankedCareerIds. Empty when the student has never had a Career
+  // recommendation computed; scoreStreams() degrades gracefully to today's exact formula in
+  // that case (see careerStreamAlignment()'s own comment). See
+  // docs/architecture/career-stream-mapping-iteration-1-plan.md.
+  rankedCareerIds: string[];
   config: MatchingConfig;
   createdAt: string;
 };
@@ -35,8 +41,21 @@ export function scoreStreams(input: StreamRecommendationInput): ScoredStream[] {
       const segmentFit = stream.recommendedSegments.includes(input.profile.segment) ? 1 : 0;
       const marksFit = calculateMarksFit(input.profile.marksBand, stream.marksBands);
       const priorityFit = 1 / (stream.priority + 1);
+      const { careerAlignment, matchedCareerIds } = careerStreamAlignment(
+        stream,
+        input.rankedCareerIds,
+        input.config.roundingScale,
+      );
+      // Redistribute weight toward careerAlignment only when a real career signal exists for
+      // THIS stream — same "missing input redistributes weight" degradation pattern already
+      // used for Career's valuesFit (career-matching.ts). With zero knowledge.career_streams
+      // rows seeded (day one), careerAlignment is always 0 for every stream, so this branch
+      // never fires and fitScore is byte-identical to the pre-Iteration-1 formula — see
+      // stream-recommendations.test.ts's regression pin.
       const fitScore = round(
-        riasecOverlap * 0.55 + segmentFit * 0.25 + marksFit * 0.15 + priorityFit * 0.05,
+        careerAlignment > 0
+          ? riasecOverlap * 0.30 + careerAlignment * 0.35 + segmentFit * 0.20 + marksFit * 0.10 + priorityFit * 0.05
+          : riasecOverlap * 0.55 + segmentFit * 0.25 + marksFit * 0.15 + priorityFit * 0.05,
         input.config.roundingScale,
       );
 
@@ -56,6 +75,7 @@ export function scoreStreams(input: StreamRecommendationInput): ScoredStream[] {
           topStudentLetters,
           matchedLetters,
           ...(stream.description ? { description: stream.description } : {}),
+          ...(careerAlignment > 0 ? { careerAlignment, matchedCareerIds } : {}),
         },
         entityDatasetVersion: stream.datasetVersion,
       };
@@ -72,6 +92,7 @@ export function buildStreamRecommendationSet(input: StreamRecommendationInput): 
   const inputHash = stableHash({
     profile: input.profile,
     config: input.config,
+    rankedCareerIds: input.rankedCareerIds,
     streamIds: input.streams
       .map((stream) => ({
         streamId: stream.streamId,
@@ -116,6 +137,37 @@ function topRiasecLetters(
       return tieOrder.indexOf(left) - tieOrder.indexOf(right);
     })
     .slice(0, count);
+}
+
+// Rank-weighted overlap between the student's ranked careers and this stream's own
+// knowledge.career_streams links, each link's weight multiplying its contribution — same
+// Σ 1/(rank+1) shape as pathway-recommendations.ts's rankedAlignment() (duplicated here rather
+// than shared, matching this file's existing convention of not sharing scoring helpers across
+// the two domain files, e.g. calculateMarksFit below). Returns 0 (not undefined) when there's
+// no rankedCareerIds or no careerLinks at all — scoreStreams() treats 0 as "no signal" for the
+// weight-redistribution decision.
+function careerStreamAlignment(
+  stream: StreamCatalogRecord,
+  rankedCareerIds: string[],
+  roundingScale: number,
+): { careerAlignment: number; matchedCareerIds: string[] } {
+  if (rankedCareerIds.length === 0 || !stream.careerLinks || stream.careerLinks.length === 0) {
+    return { careerAlignment: 0, matchedCareerIds: [] };
+  }
+
+  const totalWeight = rankedCareerIds.reduce((sum, _id, index) => sum + 1 / (index + 1), 0);
+  const matchedCareerIds: string[] = [];
+  const matchedWeight = stream.careerLinks.reduce((sum, link) => {
+    const rank = rankedCareerIds.indexOf(link.careerId);
+    if (rank === -1) return sum;
+    matchedCareerIds.push(link.careerId);
+    return sum + link.weight * (1 / (rank + 1));
+  }, 0);
+
+  return {
+    careerAlignment: round(matchedWeight / totalWeight, roundingScale),
+    matchedCareerIds,
+  };
 }
 
 function calculateMarksFit(profileMarksBand: string | undefined, streamMarksBands: string[] | undefined): number {

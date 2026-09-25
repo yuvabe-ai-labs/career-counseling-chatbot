@@ -1,4 +1,4 @@
-import type { ModuleDescriptor } from "@yuvanext/contracts";
+import type { ModuleDescriptor } from "@yuvapath/contracts";
 export { createRecommendationService } from "./application/recommendation-service.js";
 export {
   canonicalizeRiasecPair,
@@ -19,10 +19,14 @@ export {
 } from "./domain/career-matching.js";
 export {
   buildCollegeRecommendationSet,
-  partitionCollegeRings,
-  scoreColleges,
+  COLLEGE_RING_PREVIEW_LIMIT,
+  resolveEligibleColleges,
 } from "./domain/college-recommendations.js";
-export { buildPathwayRecommendationSet, scorePathways } from "./domain/pathway-recommendations.js";
+export {
+  buildPathwayRecommendationSet,
+  partitionPathwayRings,
+  scorePathways,
+} from "./domain/pathway-recommendations.js";
 export { buildPlanRecommendationSet, generatePlan } from "./domain/plan-generation.js";
 export { buildStreamRecommendationSet, scoreStreams } from "./domain/stream-recommendations.js";
 export { resolveGeoScope } from "./domain/geo-scope.js";
@@ -55,9 +59,9 @@ export type {
   ScoredCareer,
 } from "./domain/career-matching.js";
 export type {
+  CollegeFilterOptions,
   CollegeRecommendationInput,
-  CollegeRings,
-  ScoredCollege,
+  EligibleCollege,
 } from "./domain/college-recommendations.js";
 export type {
   PathwayRecommendationInput,
@@ -87,6 +91,6 @@ export * from "./infrastructure/postgres-recommendation-set-reader.js";
 export const recommendationsModule: ModuleDescriptor = {
   code: "m2",
   name: "Recommendations",
-  packageName: "@yuvanext/recommendations",
+  packageName: "@yuvapath/recommendations",
   status: "in_progress",
 };

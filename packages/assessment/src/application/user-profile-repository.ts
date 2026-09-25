@@ -1,4 +1,4 @@
-import type { UserProfile } from "@yuvanext/contracts";
+import type { UserProfile } from "@yuvapath/contracts";
 
 export type UpsertUserProfileRecord = {
   userId: string;
@@ -7,10 +7,10 @@ export type UpsertUserProfileRecord = {
   ageBand: string;
   city: string;
   state: string;
+  homeDistrict: string | undefined;
   countryCode: string;
   segment: string;
   selfStage: string;
-  wantsAid: boolean;
   profileStatus: "active";
   now: string;
 };

@@ -5,8 +5,8 @@ import {
   validJourneyState,
   validSendConversationMessageRequest,
   validStartConversationRequest,
-} from "@yuvanext/test-fixtures";
-import type { StartConversationCommand } from "@yuvanext/counselor";
+} from "@yuvapath/test-fixtures";
+import type { StartConversationCommand } from "@yuvapath/counselor";
 import { describe, expect, it, vi } from "vitest";
 import request from "supertest";
 import { z } from "zod";

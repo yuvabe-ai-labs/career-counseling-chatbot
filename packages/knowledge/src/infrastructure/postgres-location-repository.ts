@@ -1,4 +1,4 @@
-import { CityRecordSchema, StateRecordSchema, type CityRecord, type StateRecord } from "@yuvanext/contracts";
+import { CityRecordSchema, StateRecordSchema, type CityRecord, type StateRecord } from "@yuvapath/contracts";
 import type {
   CitySearchFilters,
   LocationRepository,

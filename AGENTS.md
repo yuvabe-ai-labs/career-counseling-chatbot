@@ -1,14 +1,14 @@
-# YuvaNext Backend Agent Guide
+# YuvaPath Backend Agent Guide
 
 ## Current scope
 
-This repository is the shared backend-only implementation for the YuvaNext Phase A career-counseling POC. Do not create the React product frontend in this phase. The only UI included now is the API testing/documentation UI exposed by Express.
+This repository is the shared backend-only implementation for the YuvaPath Phase A career-counseling POC. Do not create the React product frontend in this phase. The only UI included now is the API testing/documentation UI exposed by Express.
 
 ## Source-of-truth order
 
 1. `docs/reference/prd-phase1.md.docx` — product requirements.
 2. `docs/data-model/phase-a-mvp-data-model.md` — implementation scope and open gates.
-3. `docs/data-model/yuvanext-phase-a-mvp.dbml` — complete Phase A ERD.
+3. `docs/data-model/yuvapath-phase-a-mvp.dbml` — complete Phase A ERD.
 4. The assigned module's detailed data model, DBML and storage-flow document.
 5. The assigned module POC specification under `docs/poc`.
 

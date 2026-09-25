@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { getErrorMessage } from "@/lib/error-messages";
 import { AuthFormCard } from "../components/AuthFormCard";
 import { AuthLayout } from "../components/AuthLayout";
@@ -32,14 +32,26 @@ export function SignInPage() {
   const signIn = useSignInWithPassword();
   const createJourneySession = useCreateJourneySession();
 
+  const signedOut = Boolean((location.state as { signedOut?: boolean } | null)?.signedOut);
+
   useEffect(() => {
-    if ((location.state as { signedOut?: boolean } | null)?.signedOut) {
+    if (signedOut) {
       session.reset();
     }
     // Only ever act on the state this navigation arrived with, once, on mount — not on every
     // session/location identity change (session.reset() itself produces a new session object).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // A genuinely signed-in visitor landing back on /sign-in (stale tab, back button, typing the
+  // URL) shouldn't see a fresh sign-in form with a header that confusingly shows their account/
+  // Sign out — send them to /home instead. Exempt while `signedOut` is true: that's this exact
+  // page completing an actual sign-out (see this component's own doc comment) — session.userId is
+  // still set for one render until the effect above clears it, and this guard must not race that
+  // reset and bounce the student straight back to /home mid-sign-out.
+  if (!signedOut && session.userId && session.journeySessionId) {
+    return <Navigate to="/home" replace />;
+  }
 
   const handleSubmit = async ({ email, password }: { email: string; password: string }) => {
     try {

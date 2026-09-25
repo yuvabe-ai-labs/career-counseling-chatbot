@@ -7,7 +7,7 @@ import {
   StaffQueueActionPathParamsSchema, StaffQueueActionRequestSchema,
   StaffQueueActionResponseSchema, StaffQueueResponseSchema, StaffSessionQuerySchema,
   StaffSessionsResponseSchema,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import type { Express, Request, Response } from "express";
 import { createSyntheticPrivacyJob, getSyntheticPrivacyJob } from "../domain/privacy-jobs.js";
 import { createSyntheticHandoffPacket } from "../domain/handoff-packets.js";

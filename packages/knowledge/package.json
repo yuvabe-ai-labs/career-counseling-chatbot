@@ -1,12 +1,12 @@
 {
-  "name": "@yuvanext/knowledge",
+  "name": "@yuvapath/knowledge",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "exports": "./src/index.ts",
   "dependencies": {
-    "@yuvanext/contracts": "workspace:*",
-    "@yuvanext/database": "workspace:*",
+    "@yuvapath/contracts": "workspace:*",
+    "@yuvapath/database": "workspace:*",
     "express": "^5.2.1",
     "zod": "^4.4.3"
   },

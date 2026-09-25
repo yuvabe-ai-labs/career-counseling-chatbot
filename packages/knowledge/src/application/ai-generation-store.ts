@@ -7,7 +7,7 @@ import type {
   AiGenerationRun,
   AiGenerationRunStatus,
   AiGenerationTargetTable,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 
 // ---------------------------------------------------------------------------
 // Deterministic hashing / natural-key normalization
@@ -64,6 +64,21 @@ export function normalizePathwayDisciplineNaturalKey(input: {
 
 export function normalizeStreamMapItemNaturalKey(input: { mapNaturalKey: string; streamCode: string }): string {
   return [input.mapNaturalKey, input.streamCode].map(normalizeText).join("|");
+}
+
+export function normalizeCareerStreamNaturalKey(input: { careerNaturalKey: string; streamCode: string }): string {
+  return [input.careerNaturalKey, input.streamCode].map(normalizeText).join("|");
+}
+
+export function normalizeStreamPathwayNaturalKey(input: { streamOptionNaturalKey: string; pathwayCode: string }): string {
+  return [input.streamOptionNaturalKey, input.pathwayCode].map(normalizeText).join("|");
+}
+
+/** name+provider, not name alone — two different providers can legitimately run a
+ *  similarly-named scheme (e.g. a generic "Post-Metric Scholarship" offered by more than one
+ *  welfare department), and collapsing them would silently drop a real, distinct scheme. */
+export function normalizeAidSchemeNaturalKey(input: { name: string; provider: string }): string {
+  return [input.name, input.provider].map(normalizeText).join("|");
 }
 
 // ---------------------------------------------------------------------------

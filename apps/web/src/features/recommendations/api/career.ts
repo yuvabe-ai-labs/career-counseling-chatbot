@@ -1,4 +1,4 @@
-import { CareerRecommendationSetResponseSchema } from "@yuvanext/contracts";
+import { CareerRecommendationSetResponseSchema } from "@yuvapath/contracts";
 import { apiRequest } from "@/lib/api-client";
 
 /**

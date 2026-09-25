@@ -9,7 +9,7 @@ import type {
   ResendPendingGuardianConsentRequest,
   VerifyGuardianConsentRequest,
   VerifyPendingGuardianConsentRequest,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import {
   createGuardianOtp,
   createGuardianOtpExpiration,

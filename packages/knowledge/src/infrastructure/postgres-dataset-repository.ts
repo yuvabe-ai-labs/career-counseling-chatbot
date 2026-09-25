@@ -1,4 +1,4 @@
-import { PublishedDatasetSchema, type PublishedDataset } from "@yuvanext/contracts";
+import { PublishedDatasetSchema, type PublishedDataset } from "@yuvapath/contracts";
 import type { DatasetRepository } from "../domain/dataset.js";
 
 type QueryExecutor = {

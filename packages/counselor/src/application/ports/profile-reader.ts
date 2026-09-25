@@ -1,4 +1,4 @@
-import type { ProfileSnapshot } from "@yuvanext/contracts";
+import type { ProfileSnapshot } from "@yuvapath/contracts";
 
 export type ReadProfileInput = {
   userId: string;

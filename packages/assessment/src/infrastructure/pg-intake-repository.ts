@@ -4,7 +4,7 @@ import {
   type IntakeAnswer,
   type IntakeQuestion,
   type Segment,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import type { Pool } from "pg";
 import type {
   IntakeQuestionSetWithQuestions,

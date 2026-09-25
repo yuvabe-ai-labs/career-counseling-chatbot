@@ -9,7 +9,7 @@ import {
   validRecommendationSet,
   validRetrievedEvidence,
   validSafetyDecision,
-} from "@yuvanext/test-fixtures";
+} from "@yuvapath/test-fixtures";
 import { describe, expect, it, vi } from "vitest";
 import {
   CounselorAccessError,

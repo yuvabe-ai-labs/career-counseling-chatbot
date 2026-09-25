@@ -1,0 +1,28 @@
+{
+ "schemaVersion": 1,
+ "version": "2026-09-16",
+ "recordsFile": "colleges.json",
+ "checksumSha256": "1e3e030d1d1d1b7cfb491bc62085f422d4e748cee4411a4eaded99a7107ec590",
+ "reviewStatus": "approved",
+ "createdAt": "2026-09-16T00:00:00.000Z",
+ "source": {
+  "id": "3071aa2b-43f1-5fed-98b4-3801b91c743f",
+  "sourceKey": "tn-official-college-catalogue",
+  "name": "Tamil Nadu official college catalogue (DCE, DOTE/TNEA, DME, TNAU, TANUVAS, TNJFU, TNDALU)",
+  "sourceType": "official_government_directory",
+  "publisher": "Government of Tamil Nadu (multiple directorates and state universities)",
+  "trustLevel": "authoritative_external",
+  "status": "active",
+  "baseUrl": "https://tndce.tn.gov.in/",
+  "licenseRef": "Compiled from public official admission directories; verify against the source before publication."
+ },
+ "datasetKey": "tn-official-colleges",
+ "datasetVersionId": "e84a2a7d-342d-569f-9dd9-4cbafcf22af6",
+ "recordCount": 18717,
+ "recordCounts": {
+  "colleges": 2896,
+  "disciplines": 100,
+  "programs": 15563,
+  "pathwayDisciplines": 158
+ }
+}

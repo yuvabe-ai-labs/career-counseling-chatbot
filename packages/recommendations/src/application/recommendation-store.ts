@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
-import type { RecommendationSet } from "@yuvanext/contracts";
+import type { RecommendationSet } from "@yuvapath/contracts";
 import type { Pool, PoolClient } from "pg";
-import { withTransaction } from "@yuvanext/database";
+import { withTransaction } from "@yuvapath/database";
 
 export type StoredRecommendationSet = RecommendationSet;
 

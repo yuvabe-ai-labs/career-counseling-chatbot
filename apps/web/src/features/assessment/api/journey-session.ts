@@ -1,10 +1,10 @@
 import {
   JourneySessionResponseSchema,
   type CreateJourneySessionRequest,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { apiRequest } from "@/lib/api-client";
 
-/** POST /api/v1/journey-sessions — requires x-yuvanext-user-id (attached automatically by apiRequest). */
+/** POST /api/v1/journey-sessions — requires x-yuvapath-user-id (attached automatically by apiRequest). */
 export function createJourneySession(input: CreateJourneySessionRequest = {}) {
   return apiRequest("/api/v1/journey-sessions", JourneySessionResponseSchema, {
     method: "POST",

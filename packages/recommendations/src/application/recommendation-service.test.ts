@@ -8,7 +8,7 @@ import type {
   PlanTemplateCatalogRecord,
   ProfileSnapshotForRecommendations,
   StreamCatalogRecord,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { createRecommendationService } from "./recommendation-service.js";
 
 const createdAt = "2026-07-28T00:00:00.000Z";
@@ -70,7 +70,8 @@ const pathways: PathwayCatalogRecord[] = [
     pathwayId,
     title: "BSc Computer Science",
     careerIds: [careerId],
-    streamIds: [streamId],
+    streamOptionIds: [streamId],
+    collegeCount: 25,
     recommendedSegments: ["pathfinder"],
     marksBands: ["high"],
     reachability: 1,
@@ -85,10 +86,12 @@ const colleges: CollegeCatalogRecord[] = [
   {
     collegeId: "00000000-0000-4000-8000-000000005501",
     title: "Chennai Science College",
-    disciplineIds: [disciplineId],
     state: "Tamil Nadu",
+    district: "Chennai",
+    instituteKind: "Arts & Science College",
+    ownership: "government",
     tier: 1,
-    collegeType: "regular",
+    programs: [{ disciplineId, programType: "B.Sc", admissionRoute: "Direct application to the college" }],
     datasetVersion: "colleges-2026-a",
     verified: true,
   },
@@ -143,6 +146,7 @@ describe("recommendation service", () => {
       recommendationId: "stream-rec-1",
       profile,
       streams,
+      rankedCareerIds: careerSet.items.map((item) => item.entityId),
       config,
       createdAt,
     });
@@ -160,7 +164,6 @@ describe("recommendation service", () => {
       profile,
       colleges,
       targetDisciplineIds: [disciplineId],
-      selectedState: "Tamil Nadu",
       config,
       createdAt,
     });

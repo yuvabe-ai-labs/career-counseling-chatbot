@@ -1,4 +1,4 @@
-import type { HandoffPacket, HandoffReason, SafetyDecision } from "@yuvanext/contracts";
+import type { HandoffPacket, HandoffReason, SafetyDecision } from "@yuvapath/contracts";
 
 export type SafetyPreCheckInput = {
   userId: string;

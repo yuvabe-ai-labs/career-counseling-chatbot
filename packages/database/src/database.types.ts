@@ -653,7 +653,6 @@ export type Database = {
           snapshot_schema_version: number
           state: string
           user_id: string
-          wants_aid: boolean
         }
         Insert: {
           age_band: string
@@ -670,7 +669,6 @@ export type Database = {
           snapshot_schema_version: number
           state: string
           user_id: string
-          wants_aid: boolean
         }
         Update: {
           age_band?: string
@@ -687,7 +685,6 @@ export type Database = {
           snapshot_schema_version?: number
           state?: string
           user_id?: string
-          wants_aid?: boolean
         }
         Relationships: []
       }
@@ -706,7 +703,6 @@ export type Database = {
           state: string
           updated_at: string
           user_id: string
-          wants_aid: boolean | null
         }
         Insert: {
           age_at_onboarding?: number | null
@@ -722,7 +718,6 @@ export type Database = {
           state: string
           updated_at: string
           user_id: string
-          wants_aid?: boolean | null
         }
         Update: {
           age_at_onboarding?: number | null
@@ -738,7 +733,6 @@ export type Database = {
           state?: string
           updated_at?: string
           user_id?: string
-          wants_aid?: boolean | null
         }
         Relationships: []
       }

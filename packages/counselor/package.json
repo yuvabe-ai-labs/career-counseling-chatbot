@@ -1,18 +1,18 @@
 {
-  "name": "@yuvanext/counselor",
+  "name": "@yuvapath/counselor",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "exports": "./src/index.ts",
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^9.1.0",
-    "@yuvanext/contracts": "workspace:*",
-    "@yuvanext/database": "workspace:*",
+    "@yuvapath/contracts": "workspace:*",
+    "@yuvapath/database": "workspace:*",
     "express": "^5.2.1",
     "pdf-lib": "^1.17.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@yuvanext/test-fixtures": "workspace:*"
+    "@yuvapath/test-fixtures": "workspace:*"
   }
 }

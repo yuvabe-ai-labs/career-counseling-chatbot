@@ -4,7 +4,7 @@ import {
   AidDatasetRecordsSchema,
   type AidDatasetManifest,
   type AidDatasetRecords,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 
 export type AidDatasetPublisher = {
   publish(input: { manifest: AidDatasetManifest; records: AidDatasetRecords }):

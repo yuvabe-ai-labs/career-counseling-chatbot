@@ -2,7 +2,7 @@
 // Packages apps/api/dist-lambda (built by `pnpm build:lambda`) into a self-contained
 // function.zip for AWS Lambda: no pnpm/workspace symlinks, no dev dependencies, just the
 // handful of plain npm packages the build keeps external (tsup already bundles every
-// @yuvanext/* workspace package into dist-lambda/lambda.js itself).
+// @yuvapath/* workspace package into dist-lambda/lambda.js itself).
 //
 // Exact dependency versions are read from apps/api's own already-installed node_modules
 // (populated by `pnpm install --frozen-lockfile` earlier in the same CI job), so the deployed
@@ -57,7 +57,7 @@ if (!existsSync(distLambdaDir)) {
 // --external (parsed straight from its script string, not re-declared here) — those are
 // exactly the packages tsup does NOT bundle into dist-lambda/lambda.js, so they're exactly
 // what must exist as real node_modules alongside it. This includes transitive deps like
-// nodemailer (pulled in by @yuvanext/assessment) that never appear in apps/api/package.json
+// nodemailer (pulled in by @yuvapath/assessment) that never appear in apps/api/package.json
 // directly but still need to be external: esbuild bundling breaks packages that do dynamic,
 // non-string-literal require() calls internally (nodemailer, pino) — the bundled code throws
 // "Dynamic require of ... is not supported" once that code path actually runs.
@@ -75,7 +75,7 @@ if (runtimeDepNames.length === 0) {
 // than re-declaring a range here, so this never drifts from what the CI job already tested.
 // pnpm only links a package into node_modules for the workspace packages that actually declare
 // it (no hoisting), and an external can be a *transitive* dep declared by some other workspace
-// package (e.g. nodemailer, pulled in by @yuvanext/assessment, not by apps/api itself) — so try
+// package (e.g. nodemailer, pulled in by @yuvapath/assessment, not by apps/api itself) — so try
 // apps/api first, then fall back to scanning every other workspace package for one that resolves it.
 const candidatePackageDirs = [
   apiDir,
@@ -117,7 +117,7 @@ writeFileSync(
   join(deployDir, "package.json"),
   JSON.stringify(
     {
-      name: "yuvanext-api-lambda",
+      name: "yuvapath-api-lambda",
       private: true,
       type: "module",
       dependencies: pinnedDependencies,

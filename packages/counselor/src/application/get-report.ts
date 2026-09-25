@@ -1,4 +1,4 @@
-import { ReportResponseSchema, UuidSchema, type ReportResponse } from "@yuvanext/contracts";
+import { ReportResponseSchema, UuidSchema, type ReportResponse } from "@yuvapath/contracts";
 import { CounselorNotFoundError } from "./errors.js";
 import type { CounselorRepository } from "./ports/index.js";
 

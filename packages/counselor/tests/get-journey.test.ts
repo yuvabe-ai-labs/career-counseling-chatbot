@@ -4,7 +4,7 @@ import {
   validConversation,
   validJourneyState,
   validProfileSnapshot,
-} from "@yuvanext/test-fixtures";
+} from "@yuvapath/test-fixtures";
 import { describe, expect, it } from "vitest";
 import {
   CounselorNotFoundError,

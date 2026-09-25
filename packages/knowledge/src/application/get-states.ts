@@ -1,4 +1,4 @@
-import type { StateListQuery, StateListResponse } from "@yuvanext/contracts";
+import type { StateListQuery, StateListResponse } from "@yuvapath/contracts";
 import type { LocationRepository } from "../domain/location.js";
 
 export async function getStates(

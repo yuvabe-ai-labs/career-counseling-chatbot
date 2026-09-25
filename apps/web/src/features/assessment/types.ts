@@ -1,4 +1,4 @@
-import type { EducationStage, GuardianOtpTiming } from "@yuvanext/contracts";
+import type { EducationStage, GuardianOtpTiming } from "@yuvapath/contracts";
 
 /** Step 1's local form state — converted into UpsertUserProfileRequest once identity is verified. */
 export type ProfileFormValues = {
@@ -13,7 +13,6 @@ export type ProfileFormValues = {
   city: string;
   country: string;
   selfStage: EducationStage | "";
-  wantsAid: boolean;
 };
 
 export const emptyProfileFormValues: ProfileFormValues = {
@@ -24,7 +23,6 @@ export const emptyProfileFormValues: ProfileFormValues = {
   city: "",
   country: "India",
   selfStage: "",
-  wantsAid: false,
 };
 
 export type GuardianModalPhase = "email_entry" | "otp_verification";

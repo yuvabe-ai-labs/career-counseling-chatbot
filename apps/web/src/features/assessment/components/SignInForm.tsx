@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { ArrowRight, Eye, EyeOff, Lock, Mail, UserPlus } from "lucide-react";
+import { ArrowRight, Lock, Mail, UserPlus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import {
   formSectionClass,
   primaryButtonClass,
 } from "./form-styles";
+import { PasswordVisibilityToggle } from "./PasswordVisibilityToggle";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -117,18 +118,10 @@ export function SignInForm({ onSubmit, submitting }: SignInFormProps) {
               aria-invalid={Boolean(passwordError)}
               className={fieldInputWithTrailingClass}
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword((value) => !value)}
-              aria-label={showPassword ? "Hide password" : "Show password"}
-              className="absolute top-1/2 right-4 -translate-y-1/2 cursor-pointer text-muted-foreground"
-            >
-              {showPassword ? (
-                <EyeOff className="size-[18px]" aria-hidden="true" />
-              ) : (
-                <Eye className="size-[18px]" aria-hidden="true" />
-              )}
-            </button>
+            <PasswordVisibilityToggle
+              visible={showPassword}
+              onToggle={() => setShowPassword((value) => !value)}
+            />
           </div>
           {passwordError ? (
             <p className="mt-1 font-display text-xs font-normal text-destructive">
@@ -157,7 +150,7 @@ export function SignInForm({ onSubmit, submitting }: SignInFormProps) {
         <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
           <UserPlus className="size-3.5 shrink-0" aria-hidden="true" />
           Don&apos;t have an account?{" "}
-          <Link to="/" className="font-semibold text-brand hover:underline">
+          <Link to="/sign-up" className="font-semibold text-brand hover:underline">
             Sign Up
           </Link>
         </p>

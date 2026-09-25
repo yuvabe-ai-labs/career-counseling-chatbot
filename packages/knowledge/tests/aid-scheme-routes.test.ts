@@ -2,7 +2,7 @@ import {
   AidSchemeListResponseSchema,
   AidSchemeSchema,
   createOpenApiRegistry,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { aidSchemeFixtures } from "../../test-fixtures/src/index.js";
 import express from "express";
 import request from "supertest";

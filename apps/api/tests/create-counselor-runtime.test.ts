@@ -8,14 +8,14 @@ import {
   FixtureSafetyChecker,
   SendConversationMessageService,
   StartConversationService,
-} from "@yuvanext/counselor";
+} from "@yuvapath/counselor";
 import {
   validHandoffPacket,
   validProfileSnapshot,
   validRecommendationSet,
   validRetrievedEvidence,
   validSafetyDecision,
-} from "@yuvanext/test-fixtures";
+} from "@yuvapath/test-fixtures";
 import type { Request } from "express";
 import { describe, expect, it, vi } from "vitest";
 import {

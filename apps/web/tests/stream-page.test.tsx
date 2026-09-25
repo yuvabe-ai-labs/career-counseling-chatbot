@@ -56,7 +56,7 @@ function renderPage() {
   setStoredUserId("user-id");
   setStoredJourneySessionId("session-id");
   setStoredProfileSnapshotId("snapshot-id");
-  setStoredExploreGatingContext({ segment: "pathfinder", wantsAid: false, currentGoal: undefined });
+  setStoredExploreGatingContext({ segment: "pathfinder", seeksAid: false, currentGoal: undefined });
   return render(
     <QueryClientProvider client={queryClient}>
       <SessionProvider>
@@ -113,29 +113,51 @@ describe("StreamPage", () => {
     expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
   });
 
-  it("keeps the description off the card overview — only the title and fit line show there", async () => {
+  it("shows the title and description on the card, with no scores or matched letters", async () => {
     getStreamRecommendations.mockResolvedValue(RESPONSE);
     renderPage();
 
     await waitFor(() => {
       expect(screen.getByText(/Science with Mathematics/)).toBeInTheDocument();
     });
-    expect(screen.getByText(/Fit: 82%/)).toBeInTheDocument();
-    expect(
-      screen.queryByText(/Physics, Chemistry and Mathematics/),
-    ).not.toBeInTheDocument();
+    expect(screen.getByText(/Physics, Chemistry and Mathematics/)).toBeInTheDocument();
+    expect(screen.queryByText(/Fit:/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/matched/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/82%/)).not.toBeInTheDocument();
   });
 
-  it("still shows the full description once the card is clicked, via the existing detail sheet", async () => {
+  it("opens the detail sheet with the description only — no match %, Interest/Segment/Marks fit or matched interests", async () => {
     getStreamRecommendations.mockResolvedValue(RESPONSE);
     renderPage();
 
     const card = await screen.findByText(/Science with Mathematics/);
     fireEvent.click(card.closest("button")!);
 
-    expect(
-      await screen.findByText(/Physics, Chemistry and Mathematics/),
-    ).toBeInTheDocument();
+    // Title appears on the card and in the sheet; the description too.
+    expect(await screen.findAllByText(/Physics, Chemistry and Mathematics/)).toHaveLength(2);
+    expect(screen.queryByText(/% match/)).not.toBeInTheDocument();
+    expect(screen.queryByText("Interest Match")).not.toBeInTheDocument();
+    expect(screen.queryByText("Segment Fit")).not.toBeInTheDocument();
+    expect(screen.queryByText("Marks Fit")).not.toBeInTheDocument();
+    expect(screen.queryByText("Matched Interests")).not.toBeInTheDocument();
+  });
+
+  it("shows at most the top 3 streams, in the backend's order", async () => {
+    const base = RESPONSE.items[0]!;
+    const many = ["A", "B", "C", "D", "E"].map((letter, index) => ({
+      ...base,
+      itemId: `stream:${letter}`,
+      title: `Stream ${letter}`,
+      rank: index + 1,
+    }));
+    getStreamRecommendations.mockResolvedValue({ ...RESPONSE, items: many });
+    renderPage();
+
+    expect(await screen.findByText("Stream A")).toBeInTheDocument();
+    expect(screen.getByText("Stream B")).toBeInTheDocument();
+    expect(screen.getByText("Stream C")).toBeInTheDocument();
+    expect(screen.queryByText("Stream D")).not.toBeInTheDocument();
+    expect(screen.queryByText("Stream E")).not.toBeInTheDocument();
   });
 
   it("shows an error state with retry when the request fails", async () => {

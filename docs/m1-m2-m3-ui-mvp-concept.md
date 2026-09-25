@@ -5,7 +5,7 @@ Status: Ideate mode only. This document explains how the UI should be created la
 Brand placeholder: `{BRAND_NAME}`  
 When the final brand name is provided, replace `{BRAND_NAME}` in the app header, welcome copy, report title, and share/download labels.
 
-Design reference: `docs/reference/YuvaNext_Prototype.html`
+Design reference: `docs/reference/YuvaPath_Prototype.html`
 
 ## 1. What The UI Should Feel Like
 
@@ -34,9 +34,9 @@ Main app wiring:
 
 Registered backend modules:
 
-- `@yuvanext/assessment` = Module 1
-- `@yuvanext/recommendations` = Module 2
-- `@yuvanext/knowledge` = Module 3
+- `@yuvapath/assessment` = Module 1
+- `@yuvapath/recommendations` = Module 2
+- `@yuvapath/knowledge` = Module 3
 
 Module 1 important folders:
 

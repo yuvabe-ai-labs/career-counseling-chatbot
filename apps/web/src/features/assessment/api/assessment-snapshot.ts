@@ -1,4 +1,4 @@
-import { ProfileSnapshotResponseSchema } from "@yuvanext/contracts";
+import { ProfileSnapshotResponseSchema } from "@yuvapath/contracts";
 import { apiRequest } from "@/lib/api-client";
 
 /**
@@ -22,8 +22,8 @@ export function createAssessmentSnapshot(sessionId: string, runId: string) {
 
 // Deliberately no GET /api/v1/assessment-snapshots wrapper here: that route requires a real
 // Supabase Auth bearer token (resolveUserId: createSupabaseUserResolver, apps/api/src/app/
-// create-assessment-runtime.ts) — a different auth model than the x-yuvanext-user-id header
+// create-assessment-runtime.ts) — a different auth model than the x-yuvapath-user-id header
 // apiRequest sends everywhere else in this app, and one the frontend doesn't implement at all.
 // Calling it from here would just 401. The Explore Path screens instead store the gating
-// fields (segment/wantsAid/currentGoal) from this POST's own response — see
+// fields (segment/seeksAid/currentGoal) from this POST's own response — see
 // setStoredExploreGatingContext in @/lib/storage — rather than re-fetching the snapshot later.

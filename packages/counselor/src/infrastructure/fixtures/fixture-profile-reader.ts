@@ -1,4 +1,4 @@
-import { ProfileSnapshotSchema, type ProfileSnapshot } from "@yuvanext/contracts";
+import { ProfileSnapshotSchema, type ProfileSnapshot } from "@yuvapath/contracts";
 import type { ProfileReader, ReadProfileInput } from "../../application/index.js";
 
 export class FixtureProfileReader implements ProfileReader {

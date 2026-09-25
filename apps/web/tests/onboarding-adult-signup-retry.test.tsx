@@ -79,6 +79,10 @@ async function completeStepOneAsAdult(user: ReturnType<typeof userEvent.setup>) 
 
 describe("OnboardingPage — adult signup, stale pending session recovery", () => {
   it("recovers from a stale/expired pending session instead of showing the raw backend error", async () => {
+    // Cleared first so a userId/journeySessionId left over from another test file's own setup
+    // can't leak in — OnboardingPage now redirects an already-signed-in visitor straight to
+    // /home, which this test's own render() would otherwise silently hit instead.
+    localStorage.clear();
     // Simulate the actual reported bug (previously against /auth/otp/request, now against
     // /auth/signup): a pendingSessionId left over in localStorage (e.g. from before a backend
     // restart, or from >30 minutes ago) that the server no longer recognizes.

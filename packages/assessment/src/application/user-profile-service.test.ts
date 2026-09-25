@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { JourneySession, UserProfile } from "@yuvanext/contracts";
+import type { JourneySession, UserProfile } from "@yuvapath/contracts";
 import { UserProfileService } from "./user-profile-service.js";
 import type { JourneySessionRepository, NewJourneySession } from "./journey-session-repository.js";
 import type { UpsertUserProfileRecord, UserProfileRepository } from "./user-profile-repository.js";
@@ -68,10 +68,10 @@ class InMemoryUserProfileRepository implements UserProfileRepository {
       ageBand: input.ageBand as UserProfile["ageBand"],
       city: input.city,
       state: input.state,
+      homeDistrict: input.homeDistrict as UserProfile["homeDistrict"],
       countryCode: input.countryCode,
       segment: input.segment as UserProfile["segment"],
       selfStage: input.selfStage as UserProfile["selfStage"],
-      wantsAid: input.wantsAid,
       profileStatus: input.profileStatus,
       createdAt: existing?.createdAt ?? input.now,
       updatedAt: input.now,
@@ -130,9 +130,9 @@ describe("UserProfileService", () => {
         dateOfBirth: "2012-08-10",
         city: "Auroville",
         state: "Tamil Nadu",
+        homeDistrict: "Viluppuram",
         countryCode: "in",
         selfStage: "school",
-        wantsAid: false,
       },
     });
 
@@ -154,9 +154,9 @@ describe("UserProfileService", () => {
           dateOfBirth: "2015-07-29",
           city: "Pune",
           state: "Maharashtra",
+          homeDistrict: "Chennai",
           countryCode: "IN",
           selfStage: "school",
-          wantsAid: false,
         },
       }),
     ).rejects.toMatchObject({ code: "under_12_ineligible", statusCode: 422 });
@@ -174,15 +174,14 @@ describe("UserProfileService", () => {
         ageAtOnboarding: 15,
         city: "Kochi",
         state: "Kerala",
+        homeDistrict: "Chennai",
         countryCode: "IN",
         selfStage: "higher_secondary",
-        wantsAid: true,
       },
     });
 
     expect(profile.ageBand).toBe("minor_14_15");
     expect(profile.segment).toBe("pathfinder");
-    expect(profile.wantsAid).toBe(true);
   });
 
   it("requires the journey session to belong to the actor", async () => {
@@ -199,9 +198,9 @@ describe("UserProfileService", () => {
           ageAtOnboarding: 14,
           city: "Auroville",
           state: "Tamil Nadu",
+          homeDistrict: "Viluppuram",
           countryCode: "IN",
           selfStage: "school",
-          wantsAid: false,
         },
       }),
     ).rejects.toMatchObject({ code: "journey_session_not_found", statusCode: 404 });

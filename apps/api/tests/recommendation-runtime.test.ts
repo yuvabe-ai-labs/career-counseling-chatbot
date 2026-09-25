@@ -1,5 +1,5 @@
-import { RecommendationSetResponseSchema } from "@yuvanext/contracts";
-import { counselorFixtureIds, validRecommendationSet } from "@yuvanext/test-fixtures";
+import { RecommendationSetResponseSchema } from "@yuvapath/contracts";
+import { counselorFixtureIds, validRecommendationSet } from "@yuvapath/test-fixtures";
 import request from "supertest";
 import { describe, expect, it } from "vitest";
 import { createApp } from "../src/app/create-app.js";

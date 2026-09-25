@@ -25,7 +25,7 @@ import {
   type JourneyResponse,
   type ReportResponse,
   type StartConversationResponse,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import type { Express, NextFunction, Request, Response } from "express";
 import {
   CounselorAccessError,

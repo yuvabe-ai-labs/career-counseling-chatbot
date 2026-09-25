@@ -5,7 +5,7 @@ import type {
   SignInWithPasswordResponse,
   SignUpWithPasswordResponse,
   VerifyIdentityOtpResponse,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { isMinorAge, protectedEmailHash } from "../domain/guardian-consent.js";
 import {
   createIdentityOtp,

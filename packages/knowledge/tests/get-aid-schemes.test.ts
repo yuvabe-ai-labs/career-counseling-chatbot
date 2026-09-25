@@ -1,4 +1,4 @@
-import { AidCriterionSchema, AidSchemeListResponseSchema, AidSchemeSchema } from "@yuvanext/contracts";
+import { AidCriterionSchema, AidSchemeListResponseSchema, AidSchemeSchema } from "@yuvapath/contracts";
 import { aidCriterionFixtures, aidSchemeFixtures } from "../../test-fixtures/src/index.js";
 import { describe, expect, it } from "vitest";
 import { getAidSchemes, InMemoryAidSchemeRepository } from "../src/index.js";

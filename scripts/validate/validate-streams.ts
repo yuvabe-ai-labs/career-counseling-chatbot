@@ -1,8 +1,8 @@
 import process from "node:process";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { StreamDatasetManifestSchema } from "@yuvanext/contracts";
-import { validateStreamDataset } from "@yuvanext/knowledge";
+import { StreamDatasetManifestSchema } from "@yuvapath/contracts";
+import { validateStreamDataset } from "@yuvapath/knowledge";
 
 const directory = "data/seed/knowledge/streams/2026-07-31";
 

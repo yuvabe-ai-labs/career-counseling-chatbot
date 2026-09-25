@@ -14,10 +14,10 @@
   "createdAt": "2026-07-30T00:00:00.000Z",
   "source": {
     "id": "97777777-7777-4777-8777-777777777777",
-    "sourceKey": "yuvanext-synthetic-careers-poc",
-    "name": "YuvaNext synthetic career fixtures",
+    "sourceKey": "yuvapath-synthetic-careers-poc",
+    "name": "YuvaPath synthetic career fixtures",
     "sourceType": "manual_review",
-    "publisher": "YuvaNext POC team",
+    "publisher": "YuvaPath POC team",
     "trustLevel": "project_reviewed",
     "status": "active",
     "baseUrl": null,

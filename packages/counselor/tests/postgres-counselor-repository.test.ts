@@ -6,7 +6,7 @@ import {
   validConversation,
   validJourneyState,
   validStartConversationRequest,
-} from "@yuvanext/test-fixtures";
+} from "@yuvapath/test-fixtures";
 import { describe, expect, it, vi } from "vitest";
 import {
   CounselorAccessError,

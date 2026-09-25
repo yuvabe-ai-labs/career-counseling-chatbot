@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Navigate, useNavigate } from "react-router-dom";
-import type { RecommendationItem } from "@yuvanext/contracts";
+import type { RecommendationItem } from "@yuvapath/contracts";
 import { AppHeader } from "@/components/AppHeader";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
@@ -12,12 +12,24 @@ import { PathwayDetailSheet } from "../components/PathwayDetailSheet";
 import { RingMap } from "../components/RingMap";
 import { usePathwayRecommendations } from "../hooks/usePathwayRecommendations";
 
+function collegeAvailabilityOf(item: RecommendationItem): number | undefined {
+  const explanation = item.explanation;
+  return typeof explanation === "object" &&
+    explanation !== null &&
+    "collegeAvailability" in explanation &&
+    typeof explanation.collegeAvailability === "number"
+    ? explanation.collegeAvailability
+    : undefined;
+}
+
 const ZOOM_LABEL = { 1: "Explore More", 2: "Explore More", 3: "Recommended Pathways" } as const;
 
 /**
- * Pathfinder-only tab (tabsToShow() never enables it for Explorer). Same shell/pattern as
- * StreamPage — pathways aren't ring-partitioned either, so this is the same singleTier RingMap
- * treatment.
+ * Pathfinder-only tab (tabsToShow() never enables it for Explorer). Pathways are now
+ * ring-partitioned by the backend (partitionPathwayRings() in pathway-recommendations.ts,
+ * mirroring career/college's own inner/middle/outer curation) instead of being dumped into one
+ * synthetic tier, so this uses the same 3-tier RingMap treatment as CollegePage rather than
+ * `singleTier`.
  */
 export function PathwayPage() {
   const navigate = useNavigate();
@@ -35,7 +47,10 @@ export function PathwayPage() {
     return <Navigate to="/riasec-results" replace />;
   }
 
-  const items = recommendationQuery.data?.items ?? [];
+  const rings = recommendationQuery.data?.rings;
+  const hasPathways = Boolean(
+    rings && rings.inner.length + rings.middle.length + rings.outer.length > 0,
+  );
 
   return (
     <main className="bg-hero-gradient flex min-h-screen flex-col">
@@ -66,15 +81,17 @@ export function PathwayPage() {
               )}
               onRetry={() => void recommendationQuery.refetch()}
             />
-          ) : items.length > 0 ? (
+          ) : hasPathways && rings ? (
             <RingMap
-              rings={{ inner: items, middle: [], outer: [] }}
+              rings={rings}
               zoomLabels={ZOOM_LABEL}
               hideMatchPercent={false}
+              // MVP: the only number on a pathway dot is College Availability — fitScore and the
+              // other pathway sub-scores stay in the API for a later scoring phase.
+              dotMetric={collegeAvailabilityOf}
               selectedItemId={selectedItem?.itemId ?? null}
               onSelectItem={setSelectedItem}
               ariaLabel="Recommended pathways"
-              singleTier
             />
           ) : (
             <p className="text-center font-display text-base text-muted-foreground">

@@ -1,4 +1,4 @@
-import type { JourneySession } from "@yuvanext/contracts";
+import type { JourneySession } from "@yuvapath/contracts";
 
 export type NewJourneySession = {
   id: string;

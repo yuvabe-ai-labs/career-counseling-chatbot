@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
-import { ReportSnapshotSchema, type ReportSnapshot } from "@yuvanext/contracts";
+import { ReportSnapshotSchema, type ReportSnapshot } from "@yuvapath/contracts";
 import { CounselorDependencyUnavailableError } from "../application/errors.js";
 import type { RenderedReportAsset, ReportRenderer } from "../application/index.js";
 
@@ -55,7 +55,7 @@ export class SupabaseReportRenderer implements ReportRenderer {
     const bold = await document.embedFont(StandardFonts.HelveticaBold);
     let page = document.addPage([595, 842]);
     let y = 790;
-    page.drawText("YuvaNext Career Counseling Report", {
+    page.drawText("YuvaPath Career Counseling Report", {
       x: 48,
       y,
       size: 18,
@@ -86,7 +86,7 @@ export class SupabaseReportRenderer implements ReportRenderer {
 
   async renderShareCard(report: ReportSnapshot): Promise<RenderedReportAsset> {
     const parsed = ReportSnapshotSchema.parse(report);
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"><rect width="1200" height="630" fill="#f4f7f5"/><rect x="64" y="64" width="12" height="502" fill="#167d68"/><text x="112" y="205" font-family="Arial,sans-serif" font-size="62" font-weight="700" fill="#12211d">YuvaNext</text><text x="112" y="286" font-family="Arial,sans-serif" font-size="38" fill="#304a42">Career guidance summary</text><text x="112" y="378" font-family="Arial,sans-serif" font-size="27" fill="#536b64">A private counseling report has been prepared.</text><text x="112" y="516" font-family="Arial,sans-serif" font-size="20" fill="#6f817b">Reference ${escapeXml(parsed.reportId.slice(0, 8))}</text></svg>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"><rect width="1200" height="630" fill="#f4f7f5"/><rect x="64" y="64" width="12" height="502" fill="#167d68"/><text x="112" y="205" font-family="Arial,sans-serif" font-size="62" font-weight="700" fill="#12211d">YuvaPath</text><text x="112" y="286" font-family="Arial,sans-serif" font-size="38" fill="#304a42">Career guidance summary</text><text x="112" y="378" font-family="Arial,sans-serif" font-size="27" fill="#536b64">A private counseling report has been prepared.</text><text x="112" y="516" font-family="Arial,sans-serif" font-size="20" fill="#6f817b">Reference ${escapeXml(parsed.reportId.slice(0, 8))}</text></svg>`;
     const bytes = new TextEncoder().encode(svg);
     const storagePath = `${parsed.reportId}/share-card.svg`;
     await this.upload(this.options.shareBucket, storagePath, bytes, "image/svg+xml");

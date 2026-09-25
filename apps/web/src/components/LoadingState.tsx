@@ -25,7 +25,7 @@ export function LoadingState() {
     <div
       role="status"
       aria-label="Loading"
-      className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center"
+      className="pointer-events-none fixed inset-0 z-40 flex animate-in items-center justify-center fade-in duration-200"
     >
       <Spinner className="size-9 text-brand" />
       <span className="sr-only">Loading</span>

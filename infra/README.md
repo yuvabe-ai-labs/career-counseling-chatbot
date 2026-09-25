@@ -1,7 +1,7 @@
 # Deploying to AWS Lambda
 
-`staging` branch → `yuvanext-api-staging` Lambda function.
-`main` branch → `yuvanext-api-prod` Lambda function.
+`staging` branch → `yuvapath-api-staging` Lambda function.
+`main` branch → `yuvapath-api-prod` Lambda function.
 
 Every push to either branch runs [.github/workflows/deploy.yml](../.github/workflows/deploy.yml):
 typecheck → lint → test → migration validation → `pnpm build:lambda` → package →
@@ -32,17 +32,17 @@ AWS_REGION=us-east-1 ./infra/bootstrap-aws.sh
 This creates (idempotently — safe to re-run):
 
 - A GitHub OIDC provider in IAM (shared across repos in the account, created once)
-- `github-actions-yuvanext-deploy` — the role GitHub Actions assumes. Trusted **only** for
+- `github-actions-yuvapath-deploy` — the role GitHub Actions assumes. Trusted **only** for
   `repo:yuvabe-ai-labs/career-counseling-chatbot` on the `staging` and `main` branches, and
   permitted **only** to update the two Lambda functions below (nothing else in the account)
-- `yuvanext-api-lambda-exec` — the role the functions themselves run as (CloudWatch Logs only)
-- `yuvanext-api-staging` and `yuvanext-api-prod` Lambda functions, Node.js 22.x, each with a
+- `yuvapath-api-lambda-exec` — the role the functions themselves run as (CloudWatch Logs only)
+- `yuvapath-api-staging` and `yuvapath-api-prod` Lambda functions, Node.js 22.x, each with a
   placeholder handler that returns 503 until the first real deploy runs
 - A public Function URL per function (the app does its own CORS via `CORS_ORIGIN`/helmet, so
   the Function URL itself is left permissive)
 
 It prints the values you need for step 2 at the end; you can also re-read them any time with
-`aws lambda get-function-url-config --function-name yuvanext-api-staging`, etc.
+`aws lambda get-function-url-config --function-name yuvapath-api-staging`, etc.
 
 ## 2. Configure the two GitHub Environments
 
@@ -62,7 +62,7 @@ environment-scoped config):
 |---|---|---|
 | `AWS_DEPLOY_ROLE_ARN` | same value both envs — from bootstrap output | |
 | `AWS_REGION` | same value both envs | |
-| `LAMBDA_FUNCTION_NAME` | `yuvanext-api-staging` | `yuvanext-api-prod` |
+| `LAMBDA_FUNCTION_NAME` | `yuvapath-api-staging` | `yuvapath-api-prod` |
 | `LAMBDA_FUNCTION_URL` | from bootstrap output | from bootstrap output |
 | `CORS_ORIGIN` | your staging frontend origin | your production frontend origin |
 | `AI_PROVIDER` | `gemini` (or `anthropic` / `auto` / `disabled`) | |
@@ -70,7 +70,7 @@ environment-scoped config):
 | `ANTHROPIC_MODEL` | leave unset unless using Claude | |
 | `SAFETY_SERVICE_URL` | leave unset (safety runs in-process) | |
 | `SMTP_PORT` | `587` | |
-| `SMTP_FROM` | `YuvaNext <noreply@yourdomain.com>` | |
+| `SMTP_FROM` | `YuvaPath <noreply@yourdomain.com>` | |
 
 **Secrets** (Settings → Environments → _env_ → Environment secrets):
 
@@ -93,8 +93,8 @@ both environments — "staging" here means a separate deployment, not degraded/f
 ## 3. Deploy
 
 ```bash
-git push origin staging   # -> yuvanext-api-staging
-git push origin main      # -> yuvanext-api-prod (pauses for review if you set required reviewers)
+git push origin staging   # -> yuvapath-api-staging
+git push origin main      # -> yuvapath-api-prod (pauses for review if you set required reviewers)
 ```
 
 Watch it under the repo's **Actions** tab. On success the job's last step prints the

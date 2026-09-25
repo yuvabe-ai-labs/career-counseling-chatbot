@@ -1,4 +1,4 @@
-# YuvaNext Career Counseling Platform — Project Plan
+# YuvaPath Career Counseling Platform — Project Plan
 
 > Summarized from [`module-1-assessment-validation.md`](./module-1-assessment-validation.md), the full technical validation of Modules 1–5. This document translates those findings into module-level project status and next steps for planning purposes — see the validation doc for endpoint-level detail.
 

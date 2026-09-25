@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import type { UpsertIntakeAnswerRequest } from "@yuvanext/contracts";
+import type { UpsertIntakeAnswerRequest } from "@yuvapath/contracts";
 import { getIntakeQuestions, upsertIntakeAnswer } from "../api/intake";
 
 /** The segment-appropriate question set for this journey session — see api/intake.ts. */

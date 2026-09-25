@@ -1,0 +1,29 @@
+{
+ "schemaVersion": 1,
+ "datasetKey": "tn-stream-catalogue",
+ "version": "2026-09-18",
+ "datasetVersionId": "2a363b67-dab4-43a6-b676-ebaab38b539a",
+ "recordsFile": "records.json",
+ "recordCounts": {
+  "educationRoutes": 0,
+  "pathways": 0,
+  "careerPathways": 0,
+  "streamOptions": 27,
+  "streamMaps": 30,
+  "streamMapItems": 90
+ },
+ "checksumSha256": "ca2000d481203d70760f300e07d20cc63949fa7e94e6281ed881ee98a0000fa2",
+ "reviewStatus": "approved",
+ "createdAt": "2026-09-18T00:00:00.000Z",
+ "source": {
+  "id": "7c8485d5-eda8-4481-82cd-463fa6907875",
+  "sourceKey": "yuvapath-curated-stream-catalogue",
+  "name": "YuvaPath curated stream catalogue (post-10th school streams + post-12th UG discipline families)",
+  "sourceType": "manual_review",
+  "publisher": "YuvaPath",
+  "trustLevel": "internal_reviewed",
+  "status": "active",
+  "baseUrl": null,
+  "licenseRef": "Internal curated content — standard Tamil Nadu/Indian school and UG stream categories, human-authored and reviewed, not sourced from an external dataset."
+ }
+}

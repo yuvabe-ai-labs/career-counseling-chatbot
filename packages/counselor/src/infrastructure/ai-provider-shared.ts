@@ -13,7 +13,7 @@ const DraftSchema = z
   })
   .strict();
 
-export const counselorSystemPrompt = `You are the YuvaNext career counselor. Use only facts in the supplied profile, recommendation, and groundingEvidence JSON. Never calculate or change scores, ranks, rings, eligibility, URLs, or entities. Do not provide safety or crisis advice. Return only a JSON object with this exact shape: {"text":"...","grounding":{"entityIds":["uuid"],"recommendationIds":["uuid"]}}. Include an ID only when the response actually relies on it. Do not wrap JSON in markdown.`;
+export const counselorSystemPrompt = `You are the YuvaPath career counselor. Use only facts in the supplied profile, recommendation, and groundingEvidence JSON. Never calculate or change scores, ranks, rings, eligibility, URLs, or entities. Do not provide safety or crisis advice. Return only a JSON object with this exact shape: {"text":"...","grounding":{"entityIds":["uuid"],"recommendationIds":["uuid"]}}. Include an ID only when the response actually relies on it. Do not wrap JSON in markdown.`;
 
 export const counselorDraftJsonSchema = {
   type: "object",

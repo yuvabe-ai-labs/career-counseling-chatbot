@@ -7,15 +7,16 @@ import type {
 } from "../application/email-provider.js";
 
 const SUBJECTS: Record<EmailContext, string> = {
-  identity_otp: "Your YuvaNext verification code",
-  guardian_otp: "YuvaNext: approve your child's account",
+  identity_otp: "Your YuvaPath verification code",
+  guardian_otp: "YuvaPath: approve your child's account",
+  counselor_password_reset_otp: "Your YuvaPath counselor password reset code",
 };
 
 const renderBody = (context: EmailContext, templateVars: Record<string, string>): string => {
   switch (context) {
     case "identity_otp":
       return [
-        `Your YuvaNext verification code is ${templateVars.OTP ?? ""}.`,
+        `Your YuvaPath verification code is ${templateVars.OTP ?? ""}.`,
         "It expires in 5 minutes.",
         "",
         "If you didn't request this, you can safely ignore this email.",
@@ -25,12 +26,19 @@ const renderBody = (context: EmailContext, templateVars: Record<string, string>)
     // OTP-only body.
     case "guardian_otp":
       return [
-        "Your child has started a YuvaNext career-exploration account and needs your approval to continue.",
+        "Your child has started a YuvaPath career-exploration account and needs your approval to continue.",
         `Your verification code is ${templateVars.OTP ?? ""}. It expires in 5 minutes.`,
         "",
         "To approve, enter this code where your child is signing up.",
         "",
         "If you weren't expecting this, you can safely ignore this email.",
+      ].join("\n");
+    case "counselor_password_reset_otp":
+      return [
+        `Your YuvaPath counselor password reset code is ${templateVars.OTP ?? ""}.`,
+        "It expires in 10 minutes.",
+        "",
+        "If you didn't request this, you can safely ignore this email.",
       ].join("\n");
   }
 };
@@ -40,7 +48,7 @@ export type SmtpEmailProviderOptions = {
   port: number;
   user: string;
   password: string;
-  /** "YuvaNext <no-reply@yuvanext.com>" style From header. */
+  /** "YuvaPath <no-reply@yuvapath.com>" style From header. */
   from: string;
   /** Defaults to true for port 465 (implicit TLS), false otherwise (STARTTLS on 587/25). */
   secure?: boolean;

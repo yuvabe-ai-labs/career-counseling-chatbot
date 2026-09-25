@@ -1,4 +1,4 @@
-import type { CareerSearchQuery, CareerSearchResponse } from "@yuvanext/contracts";
+import type { CareerSearchQuery, CareerSearchResponse } from "@yuvapath/contracts";
 import { InvalidCatalogCursorError, type CareerSearchRepository } from "../domain/career-search.js";
 
 export type SearchCareersOptions = {

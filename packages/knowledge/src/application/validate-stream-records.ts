@@ -1,7 +1,7 @@
 import {
   StreamDatasetRecordsSchema,
   type StreamDatasetRecords,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 
 export type StreamValidationIssue = {
   code:
@@ -35,6 +35,13 @@ export function validateStreamRecords(
   // than one newly included in this same batch — permissive-by-default when the caller
   // doesn't supply a list, exactly like knownCareerIds/knownPathwayIds above.
   knownEducationRouteIds: readonly string[] = [],
+  // Same reasoning again, for careerStreams links against a stream_option_id published in an
+  // earlier batch rather than this same payload's own streamOptions array.
+  knownStreamOptionIds: readonly string[] = [],
+  // Same reasoning again, for streamPathways links (Iteration 2) against a pathway_id published
+  // in an earlier batch rather than this same payload's own pathways array — the common case
+  // when drafting stream-pathway links per stream (the pathway almost always already exists).
+  knownPathwayIds: readonly string[] = [],
 ): StreamValidationResult {
   const parsed = StreamDatasetRecordsSchema.safeParse(input);
   if (!parsed.success) {
@@ -116,6 +123,51 @@ export function validateStreamRecords(
       issues,
       "DUPLICATE_CODE",
     );
+  });
+
+  const careerStreamKeys = new Set<string>();
+  parsed.data.careerStreams.forEach((link, index) => {
+    const careerKnown = knownCareerIds.length === 0 || knownCareerIds.includes(link.careerId);
+    const streamOptionKnown =
+      optionIds.has(link.streamOptionId) || knownStreamOptionIds.includes(link.streamOptionId);
+    if (!careerKnown || !streamOptionKnown) {
+      issues.push({
+        code: "ORPHAN_REFERENCE",
+        path: `careerStreams.${index}`,
+        message: "Career-stream link references an unknown career or stream option",
+      });
+    }
+    const key = `${link.careerId}:${link.streamOptionId}`;
+    if (careerStreamKeys.has(key)) {
+      issues.push({
+        code: "DUPLICATE_LINK",
+        path: `careerStreams.${index}`,
+        message: "Duplicate career-stream link",
+      });
+    }
+    careerStreamKeys.add(key);
+  });
+
+  const streamPathwayKeys = new Set<string>();
+  parsed.data.streamPathways.forEach((link, index) => {
+    const streamOptionKnown = optionIds.has(link.streamOptionId) || knownStreamOptionIds.includes(link.streamOptionId);
+    const pathwayKnown = pathwayIds.has(link.pathwayId) || knownPathwayIds.includes(link.pathwayId);
+    if (!streamOptionKnown || !pathwayKnown) {
+      issues.push({
+        code: "ORPHAN_REFERENCE",
+        path: `streamPathways.${index}`,
+        message: "Stream-pathway link references an unknown stream option or pathway",
+      });
+    }
+    const key = `${link.streamOptionId}:${link.pathwayId}`;
+    if (streamPathwayKeys.has(key)) {
+      issues.push({
+        code: "DUPLICATE_LINK",
+        path: `streamPathways.${index}`,
+        message: "Duplicate stream-pathway link",
+      });
+    }
+    streamPathwayKeys.add(key);
   });
 
   parsed.data.streamMaps.forEach((map, index) => {

@@ -1,4 +1,4 @@
-import type { Career } from "@yuvanext/contracts";
+import type { Career } from "@yuvapath/contracts";
 import type { CareerSearchFilters, CareerSearchRepository } from "../domain/career-search.js";
 
 export class InMemoryCareerSearchRepository implements CareerSearchRepository {

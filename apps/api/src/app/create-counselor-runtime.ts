@@ -17,7 +17,7 @@ import {
   type RecommendationReader,
   type ReportRenderer,
   type SafetyChecker,
-} from "@yuvanext/counselor";
+} from "@yuvapath/counselor";
 import {
   createSupabaseUserResolver,
   type SupabaseAuthClient,

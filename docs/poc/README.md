@@ -1,12 +1,12 @@
-# YuvaNext — Five-Module POC Master Plan
+# YuvaPath — Five-Module POC Master Plan
 
 ## Purpose
 
-This directory contains independently assignable Proof of Concept specifications for YuvaNext. The POCs prove the highest-risk behavior and integration contracts before the full MVP is built.
+This directory contains independently assignable Proof of Concept specifications for YuvaPath. The POCs prove the highest-risk behavior and integration contracts before the full MVP is built.
 
-For colleague ownership, branch rules, contract changes, and merge sequencing, use the [Collaboration and Integration Plan](../architecture/yuvanext-collaboration-integration-plan.md). This README defines what must be built; the integration plan defines how five people build it without creating five competing applications.
+For colleague ownership, branch rules, contract changes, and merge sequencing, use the [Collaboration and Integration Plan](../architecture/yuvapath-collaboration-integration-plan.md). This README defines what must be built; the integration plan defines how five people build it without creating five competing applications.
 
-Backend database design is indexed in the [YuvaNext Data Model](../data-model/README.md). Review the [Phase A MVP data model](../data-model/phase-a-mvp-data-model.md) before changing Supabase migrations.
+Backend database design is indexed in the [YuvaPath Data Model](../data-model/README.md). Review the [Phase A MVP data model](../data-model/phase-a-mvp-data-model.md) before changing Supabase migrations.
 
 The selected implementation stack is:
 

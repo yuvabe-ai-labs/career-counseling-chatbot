@@ -1,4 +1,4 @@
-# YuvaNext தொழில் வழிகாட்டல் Chatbot — PRD தமிழாக்கம் மற்றும் தொகுதி பிரிப்பு
+# YuvaPath தொழில் வழிகாட்டல் Chatbot — PRD தமிழாக்கம் மற்றும் தொகுதி பிரிப்பு
 
 > மூல ஆவணம்: `prd-phase1.md.docx`  
 > PRD பதிப்பு: Phase 1 MVP v0.1 draft + Phase 2 Addendum v0.2, July 2026  
@@ -14,7 +14,7 @@
 
 ## 1. திட்டத்தின் சுருக்கம்
 
-YuvaNext என்பது `yuvabeeducation.com`-ன் subdomain-இல் இயங்கும் web-based career-counselling chatbot. இது மூன்று மாணவர் குழுக்களுக்கு சேவை செய்கிறது:
+YuvaPath என்பது `yuvabeeducation.com`-ன் subdomain-இல் இயங்கும் web-based career-counselling chatbot. இது மூன்று மாணவர் குழுக்களுக்கு சேவை செய்கிறது:
 
 - **Explorer (12–16):** ஆர்வங்களை அறிந்து, subject/stream மற்றும் ஆரம்ப career ideas பெறுதல்.
 - **Pathfinder (17–18):** interest code, values, 3–5 pathways, degrees, entrance exams, colleges மற்றும் backup routes பெறுதல்.
@@ -206,7 +206,7 @@ Report card order:
 
 Report render நேரத்தில் புதிய recommendation கணக்கிடக் கூடாது; stored snapshot மட்டுமே பயன்படுத்த வேண்டும்.
 
-Share card social-safe ஆக first name, code, code name, YuvaNext branding மட்டும் கொண்டிருக்க வேண்டும். Age, phone, school, raw scores, selected colleges/careers இருக்கக்கூடாது. Server-side generation 2 விநாடிக்குள் முடிக்க வேண்டும்.
+Share card social-safe ஆக first name, code, code name, YuvaPath branding மட்டும் கொண்டிருக்க வேண்டும். Age, phone, school, raw scores, selected colleges/careers இருக்கக்கூடாது. Server-side generation 2 விநாடிக்குள் முடிக்க வேண்டும்.
 
 #### US-14 — Retake cooldown
 
@@ -311,7 +311,7 @@ Claude API down ஆனாலும் assessment, scoring, reveal மற்ற�
 
 ## 4. Conversation மற்றும் AI விதிகள்
 
-YuvaNext AI ஒரு warm, simple, encouraging Indian career guide ஆக இருக்க வேண்டும்.
+YuvaPath AI ஒரு warm, simple, encouraging Indian career guide ஆக இருக்க வேண்டும்.
 
 கட்டாய விதிகள்:
 

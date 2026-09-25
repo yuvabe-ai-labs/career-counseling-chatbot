@@ -1,6 +1,6 @@
 import type { Pool } from "pg";
-import type { AuditEvent, PrivacyJob, PrivacyJobResponse, ResolvedPrivacyJobRequest } from "@yuvanext/contracts";
-import { withTransaction } from "@yuvanext/database";
+import type { AuditEvent, PrivacyJob, PrivacyJobResponse, ResolvedPrivacyJobRequest } from "@yuvapath/contracts";
+import { withTransaction } from "@yuvapath/database";
 import { createSyntheticPrivacyJob } from "../domain/privacy-jobs.js";
 
 type PrivacyJobRow = {

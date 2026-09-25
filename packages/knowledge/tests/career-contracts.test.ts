@@ -2,7 +2,7 @@ import {
   CareerInterestProfileSchema,
   CareerProfileSchema,
   CareerSchema,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import {
   careerFixtures,
   careerInterestProfileFixtures,

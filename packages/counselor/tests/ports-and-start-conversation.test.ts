@@ -9,7 +9,7 @@ import {
   validRetrievedEvidence,
   validSafetyDecision,
   validStartConversationRequest,
-} from "@yuvanext/test-fixtures";
+} from "@yuvapath/test-fixtures";
 import { describe, expect, it } from "vitest";
 import {
   CounselorNotFoundError,

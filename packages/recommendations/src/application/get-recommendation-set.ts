@@ -2,7 +2,7 @@ import {
   RecommendationSetResponseSchema,
   UuidSchema,
   type RecommendationSetResponse,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import type { RecommendationSetReader } from "./recommendation-set-reader.js";
 
 export class RecommendationSetNotFoundError extends Error {

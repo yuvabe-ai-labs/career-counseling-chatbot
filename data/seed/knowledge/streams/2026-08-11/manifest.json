@@ -16,10 +16,10 @@
   "createdAt": "2026-08-11T00:00:00.000Z",
   "source": {
     "id": "b7777777-7777-4777-8777-777777777777",
-    "sourceKey": "yuvanext-synthetic-streams-poc",
-    "name": "YuvaNext reviewed pathway and stream mappings",
+    "sourceKey": "yuvapath-synthetic-streams-poc",
+    "name": "YuvaPath reviewed pathway and stream mappings",
     "sourceType": "manual_review",
-    "publisher": "YuvaNext POC team",
+    "publisher": "YuvaPath POC team",
     "trustLevel": "project_reviewed",
     "status": "active",
     "baseUrl": null,

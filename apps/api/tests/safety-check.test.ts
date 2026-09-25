@@ -9,7 +9,7 @@ import {
   StaffQueueActionResponseSchema,
   StaffQueueResponseSchema,
   StaffSessionsResponseSchema,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { z } from "zod";
 import { createApp } from "../src/app/create-app.js";
 

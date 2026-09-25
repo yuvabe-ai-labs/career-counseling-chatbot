@@ -1,11 +1,11 @@
 {
-  "name": "@yuvanext/safety",
+  "name": "@yuvapath/safety",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "exports": "./src/index.ts",
   "dependencies": {
-    "@yuvanext/contracts": "workspace:*",
-    "@yuvanext/database": "workspace:*"
+    "@yuvapath/contracts": "workspace:*",
+    "@yuvapath/database": "workspace:*"
   }
 }

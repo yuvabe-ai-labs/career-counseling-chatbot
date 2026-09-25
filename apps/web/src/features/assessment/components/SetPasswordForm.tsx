@@ -1,5 +1,5 @@
 import { useState, type FormEvent, type KeyboardEvent } from "react";
-import { ArrowRight, Check, Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { ArrowRight, Check, Lock, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,7 @@ import {
   formSectionClass,
   primaryButtonClass,
 } from "./form-styles";
+import { PasswordVisibilityToggle } from "./PasswordVisibilityToggle";
 
 /** Same policy as the backend's SignUpWithPasswordRequestSchema (packages/contracts/src/auth.ts). */
 const PASSWORD_RULES: { label: string; test: (password: string) => boolean }[] = [
@@ -192,18 +193,10 @@ export function SetPasswordForm({
               aria-describedby={showPasswordRules ? "signup-password-rules" : undefined}
               className={fieldInputWithTrailingClass}
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword((value) => !value)}
-              aria-label={showPassword ? "Hide password" : "Show password"}
-              className="absolute top-1/2 right-4 -translate-y-1/2 cursor-pointer text-muted-foreground"
-            >
-              {showPassword ? (
-                <EyeOff className="size-[18px]" aria-hidden="true" />
-              ) : (
-                <Eye className="size-[18px]" aria-hidden="true" />
-              )}
-            </button>
+            <PasswordVisibilityToggle
+              visible={showPassword}
+              onToggle={() => setShowPassword((value) => !value)}
+            />
           </div>
           {passwordError ? (
             <p className="mt-1 font-display text-xs font-normal text-destructive">
@@ -262,18 +255,10 @@ export function SetPasswordForm({
               aria-invalid={Boolean(confirmError)}
               className={fieldInputWithTrailingClass}
             />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword((value) => !value)}
-              aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-              className="absolute top-1/2 right-4 -translate-y-1/2 cursor-pointer text-muted-foreground"
-            >
-              {showConfirmPassword ? (
-                <EyeOff className="size-[18px]" aria-hidden="true" />
-              ) : (
-                <Eye className="size-[18px]" aria-hidden="true" />
-              )}
-            </button>
+            <PasswordVisibilityToggle
+              visible={showConfirmPassword}
+              onToggle={() => setShowConfirmPassword((value) => !value)}
+            />
           </div>
           {confirmError ? (
             <p className="mt-1 font-display text-xs font-normal text-destructive">{confirmError}</p>

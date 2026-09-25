@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import request from "supertest";
-import type { JourneySession } from "@yuvanext/contracts";
-import { JourneySessionResponseSchema } from "@yuvanext/contracts";
+import type { JourneySession } from "@yuvapath/contracts";
+import { JourneySessionResponseSchema } from "@yuvapath/contracts";
 import { createApp } from "../src/app/create-app.js";
 
 const userId = "11111111-1111-4111-8111-111111111111";
@@ -42,7 +42,7 @@ describe("Journey session routes", () => {
   it("returns storage unavailable when the database is not configured", async () => {
     const response = await request(createApp({ logging: false }))
       .post("/api/v1/journey-sessions")
-      .set("x-yuvanext-user-id", userId)
+      .set("x-yuvapath-user-id", userId)
       .send({});
 
     expect(response.status).toBe(503);

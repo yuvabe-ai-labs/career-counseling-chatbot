@@ -1,4 +1,4 @@
-import type { AuditEvent, StaffPacket, StaffPacketResponse } from "@yuvanext/contracts";
+import type { AuditEvent, StaffPacket, StaffPacketResponse } from "@yuvapath/contracts";
 
 const syntheticPacketSnapshot = {
   firstName: "Asha",

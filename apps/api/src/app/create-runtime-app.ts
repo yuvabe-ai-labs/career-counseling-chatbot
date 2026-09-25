@@ -8,7 +8,7 @@ import { createRecommendationRuntime } from "./create-recommendation-runtime.js"
 import { createSupabaseUserResolver } from "../auth/supabase-user-resolver.js";
 import { createApp, type CreateAppOptions } from "./create-app.js";
 import { env } from "../config/env.js";
-import { createDatabasePool, createSupabaseServerClient } from "@yuvanext/database";
+import { createDatabasePool, createSupabaseServerClient } from "@yuvapath/database";
 import type { Express } from "express";
 
 export type RuntimeApp = {
@@ -58,11 +58,11 @@ export const createRuntimeApp = async (
             counselorPackage,
             safetyPackage,
           ] = await Promise.all([
-            import("@yuvanext/assessment"),
-            import("@yuvanext/recommendations"),
-            import("@yuvanext/knowledge"),
-            import("@yuvanext/counselor"),
-            import("@yuvanext/safety"),
+            import("@yuvapath/assessment"),
+            import("@yuvapath/recommendations"),
+            import("@yuvapath/knowledge"),
+            import("@yuvapath/counselor"),
+            import("@yuvapath/safety"),
           ]);
           const geminiConfigured = Boolean(env.GEMINI_API_KEY && env.GEMINI_MODEL);
           const anthropicConfigured = Boolean(env.ANTHROPIC_API_KEY && env.ANTHROPIC_MODEL);
@@ -163,8 +163,8 @@ export const createRuntimeApp = async (
     ...(databasePool
       ? await (async () => {
           const [evaluationPackage, safetyPackage] = await Promise.all([
-            import("@yuvanext/evaluation"),
-            import("@yuvanext/safety"),
+            import("@yuvapath/evaluation"),
+            import("@yuvapath/safety"),
           ]);
           return {
             evaluationRunRepository:

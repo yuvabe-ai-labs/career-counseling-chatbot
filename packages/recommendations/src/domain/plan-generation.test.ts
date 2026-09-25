@@ -3,7 +3,7 @@ import type {
   MatchingConfig,
   PlanTemplateCatalogRecord,
   ProfileSnapshotForRecommendations,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { buildPlanRecommendationSet, generatePlan } from "./plan-generation.js";
 
 const createdAt = "2026-07-28T00:00:00.000Z";

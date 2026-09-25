@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { CareerDatasetManifestSchema } from "@yuvanext/contracts";
+import { CareerDatasetManifestSchema } from "@yuvapath/contracts";
 import { describe, expect, it } from "vitest";
 import { validateCareerRecords } from "../src/index.js";
 

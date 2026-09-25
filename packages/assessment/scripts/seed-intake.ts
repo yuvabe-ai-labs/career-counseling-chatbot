@@ -42,21 +42,43 @@ const questions = {
     ["preferred_work_style", 14, "How do you prefer to work?", "short_text", null, false, true, "Example: Working independently"],
     ["decision_confidence", 15, "How confident are you about your next step?", "single_choice", ["very_confident", "somewhat_confident", "confused", "starting_from_zero"], false, true, null],
     ["constraints", 16, "Which constraint matters most right now?", "single_choice", ["fees", "distance", "family_expectations", "entrance_exam", "language", "none", "prefer_not_to_say"], true, true, null],
-    ["support_needed", 17, "What should YuvaNext help with first?", "single_choice", ["stream_choice", "career_shortlist", "college_pathway", "exam_plan", "aid_options", "not_sure"], false, true, null],
+    ["support_needed", 17, "What should YuvaPath help with first?", "single_choice", ["stream_choice", "career_shortlist", "college_pathway", "exam_plan", "aid_options", "not_sure"], false, true, null],
     // display_order is globally unique across every segment's questions (each segment reserves
     // a block of 10: explorer 1-10, pathfinder 11-20, launcher 21-30) — 18 is pathfinder's next
     // free slot within its own block, added after support_needed rather than renumbering it.
     ["location_preference", 18, "What location option do you prefer?", "single_choice", ["same_city", "same_state", "anywhere_in_india", "remote", "not_sure"], false, true, null],
+    // The single source of truth for "show this student scholarships/aid" (replaces the removed
+    // signup `wantsAid` flag): Yes -> Explore Path shows the Scholarships & Aid screen. Optional
+    // on purpose, so students who already finished intake aren't sent back; unanswered = No.
+    ["seeks_aid", 19, "Do you want to see scholarship and financial aid options?", "single_choice", ["yes", "no"], false, false, null],
   ],
   launcher: [
-    ["current_status", 21, "What are you doing right now?", "single_choice", ["college", "graduate", "working", "job_search", "gap_year", "other"], false, true, null],
+    // current_status (display_order 21) removed: its 3 main options (college/graduate/working)
+    // just repeated signup's own "Current stage" field, which is what routes someone into
+    // launcher in the first place (deriveSegment() in user-profile.ts). Its only two options that
+    // added anything (job_search/gap_year) weren't worth a whole repeat-feeling question for.
     ["current_goal", 22, "What is your current goal?", "single_choice", ["job", "higher_studies", "career_switch", "skill_building", "business", "not_sure"], false, true, null],
     ["education_level", 23, "What is your highest completed education level?", "single_choice", ["class_12", "diploma", "bachelors", "masters", "iti", "other"], false, true, null],
+    // field_of_study: brought back after being removed for the same reason as experience_band/
+    // preferred_work_style below it (unread by any automated scoring) — re-added for a different
+    // consumer than the recommendation pipeline: a human counselor needs to know what a
+    // college/graduate student actually studied to give relevant advice, even though no
+    // eligibility rule reads it today.
     ["field_of_study", 24, "Which field is closest to your study or work?", "short_text", null, false, true, "Example: Computer Science Engineering"],
-    ["experience_band", 25, "How much work experience do you have?", "single_choice", ["none", "less_than_1_year", "1_3_years", "3_5_years", "5_plus_years"], false, true, null],
+    // decision_confidence / constraints: new to launcher, not invented — reusing pathfinder's own
+    // questions/options verbatim (display_order 15/16 there) since launcher had no equivalent
+    // signal at all for how much guidance a student needs or what's practically constraining
+    // their choices. Same counselor-context rationale as field_of_study above, not automated
+    // scoring — see HandoffProfileContext (packages/counselor) for the separate, still-open gap
+    // that no intake answer (old or new) reaches a counselor's screen yet.
+    ["decision_confidence", 25, "How confident are you about your next step?", "single_choice", ["very_confident", "somewhat_confident", "confused", "starting_from_zero"], false, true, null],
     ["marks_band", 26, "Which academic performance band best represents you?", "single_choice", ["below_50", "50_60", "60_75", "75_90", "90_plus", "prefer_not_to_say"], true, true, null],
-    ["preferred_work_style", 27, "What type of work feels most natural to you?", "short_text", null, false, true, "Example: Hands-on problem solving"],
-    ["location_preference", 28, "What location option do you prefer?", "single_choice", ["same_city", "same_state", "anywhere_in_india", "remote", "not_sure"], false, true, null],
+    ["constraints", 27, "Which constraint matters most right now?", "single_choice", ["fees", "distance", "family_expectations", "entrance_exam", "language", "none", "prefer_not_to_say"], true, true, null],
+    // location_preference (28) removed: resolveGeoScope() (geo-scope.ts) already implements real
+    // ranking logic for this answer, but it's not wired into college-recommendations.ts yet
+    // (Phase A is Tamil Nadu-only, so there's no state comparison to make). Re-add when a
+    // multi-state ranking phase actually turns it on — no point collecting it with zero effect
+    // until then.
     ["support_needed", 29, "What support do you want first?", "single_choice", ["career_shortlist", "job_roles", "higher_study_path", "skills_plan", "aid_options", "not_sure"], false, true, null],
   ],
 } as const;
@@ -134,6 +156,43 @@ try {
     }
   }
 
+  // Cleanup pass: a question_key present in a question_set_id but no longer in `questions` above
+  // was deliberately removed from the source (e.g. launcher's current_status) — the upsert loop
+  // above only ever inserts/updates, so without this the DB would keep serving a retired question
+  // forever, the same silent-drift failure mode this script's own upsert (vs. insert-only) was
+  // written to avoid in the first place. Any answers already recorded against a removed question
+  // go with it (FK requires it) — fine here since removing a question is a content decision, not
+  // a routine edit, and any such answers are for a question that no longer exists to display.
+  let removedQuestions = 0;
+  for (const [segment, segmentQuestions] of Object.entries(questions)) {
+    const questionSetId = setIds[segment];
+    const currentKeys = segmentQuestions.map(([key]) => key);
+    const removedAnswers = await client.query(
+      `
+        delete from assessment.intake_answers
+        where question_id in (
+          select id from assessment.intake_questions
+          where question_set_id = $1 and not (question_key = any($2::text[]))
+        )
+      `,
+      [questionSetId, currentKeys],
+    );
+    const removed = await client.query<{ question_key: string }>(
+      `
+        delete from assessment.intake_questions
+        where question_set_id = $1 and not (question_key = any($2::text[]))
+        returning question_key
+      `,
+      [questionSetId, currentKeys],
+    );
+    if (removed.rowCount) {
+      removedQuestions += removed.rowCount;
+      console.log(
+        `Removed from ${segment}: ${removed.rows.map((r) => r.question_key).join(", ")} (${removedAnswers.rowCount ?? 0} answers cascaded)`,
+      );
+    }
+  }
+
   await client.query("commit");
 
   // client.query, not pool.query: with max: 1, the transaction's own client above is still
@@ -148,7 +207,9 @@ try {
       order by s.segment
     `,
   );
-  console.log(JSON.stringify({ insertedQuestions, updatedQuestions, counts: counts.rows }, null, 2));
+  console.log(
+    JSON.stringify({ insertedQuestions, updatedQuestions, removedQuestions, counts: counts.rows }, null, 2),
+  );
 } catch (error) {
   await client.query("rollback");
   console.error(error);

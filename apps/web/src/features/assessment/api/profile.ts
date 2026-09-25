@@ -1,4 +1,4 @@
-import { UserProfileResponseSchema, type UpsertUserProfileRequest } from "@yuvanext/contracts";
+import { UserProfileResponseSchema, type UpsertUserProfileRequest } from "@yuvapath/contracts";
 import { apiRequest } from "@/lib/api-client";
 
 /** PUT /api/v1/journey-sessions/:sessionId/user-profile — server derives ageBand/segment. */

@@ -1,4 +1,4 @@
--- Locally reviewed YuvaNext crosswalk between official O*NET careers and
+-- Locally reviewed YuvaPath crosswalk between official O*NET careers and
 -- official TNDCE undergraduate programme listings captured on 2026-08-05.
 -- A relationship is guidance only; it is not an admission or eligibility guarantee.
 
@@ -9,11 +9,11 @@ INSERT INTO knowledge.knowledge_sources (
   trust_level, status, created_at, updated_at
 ) VALUES (
   'e5000000-0000-4000-8000-999999999991',
-  'yuvanext-tn-dce-career-pathway-crosswalk',
-  'YuvaNext reviewed O*NET-to-TNDCE pathway crosswalk',
+  'yuvapath-tn-dce-career-pathway-crosswalk',
+  'YuvaPath reviewed O*NET-to-TNDCE pathway crosswalk',
   'manual_review',
   'https://tndce.tn.gov.in/',
-  'YuvaNext POC team',
+  'YuvaPath POC team',
   'Derived crosswalk; verify current programme and professional-entry requirements',
   'project_reviewed',
   'active',

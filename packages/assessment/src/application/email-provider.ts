@@ -4,7 +4,7 @@
  * own OTP generation, storage, and verification ourselves (identity-service.ts,
  * guardian-consent-service.ts); a provider only ever sends the message.
  */
-export type EmailContext = "identity_otp" | "guardian_otp";
+export type EmailContext = "identity_otp" | "guardian_otp" | "counselor_password_reset_otp";
 
 export type SendEmailInput = {
   to: string;

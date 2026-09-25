@@ -9,14 +9,14 @@ import type {
   RecommendationReplayResult,
   RecommendationSet,
   StreamCatalogRecord,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { buildAidRecommendationSet, type StoredFacts } from "../domain/aid-recommendations.js";
 import {
   buildCareerRecommendationSet,
   type CounselorPriority,
   type FeasibilityRule,
 } from "../domain/career-matching.js";
-import { buildCollegeRecommendationSet } from "../domain/college-recommendations.js";
+import { buildCollegeRecommendationSet, type CollegeFilterOptions } from "../domain/college-recommendations.js";
 import { buildPathwayRecommendationSet } from "../domain/pathway-recommendations.js";
 import { buildPlanRecommendationSet, type PlanTarget } from "../domain/plan-generation.js";
 import { buildStreamRecommendationSet } from "../domain/stream-recommendations.js";
@@ -42,6 +42,7 @@ export type StreamRecommendationRequest = RecommendationServiceContext & {
   recommendationId: string;
   profile: ProfileSnapshotForRecommendations;
   streams: StreamCatalogRecord[];
+  rankedCareerIds: string[];
 };
 
 export type PathwayRecommendationRequest = RecommendationServiceContext & {
@@ -52,14 +53,13 @@ export type PathwayRecommendationRequest = RecommendationServiceContext & {
   rankedStreamIds: string[];
 };
 
-export type CollegeRecommendationRequest = RecommendationServiceContext & {
-  recommendationId: string;
-  profile: ProfileSnapshotForRecommendations;
-  colleges: CollegeCatalogRecord[];
-  targetDisciplineIds: string[];
-  selectedState?: string;
-  neighboringStates?: string[];
-};
+export type CollegeRecommendationRequest = RecommendationServiceContext &
+  CollegeFilterOptions & {
+    recommendationId: string;
+    profile: ProfileSnapshotForRecommendations;
+    colleges: CollegeCatalogRecord[];
+    targetDisciplineIds: string[];
+  };
 
 export type AidRecommendationRequest = RecommendationServiceContext & {
   recommendationId: string;
@@ -123,6 +123,7 @@ export function createRecommendationService(
           recommendationId: request.recommendationId,
           profile: request.profile,
           streams: request.streams,
+          rankedCareerIds: request.rankedCareerIds,
           config: request.config,
           createdAt: request.createdAt,
         }),
@@ -146,8 +147,11 @@ export function createRecommendationService(
           profile: request.profile,
           colleges: request.colleges,
           targetDisciplineIds: request.targetDisciplineIds,
-          ...(request.selectedState ? { selectedState: request.selectedState } : {}),
-          ...(request.neighboringStates ? { neighboringStates: request.neighboringStates } : {}),
+          ...(request.programType ? { programType: request.programType } : {}),
+          ...(request.instituteKind ? { instituteKind: request.instituteKind } : {}),
+          ...(request.ownership ? { ownership: request.ownership } : {}),
+          ...(request.district ? { district: request.district } : {}),
+          ...(request.admissionRoute ? { admissionRoute: request.admissionRoute } : {}),
           config: request.config,
           createdAt: request.createdAt,
         }),

@@ -1,4 +1,4 @@
-import { CareerSchema, type Career } from "@yuvanext/contracts";
+import { CareerSchema, type Career } from "@yuvapath/contracts";
 import type { CareerSearchFilters, CareerSearchRepository } from "../domain/career-search.js";
 
 type CareerSearchDatabaseRow = {

@@ -1,4 +1,4 @@
-import type { LocationPreference } from "@yuvanext/contracts";
+import type { LocationPreference } from "@yuvapath/contracts";
 import { ALL_INDIAN_STATES, neighboringStatesOf } from "./state-adjacency.js";
 
 export type GeoScope = {
@@ -7,11 +7,10 @@ export type GeoScope = {
 };
 
 /**
- * Turns a student's `location_preference` intake answer + home state into the two inputs
- * `college-recommendations.ts`'s `scoreColleges()` already accepts (`selectedState`,
- * `neighboringStates`) — pure, deterministic, no Gemini/network/DB involved. This function is
- * the only piece that was missing; `resolveStateBand()` inside `college-recommendations.ts`
- * itself needed no change.
+ * Turns a student's `location_preference` intake answer + home state into a selected/neighboring
+ * state pair — pure, deterministic, no Gemini/network/DB involved. Not currently wired into
+ * `college-recommendations.ts` (Tamil Nadu-only phase has no state comparison to make; see
+ * docs/recommendation-pipeline-explained.md). Kept, unused, for a future multi-state phase.
  *
  * - same_city / same_state: only the home state counts as "selected"; nothing is "neighboring"
  *   (a tighter list, not a broader one).

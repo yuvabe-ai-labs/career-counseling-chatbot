@@ -1,4 +1,4 @@
-import type { PublishedDataset } from "@yuvanext/contracts";
+import type { PublishedDataset } from "@yuvapath/contracts";
 import type { DatasetRepository } from "../domain/dataset.js";
 
 export class InMemoryDatasetRepository implements DatasetRepository {

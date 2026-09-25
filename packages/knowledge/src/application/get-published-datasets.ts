@@ -1,4 +1,4 @@
-import type { PublishedDatasetListResponse } from "@yuvanext/contracts";
+import type { PublishedDatasetListResponse } from "@yuvapath/contracts";
 import type { DatasetRepository } from "../domain/dataset.js";
 
 export async function getPublishedDatasets(

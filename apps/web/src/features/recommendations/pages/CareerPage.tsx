@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Navigate, useNavigate } from "react-router-dom";
-import type { RecommendationItem } from "@yuvanext/contracts";
+import type { RecommendationItem } from "@yuvapath/contracts";
 import { AppHeader } from "@/components/AppHeader";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
@@ -75,7 +75,9 @@ export function CareerPage() {
           ) : rings ? (
             <CareerRingMap
               rings={rings}
-              hideMatchPercent={gatingContext.segment === "explorer"}
+              // MVP: no career percentage for any segment (fitScore stays in the API for a later
+              // scoring phase) — Explorer was already hidden, Pathfinder/Launcher now match.
+              hideMatchPercent
               selectedItemId={selectedItem?.itemId ?? null}
               onSelectCareer={setSelectedItem}
             />

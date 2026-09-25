@@ -1,4 +1,4 @@
-import type { AidCriterion, AidScheme } from "@yuvanext/contracts";
+import type { AidCriterion, AidScheme } from "@yuvapath/contracts";
 
 export type AidSchemeFilters = {
   state?: string;

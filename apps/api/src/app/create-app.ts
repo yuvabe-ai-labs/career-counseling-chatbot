@@ -4,17 +4,18 @@ import {
   registerAssessmentRoutes,
   SmtpEmailProvider,
   type AssessmentHttpDependencies,
+  type CounselorDirectory,
   type EmailProvider,
   type IdentityUserDirectory,
-} from "@yuvanext/assessment";
-import { createOpenApiRegistry, generateOpenApiDocument } from "@yuvanext/contracts";
-import { registerCounselorRoutes, type CounselorHttpDependencies } from "@yuvanext/counselor";
-import { createDatabasePool, createSupabaseServerClient } from "@yuvanext/database";
+} from "@yuvapath/assessment";
+import { createOpenApiRegistry, generateOpenApiDocument } from "@yuvapath/contracts";
+import { registerCounselorRoutes, type CounselorHttpDependencies } from "@yuvapath/counselor";
+import { createDatabasePool, createSupabaseServerClient } from "@yuvapath/database";
 import {
   createPostgresEvaluationRunRepository,
   type EvaluationRunRepository,
   registerEvaluationRoutes,
-} from "@yuvanext/evaluation";
+} from "@yuvapath/evaluation";
 import {
   InMemoryAidSchemeRepository,
   InMemoryCareerRepository,
@@ -40,7 +41,7 @@ import {
   type DatasetRepository,
   type LocationRepository,
   type StreamRepository,
-} from "@yuvanext/knowledge";
+} from "@yuvapath/knowledge";
 import {
   createPostgresRecommendationDataSource,
   createPostgresRecommendationStore,
@@ -48,7 +49,7 @@ import {
   registerRecommendationRoutes,
   type RecommendationHttpDependencies,
   type RecommendationStore,
-} from "@yuvanext/recommendations";
+} from "@yuvapath/recommendations";
 import {
   createPostgresPrivacyJobRepository,
   createPostgresSafetyOperationsRepository,
@@ -56,12 +57,13 @@ import {
   type ResolveSafetyUserId,
   type SafetyOperationsRepository,
   registerSafetyRoutes,
-} from "@yuvanext/safety";
+} from "@yuvapath/safety";
 import cors from "cors";
 import express, { type Express } from "express";
 import helmet from "helmet";
 import type { Pool } from "pg";
 import swaggerUi from "swagger-ui-express";
+import { SupabaseCounselorDirectory } from "../auth/supabase-counselor-directory.js";
 import { SupabaseIdentityDirectory } from "../auth/supabase-identity-directory.js";
 import { env } from "../config/env.js";
 import { errorHandler, notFoundHandler } from "../middleware/error-handler.js";
@@ -92,6 +94,7 @@ export type CreateAppOptions = {
   database?: boolean;
   assessment?: AssessmentHttpDependencies;
   identityUserDirectory?: IdentityUserDirectory;
+  counselorDirectory?: CounselorDirectory;
   emailProvider?: EmailProvider;
   recommendations?: RecommendationHttpDependencies;
   recommendationStore?: RecommendationStore;
@@ -178,7 +181,7 @@ export const createApp = (options: CreateAppOptions = {}): Express => {
   );
 
   // No dev-echo/no-op fallback — unconfigured SMTP means OTP requests fail with a clear 503
-  // (UnavailableEmailProvider, @yuvanext/assessment's own default) rather than a silent fake
+  // (UnavailableEmailProvider, @yuvapath/assessment's own default) rather than a silent fake
   // send. env.ts's superRefine guarantees these are set in production.
   const emailProvider: EmailProvider | undefined =
     options.emailProvider ??
@@ -206,10 +209,26 @@ export const createApp = (options: CreateAppOptions = {}): Express => {
         })
       : undefined);
 
+  // Same service-role client shape as identityUserDirectory above, gated by
+  // operations.staff_profiles/staff_role_assignments instead of just auth.users — see
+  // docs/architecture/counselor-auth-landing-page-plan.md.
+  const counselorDirectory =
+    options.counselorDirectory ??
+    (databasePool && env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY
+      ? new SupabaseCounselorDirectory({
+          pool: databasePool,
+          client: createSupabaseServerClient({
+            url: env.SUPABASE_URL,
+            apiKey: env.SUPABASE_SERVICE_ROLE_KEY,
+          }),
+        })
+      : undefined);
+
   registerAssessmentRoutes(app, registry, {
     ...(databasePool ? { pool: databasePool } : {}),
     ...(emailProvider ? { emailProvider } : {}),
     ...(identityUserDirectory ? { identityUserDirectory } : {}),
+    ...(counselorDirectory ? { counselorDirectory } : {}),
     enableGuardianOtpDebugRoute: env.NODE_ENV !== "production",
   });
   registerAssessmentSnapshotRoutes(app, registry, options.assessment);

@@ -247,7 +247,7 @@ describe("RiasecAssessmentPage", () => {
       snapshot: {
         snapshotId: "snapshot-1",
         segment: "pathfinder",
-        wantsAid: false,
+        seeksAid: false,
         intakeSummary: {},
       },
     });
@@ -259,7 +259,7 @@ describe("RiasecAssessmentPage", () => {
     expect(getStoredProfileSnapshotId()).toBe("snapshot-1");
     expect(getStoredExploreGatingContext()).toEqual({
       segment: "pathfinder",
-      wantsAid: false,
+      seeksAid: false,
       currentGoal: undefined,
     });
   });

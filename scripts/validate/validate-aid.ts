@@ -1,8 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import process from "node:process";
-import { AidDatasetManifestSchema } from "@yuvanext/contracts";
-import { validateAidDataset } from "@yuvanext/knowledge";
+import { AidDatasetManifestSchema } from "@yuvapath/contracts";
+import { validateAidDataset } from "@yuvapath/knowledge";
 
 const directory = resolve("data/seed/knowledge/aid-schemes/2026-08-02");
 const manifestInput = JSON.parse(await readFile(resolve(directory, "manifest.json"), "utf8")) as unknown;

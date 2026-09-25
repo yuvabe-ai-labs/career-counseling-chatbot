@@ -4,6 +4,7 @@ export * from "./auth.js";
 export * from "./catalog.js";
 export * from "./chat.js";
 export * from "./common.js";
+export * from "./counselor-dashboard.js";
 export * from "./guardian-consent.js";
 export * from "./http.js";
 export * from "./intake.js";
@@ -72,7 +73,9 @@ export {
   CareerRecommendationRouteRequestSchema,
   CareerRecommendationSetResponseSchema,
   CollegeCatalogRecordSchema,
-  CollegeFitExplanationSchema,
+  CollegeEligibilityExplanationSchema,
+  CollegeOwnershipSchema,
+  CollegeProgramRecordSchema,
   CollegeRecommendationRouteRequestSchema,
   CollegeRecommendationSetResponseSchema,
   GeneratedPlanStepSchema,
@@ -111,7 +114,9 @@ export type {
   CareerRecommendationRouteRequest,
   CareerRecommendationSetResponse,
   CollegeCatalogRecord,
-  CollegeFitExplanation,
+  CollegeEligibilityExplanation,
+  CollegeOwnership,
+  CollegeProgramRecord,
   CollegeRecommendationRouteRequest,
   CollegeRecommendationSetResponse,
   GeneratedPlanStep,

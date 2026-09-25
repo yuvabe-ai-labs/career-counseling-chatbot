@@ -1,4 +1,4 @@
-import type { RetrievedEvidence } from "@yuvanext/contracts";
+import type { RetrievedEvidence } from "@yuvapath/contracts";
 
 export type ReadKnowledgeEntityInput = {
   entityId: string;

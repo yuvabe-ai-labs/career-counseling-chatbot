@@ -5,7 +5,7 @@ import {
   JourneyStateSchema,
   ReportSnapshotSchema,
   StartConversationRequestSchema,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { describe, expect, it } from "vitest";
 import {
   invalidCounselorFixtures,

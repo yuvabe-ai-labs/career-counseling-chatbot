@@ -1,4 +1,4 @@
-import { CollegeListResponseSchema } from "@yuvanext/contracts";
+import { CollegeListResponseSchema } from "@yuvapath/contracts";
 import request from "supertest";
 import { describe, expect, it } from "vitest";
 import { createApp } from "../src/app/create-app.js";

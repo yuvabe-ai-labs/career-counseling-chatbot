@@ -19,13 +19,13 @@ import {
   type JourneyState,
   type ReportSnapshot,
   type StartConversationResponse,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import {
   withTransaction,
   type createDatabasePool,
   type Database,
   type Json,
-} from "@yuvanext/database";
+} from "@yuvapath/database";
 import {
   CounselorAccessError,
   CounselorConflictError,

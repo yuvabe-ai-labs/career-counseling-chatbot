@@ -1,4 +1,4 @@
-import type { RecommendationItem } from "@yuvanext/contracts";
+import type { RecommendationItem } from "@yuvapath/contracts";
 import { RingMap, type RingMapRings } from "./RingMap";
 
 export type CareerRingKey = "outer" | "middle" | "inner";

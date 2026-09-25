@@ -1,5 +1,5 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
-import type { UserProfile } from "@yuvanext/contracts";
+import type { UserProfile } from "@yuvapath/contracts";
 import {
   clearStoredSession,
   getStoredEmail,

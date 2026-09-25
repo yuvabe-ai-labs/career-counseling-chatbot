@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { StaffQueueResponseSchema, type StaffQueueItem } from "@yuvanext/contracts";
+import { StaffQueueResponseSchema, type StaffQueueItem } from "@yuvapath/contracts";
 import {
   handoffPriorityByReason,
   listSyntheticStaffQueue,

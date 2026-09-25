@@ -1,4 +1,4 @@
-import type { GuardianConsent } from "@yuvanext/contracts";
+import type { GuardianConsent } from "@yuvapath/contracts";
 
 export type NewGuardianConsent = {
   id: string;

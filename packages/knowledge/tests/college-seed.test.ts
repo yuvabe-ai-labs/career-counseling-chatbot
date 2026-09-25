@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import {
   CollegeDatasetManifestSchema,
   CollegeDatasetRecordsSchema,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { describe, expect, it } from "vitest";
 
 const seedDirectory = resolve(

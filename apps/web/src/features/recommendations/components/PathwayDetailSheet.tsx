@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { X } from "lucide-react";
-import type { PathwayFitExplanation, RecommendationItem } from "@yuvanext/contracts";
+import type { PathwayFitExplanation, RecommendationItem } from "@yuvapath/contracts";
 import { cn } from "@/lib/utils";
 
 type PathwayDetailSheetProps = {
@@ -14,10 +14,10 @@ function isPathwayExplanation(
   return typeof explanation === "object" && explanation !== null && "careerAlignment" in explanation;
 }
 
+// MVP: College Availability is the only pathway score shown. Career Fit, Reachability (and the
+// stream/segment/marks/overall scores) stay in the API and may return in a later scoring phase.
 const FIT_ROWS: { key: keyof PathwayFitExplanation; label: string }[] = [
-  { key: "careerAlignment", label: "Career Fit" },
-  { key: "streamAlignment", label: "Stream Fit" },
-  { key: "reachability", label: "Reachability" },
+  { key: "collegeAvailability", label: "College Availability" },
 ];
 
 /**
@@ -79,7 +79,7 @@ export function PathwayDetailSheet({ item, onClose }: PathwayDetailSheetProps) {
 
           {explanation ? (
             <>
-              <div className="mt-5 grid grid-cols-3 gap-x-6 gap-y-4">
+              <div className="mt-5 grid grid-cols-1 gap-x-6 gap-y-4">
                 {FIT_ROWS.map(({ key, label }) => {
                   const value = explanation[key];
                   if (typeof value !== "number") return null;

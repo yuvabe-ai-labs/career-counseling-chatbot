@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import request from "supertest";
-import { HealthResponseSchema } from "@yuvanext/contracts";
-import { createInMemoryRecommendationStore } from "@yuvanext/recommendations";
+import { HealthResponseSchema } from "@yuvapath/contracts";
+import { createInMemoryRecommendationStore } from "@yuvapath/recommendations";
 import { z } from "zod";
 import { createApp } from "../src/app/create-app.js";
 

@@ -77,7 +77,7 @@ else
   aws iam create-role \
     --role-name "$ROLE_NAME" \
     --assume-role-policy-document "$TRUST_POLICY" \
-    --description "GitHub Actions OIDC role: deploys the yuvanext API to Lambda" >/dev/null
+    --description "GitHub Actions OIDC role: deploys the yuvapath API to Lambda" >/dev/null
 fi
 DEPLOY_ROLE_ARN="arn:aws:iam::${ACCOUNT_ID}:role/${ROLE_NAME}"
 
@@ -101,7 +101,7 @@ JSON
 )
 aws iam put-role-policy \
   --role-name "$ROLE_NAME" \
-  --policy-name "deploy-yuvanext-lambda" \
+  --policy-name "deploy-yuvapath-lambda" \
   --policy-document "$PERMISSIONS_POLICY" >/dev/null
 echo "Deploy role ready: $DEPLOY_ROLE_ARN"
 
@@ -121,7 +121,7 @@ else
   aws iam create-role \
     --role-name "$EXEC_ROLE_NAME" \
     --assume-role-policy-document "$LAMBDA_TRUST_POLICY" \
-    --description "Execution role for the yuvanext API Lambda functions" >/dev/null
+    --description "Execution role for the yuvapath API Lambda functions" >/dev/null
   aws iam attach-role-policy \
     --role-name "$EXEC_ROLE_NAME" \
     --policy-arn "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole" >/dev/null

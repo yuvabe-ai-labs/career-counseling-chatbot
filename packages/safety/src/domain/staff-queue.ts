@@ -1,4 +1,4 @@
-import type { HandoffReason, StaffQueueItem } from "@yuvanext/contracts";
+import type { HandoffReason, StaffQueueItem } from "@yuvapath/contracts";
 
 export const handoffPriorityByReason = {
   tier_1: 1,

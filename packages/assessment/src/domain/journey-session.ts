@@ -1,4 +1,4 @@
-import type { JourneySession, JourneySessionStatus } from "@yuvanext/contracts";
+import type { JourneySession, JourneySessionStatus } from "@yuvapath/contracts";
 
 export type JourneySessionRecord = JourneySession;
 

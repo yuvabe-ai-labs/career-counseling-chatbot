@@ -1,5 +1,5 @@
-import { ProfileSnapshotSchema, UuidSchema, type ProfileSnapshot } from "@yuvanext/contracts";
-import type { createDatabasePool, Database } from "@yuvanext/database";
+import { ProfileSnapshotSchema, UuidSchema, type ProfileSnapshot } from "@yuvapath/contracts";
+import type { createDatabasePool, Database } from "@yuvapath/database";
 import type {
   HandoffProfileContext,
   AssessmentSnapshotReader,
@@ -75,7 +75,6 @@ export class PostgresAssessmentSnapshotReader implements AssessmentSnapshotReade
       city: row.city,
       state: row.state,
       selfStage: row.self_stage,
-      wantsAid: row.wants_aid,
       intakeSummary: asRecord(row.intake_summary_json),
       ...optionalResults,
       profileVersion: row.profile_version,

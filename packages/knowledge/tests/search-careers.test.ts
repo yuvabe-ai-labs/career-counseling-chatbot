@@ -2,7 +2,7 @@ import {
   CareerSchema,
   CareerSearchQuerySchema,
   CareerSearchResponseSchema,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { careerFixtures } from "../../test-fixtures/src/index.js";
 import { describe, expect, it } from "vitest";
 import {

@@ -2,7 +2,7 @@ import {
   CollegeListQuerySchema,
   CollegeListResponseSchema,
   CollegeSchema,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { describe, expect, it } from "vitest";
 import { collegeFixtures } from "../../test-fixtures/src/index.js";
 import {

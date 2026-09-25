@@ -1,5 +1,5 @@
-import { UuidSchema } from "@yuvanext/contracts";
-import type { ResolveCounselorUserId } from "@yuvanext/counselor";
+import { UuidSchema } from "@yuvapath/contracts";
+import type { ResolveCounselorUserId } from "@yuvapath/counselor";
 
 export type SupabaseAuthClient = {
   auth: {

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { IsoTimestampSchema, SegmentSchema, UuidSchema } from "./common.js";
+import { IsoTimestampSchema, SegmentSchema, TnDistrictSchema, UuidSchema } from "./common.js";
 import { AgeBandSchema, EducationStageSchema } from "./profile.js";
 
 export const InstrumentCodeSchema = z.enum([
@@ -218,8 +218,11 @@ export const ProfileSnapshotSchema = z.object({
   ageBand: AgeBandSchema,
   city: z.string().min(1),
   state: z.string().min(1),
+  // Optional — copied from UserProfile.homeDistrict at snapshot-creation time (see
+  // pg-assessment-repository.ts's createAssessmentSnapshot), which is itself optional for the
+  // same pre-existing-row reason (see UserProfileSchema's own comment, profile.ts).
+  homeDistrict: TnDistrictSchema.optional(),
   selfStage: EducationStageSchema,
-  wantsAid: z.boolean(),
   intakeSummary: z.record(z.string(), z.unknown()),
   riasec: z
     .object({

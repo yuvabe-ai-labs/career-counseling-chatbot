@@ -3,7 +3,7 @@ import type {
   PrivacyJob,
   ResolvedPrivacyJobRequest,
   PrivacyJobResponse,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 
 const syntheticJobRequestedAt = "2026-07-30T12:00:00.000Z";
 

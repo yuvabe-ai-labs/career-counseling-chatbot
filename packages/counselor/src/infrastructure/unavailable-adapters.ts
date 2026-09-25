@@ -3,7 +3,7 @@ import {
   type HandoffPacket,
   type RetrievedEvidence,
   type SafetyDecision,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import {
   CounselorDependencyUnavailableError,
   type KnowledgeReader,

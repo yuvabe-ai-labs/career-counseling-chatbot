@@ -9,7 +9,7 @@ import type {
   StartAssessmentRunRequest,
   SubmitAssessmentResponseRequest,
   UserProfile,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import {
   canResumeJourneySession,
   createJourneySessionExpiration,

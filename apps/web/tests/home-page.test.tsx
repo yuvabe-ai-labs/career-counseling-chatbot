@@ -64,7 +64,7 @@ describe("HomePage", () => {
     // reliable signal that they've already been through the whole flow before, not just that
     // they started it.
     setStoredProfileSnapshotId("snapshot-1");
-    setStoredExploreGatingContext({ segment: "pathfinder", wantsAid: false, currentGoal: undefined });
+    setStoredExploreGatingContext({ segment: "pathfinder", seeksAid: false, currentGoal: undefined });
     const user = userEvent.setup();
     renderAt("/home");
 

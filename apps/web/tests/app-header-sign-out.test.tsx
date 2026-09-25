@@ -2,10 +2,20 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { queryClient } from "@/lib/query-client";
 import { getStoredUserId, setStoredJourneySessionId, setStoredUserId } from "@/lib/storage";
 import { HomePage, SessionProvider, SignInPage } from "@/features/assessment";
+
+// AppHeader fetches the student's profile on demand when the in-memory session doesn't already
+// have one (the normal case for a returning signed-in user — see useProfile.ts's own comment),
+// to derive the account-avatar initials. Mocked here so every test in this file gets a
+// deterministic, offline response instead of a real (failing) network call.
+const { getUserProfile } = vi.hoisted(() => ({ getUserProfile: vi.fn() }));
+vi.mock("@/features/assessment/api/profile", () => ({
+  getUserProfile,
+  upsertUserProfile: vi.fn(),
+}));
 
 // AppHeader (used by HomePage and every other post-auth screen) is where the account menu /
 // sign-out lives — HomePage is just a convenient, side-effect-free host to render it under.
@@ -51,6 +61,26 @@ describe("AppHeader — account menu / sign out", () => {
     localStorage.clear();
     setStoredUserId("user-id");
     setStoredJourneySessionId("session-id");
+    queryClient.clear();
+    vi.clearAllMocks();
+    getUserProfile.mockResolvedValue({
+      profile: {
+        userId: "user-id",
+        firstName: "Asha Kumar",
+        ageAtOnboarding: 18,
+        ageBand: "adult_18",
+        city: "Chennai",
+        state: "Tamil Nadu",
+        countryCode: "IN",
+        segment: "explorer",
+        selfStage: "higher_secondary",
+        seeksAid: false,
+        profileStatus: "active",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+        deletedAt: null,
+      },
+    });
   });
 
   it("shows Help above Sign out for a logged-in user", async () => {
@@ -134,5 +164,67 @@ describe("AppHeader — account menu / sign out", () => {
 
     expect(screen.queryByRole("menuitem", { name: /sign out/i })).not.toBeInTheDocument();
     expect(getStoredUserId()).toBe("user-id");
+  });
+});
+
+describe("AppHeader — account avatar initials", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    queryClient.clear();
+    vi.clearAllMocks();
+  });
+
+  it("fetches the student's profile on demand and shows its initials for a logged-in user", async () => {
+    setStoredUserId("user-id");
+    setStoredJourneySessionId("session-id");
+    getUserProfile.mockResolvedValue({
+      profile: {
+        userId: "user-id",
+        firstName: "Asha Kumar",
+        ageAtOnboarding: 18,
+        ageBand: "adult_18",
+        city: "Chennai",
+        state: "Tamil Nadu",
+        countryCode: "IN",
+        segment: "explorer",
+        selfStage: "higher_secondary",
+        seeksAid: false,
+        profileStatus: "active",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+        deletedAt: null,
+      },
+    });
+    renderHome();
+
+    expect(await screen.findByText("AK")).toBeInTheDocument();
+    expect(getUserProfile).toHaveBeenCalledWith("session-id");
+  });
+
+  it("shows the generic fallback icon (not a blank/malformed badge) before the profile loads and when signed out", async () => {
+    // No stored session at all — pre-auth, matching how a visitor actually arrives at /sign-in.
+    getUserProfile.mockResolvedValue({
+      profile: {
+        userId: "user-id",
+        firstName: "Someone",
+        ageAtOnboarding: 18,
+        ageBand: "adult_18",
+        city: "Chennai",
+        state: "Tamil Nadu",
+        countryCode: "IN",
+        segment: "explorer",
+        selfStage: "higher_secondary",
+        seeksAid: false,
+        profileStatus: "active",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+        deletedAt: null,
+      },
+    });
+    const { container } = renderSignIn();
+
+    expect(await screen.findByRole("heading", { name: /welcome back/i })).toBeInTheDocument();
+    expect(container.querySelector("svg")).toBeInTheDocument();
+    expect(getUserProfile).not.toHaveBeenCalled();
   });
 });

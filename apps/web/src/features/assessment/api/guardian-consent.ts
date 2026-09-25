@@ -9,7 +9,7 @@ import {
   type ResendPendingGuardianConsentRequest,
   type VerifyGuardianConsentRequest,
   type VerifyPendingGuardianConsentRequest,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { apiRequest } from "@/lib/api-client";
 
 /** GET /api/v1/journey-sessions/:sessionId/guardian-consents/status — the server's own minor determination. */

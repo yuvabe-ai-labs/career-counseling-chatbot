@@ -1,4 +1,4 @@
-import type { ReportSnapshot } from "@yuvanext/contracts";
+import type { ReportSnapshot } from "@yuvapath/contracts";
 
 export type RenderedReportAsset = {
   assetType: "report_pdf" | "share_card";

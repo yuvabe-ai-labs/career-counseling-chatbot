@@ -1,7 +1,7 @@
 import {
   withTransaction,
   type createDatabasePool,
-} from "@yuvanext/database";
+} from "@yuvapath/database";
 import type { StreamDatasetPublisher } from "../application/import-stream-dataset.js";
 import { DatasetVersionConflictError } from "./postgres-college-dataset-publisher.js";
 
@@ -168,6 +168,52 @@ export class PostgresStreamDatasetPublisher
             option.title,
             option.description,
             option.status,
+          ],
+        );
+      }
+
+      // Must run after the streamOptions loop above — a career_streams row commonly references
+      // a stream_option_id being published in this very batch, and the FK would fail otherwise.
+      for (const link of input.records.careerStreams) {
+        await client.query(
+          `insert into knowledge.career_streams
+            (career_id, stream_option_id, relationship_type, weight, source, display_order)
+           values ($1,$2,$3,$4,$5,$6)
+           on conflict (career_id, stream_option_id) do update set
+             relationship_type=excluded.relationship_type,
+             weight=excluded.weight,
+             source=excluded.source,
+             display_order=excluded.display_order`,
+          [
+            link.careerId,
+            link.streamOptionId,
+            link.relationshipType,
+            link.weight,
+            link.source,
+            link.displayOrder,
+          ],
+        );
+      }
+
+      // Also runs after both the pathways loop and the streamOptions loop above — same FK
+      // ordering reasoning as careerStreams.
+      for (const link of input.records.streamPathways) {
+        await client.query(
+          `insert into knowledge.stream_pathways
+            (stream_option_id, pathway_id, relationship_type, weight, source, display_order)
+           values ($1,$2,$3,$4,$5,$6)
+           on conflict (stream_option_id, pathway_id) do update set
+             relationship_type=excluded.relationship_type,
+             weight=excluded.weight,
+             source=excluded.source,
+             display_order=excluded.display_order`,
+          [
+            link.streamOptionId,
+            link.pathwayId,
+            link.relationshipType,
+            link.weight,
+            link.source,
+            link.displayOrder,
           ],
         );
       }

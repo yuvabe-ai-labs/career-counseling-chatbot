@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { StaffPacketResponseSchema } from "@yuvanext/contracts";
+import { StaffPacketResponseSchema } from "@yuvapath/contracts";
 import { createSyntheticStaffPacket, createSyntheticStaffPacketView } from "../src/index.js";
 
 const userId = "11111111-1111-4111-8111-111111111111";

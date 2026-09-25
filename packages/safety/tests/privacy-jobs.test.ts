@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PrivacyJobResponseSchema, type ResolvedPrivacyJobRequest } from "@yuvanext/contracts";
+import { PrivacyJobResponseSchema, type ResolvedPrivacyJobRequest } from "@yuvapath/contracts";
 import { createSyntheticPrivacyJob, getSyntheticPrivacyJob } from "../src/index.js";
 
 const uuid = "11111111-1111-4111-8111-111111111111";

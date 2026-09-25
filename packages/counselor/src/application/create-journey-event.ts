@@ -4,7 +4,7 @@ import {
   CreateJourneyEventResponseSchema,
   UuidSchema,
   type CreateJourneyEventResponse,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import type { CounselorRepository } from "./ports/index.js";
 
 export type CreateJourneyEventCommand = {

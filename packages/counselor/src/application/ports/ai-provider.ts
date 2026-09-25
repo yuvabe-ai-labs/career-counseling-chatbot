@@ -3,7 +3,7 @@ import type {
   ProfileSnapshot,
   RecommendationSet,
   RetrievedEvidence,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 
 export type AiProviderRequest = {
   conversationId: string;

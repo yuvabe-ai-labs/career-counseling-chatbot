@@ -1,4 +1,4 @@
-import type { HandoffPacket, SafetyDecision } from "@yuvanext/contracts";
+import type { HandoffPacket, SafetyDecision } from "@yuvapath/contracts";
 import type {
   RequestHandoffInput,
   SafetyChecker,
@@ -7,7 +7,7 @@ import type {
 
 /**
  * The narrow shape of Module 5's safety operations that this adapter depends on. Deliberately
- * declared locally (not imported from `@yuvanext/safety`) so Module 4 never depends on Module 5's
+ * declared locally (not imported from `@yuvapath/safety`) so Module 4 never depends on Module 5's
  * repository/database types directly — only the composition root needs to know that the concrete
  * value passed in happens to be a `SafetyOperationsRepository`. This keeps `packages/counselor`
  * self-contained per its module boundary rules (no upstream repository/database imports) while

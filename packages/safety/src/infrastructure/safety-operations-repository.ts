@@ -19,8 +19,8 @@ import type {
   StaffQueueResponse,
   StaffSessionQuery,
   StaffSessionsResponse,
-} from "@yuvanext/contracts";
-import { withTransaction } from "@yuvanext/database";
+} from "@yuvapath/contracts";
+import { withTransaction } from "@yuvapath/database";
 import { createSyntheticHandoffPacket } from "../domain/handoff-packets.js";
 import { evaluateSafetyCheck } from "../domain/safety-rules.js";
 import { handoffPriorityByReason, sortStaffQueueItems } from "../domain/staff-queue.js";

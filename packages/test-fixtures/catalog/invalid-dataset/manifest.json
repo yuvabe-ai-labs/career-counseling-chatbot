@@ -10,10 +10,10 @@
   "createdAt": "2026-07-30T00:00:00.000Z",
   "source": {
     "id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
-    "sourceKey": "yuvanext-invalid-colleges-demo",
-    "name": "YuvaNext deliberately invalid college fixtures",
+    "sourceKey": "yuvapath-invalid-colleges-demo",
+    "name": "YuvaPath deliberately invalid college fixtures",
     "sourceType": "synthetic_invalid_fixture",
-    "publisher": "YuvaNext POC team",
+    "publisher": "YuvaPath POC team",
     "trustLevel": "test_only",
     "status": "active",
     "baseUrl": null,

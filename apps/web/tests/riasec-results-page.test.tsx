@@ -1,5 +1,5 @@
 import { QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -15,10 +15,84 @@ import {
 } from "@/lib/storage";
 import { RiasecResultsPage, SessionProvider } from "@/features/assessment";
 
-const { scoreAssessmentRun, createAssessmentSnapshot } = vi.hoisted(() => ({
+const { toJpeg, pdfSave } = vi.hoisted(() => ({
+  toJpeg: vi.fn(),
+  pdfSave: vi.fn(),
+}));
+
+vi.mock("html-to-image", () => ({ toJpeg }));
+vi.mock("jspdf", () => ({
+  jsPDF: class {
+    internal = { pageSize: { getWidth: () => 210 } };
+    addImage() {}
+    save(name: string) {
+      pdfSave(name);
+    }
+  },
+}));
+
+const {
+  scoreAssessmentRun,
+  createAssessmentSnapshot,
+  getUserProfile,
+  getIntakeQuestions,
+  getCareerRecommendations,
+  getStreamRecommendations,
+  getPathwayRecommendations,
+} = vi.hoisted(() => ({
   scoreAssessmentRun: vi.fn(),
   createAssessmentSnapshot: vi.fn(),
+  getUserProfile: vi.fn(),
+  getIntakeQuestions: vi.fn(),
+  getCareerRecommendations: vi.fn(),
+  getStreamRecommendations: vi.fn(),
+  getPathwayRecommendations: vi.fn(),
 }));
+
+vi.mock("@/features/assessment/api/profile", () => ({ getUserProfile, upsertUserProfile: vi.fn() }));
+vi.mock("@/features/assessment/api/intake", () => ({ getIntakeQuestions, upsertIntakeAnswer: vi.fn() }));
+vi.mock("@/features/recommendations/api/career", () => ({ getCareerRecommendations }));
+vi.mock("@/features/recommendations/api/stream", () => ({ getStreamRecommendations }));
+vi.mock("@/features/recommendations/api/pathway", () => ({ getPathwayRecommendations }));
+
+const PROFILE = {
+  userId: "user-id",
+  firstName: "Asha",
+  ageAtOnboarding: 17,
+  ageBand: "minor_16_17",
+  city: "Chennai",
+  state: "Tamil Nadu",
+  countryCode: "IN",
+  segment: "pathfinder" as const,
+  selfStage: "higher_secondary" as const,
+  profileStatus: "active",
+  createdAt: "2026-01-01T00:00:00.000Z",
+  updatedAt: "2026-01-01T00:00:00.000Z",
+  deletedAt: null,
+};
+
+const QUESTION_SET = {
+  id: "00000000-0000-4000-8000-000000000001",
+  segment: "pathfinder",
+  version: "1.0",
+  language: "en",
+};
+
+function recommendationSet(kind: string, titles: string[]) {
+  return {
+    kind,
+    items: titles.map((title, index) => ({
+      itemId: `${kind}:${index}`,
+      entityType: kind,
+      entityId: `id-${kind}-${index}`,
+      title,
+      rank: index + 1,
+      fitScore: 0.9,
+      explanation: {},
+      entityDatasetVersion: "test",
+    })),
+  };
+}
 
 vi.mock("@/features/assessment/api/assessment", () => ({
   startAssessmentRun: vi.fn(),
@@ -57,7 +131,7 @@ const RESULT = {
 const SNAPSHOT = {
   snapshotId: "snapshot-1",
   segment: "launcher" as const,
-  wantsAid: false,
+  seeksAid: false,
   intakeSummary: { current_goal: { value: "skill_building" } },
 };
 
@@ -80,6 +154,18 @@ function renderAt(initialPath: string) {
 
 describe("RiasecResultsPage", () => {
   beforeEach(() => {
+    toJpeg.mockReset();
+    toJpeg.mockResolvedValue("data:image/png;base64,AA==");
+    pdfSave.mockReset();
+    getUserProfile.mockResolvedValue({ profile: PROFILE });
+    getIntakeQuestions.mockResolvedValue({ questionSet: QUESTION_SET, questions: [], answers: [] });
+    getCareerRecommendations.mockResolvedValue(recommendationSet("career", ["Data Scientist"]));
+    getStreamRecommendations.mockResolvedValue(
+      recommendationSet("stream", ["Science with Mathematics"]),
+    );
+    getPathwayRecommendations.mockResolvedValue(
+      recommendationSet("pathway", ["B.E./B.Tech. Computer Science"]),
+    );
     localStorage.clear();
     vi.clearAllMocks();
     queryClient.clear();
@@ -115,16 +201,16 @@ describe("RiasecResultsPage", () => {
     // The one shared loading indicator, and nothing else — no result heading (a fully/partially
     // populated card) and no visible "Loading" text (the word only exists for screen readers).
     expect(screen.getByRole("status", { name: /loading/i })).toBeInTheDocument();
-    expect(screen.queryByText("Assessment")).not.toBeInTheDocument();
+    expect(screen.queryByText("Personality Type Trait Strength!")).not.toBeInTheDocument();
     expect(screen.queryByText("Loading…")).not.toBeInTheDocument();
     expect(screen.queryByText("Loading...")).not.toBeInTheDocument();
 
     resolveScore({ result: RESULT });
-    expect(await screen.findByText("Assessment")).toBeInTheDocument();
+    expect(await screen.findByText("Personality Type Trait Strength!")).toBeInTheDocument();
     expect(screen.queryByRole("status", { name: /loading/i })).not.toBeInTheDocument();
   });
 
-  it("scores the run and renders the real result — trait bars and RIASEC code, nothing hardcoded", async () => {
+  it("defaults to the Score segment — trait bars and the RIASEC coin, nothing hardcoded", async () => {
     setStoredUserId("user-id");
     setStoredJourneySessionId("session-id");
     setStoredAssessmentRunId("run-1");
@@ -133,7 +219,7 @@ describe("RiasecResultsPage", () => {
     const user = userEvent.setup();
     renderAt("/riasec-results");
 
-    expect(await screen.findByText("Assessment")).toBeInTheDocument();
+    expect(await screen.findByText("Personality Type Trait Strength!")).toBeInTheDocument();
     expect(scoreAssessmentRun).toHaveBeenCalledWith("run-1");
 
     expect(screen.getByText("Realistic")).toBeInTheDocument();
@@ -142,9 +228,10 @@ describe("RiasecResultsPage", () => {
     expect(screen.getByText("80%")).toBeInTheDocument(); // I: 0.8 -> 80%
     expect(screen.getByText("Conventional")).toBeInTheDocument();
     expect(screen.getByText("10%")).toBeInTheDocument(); // C: 0.1 -> 10%
-    // "RIA" appears twice — once in the hero band, once in the trait recap line underneath the
-    // bars — so this can't be a single getByText.
-    expect(screen.getAllByText("RIA").length).toBeGreaterThan(0);
+    // The RIASEC coin, centered in its own circle.
+    expect(screen.getByText("RIA")).toBeInTheDocument();
+    // Report Card-only content isn't rendered until that segment is selected.
+    expect(screen.queryByText("Assessment")).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Explore Path" }));
 
@@ -153,62 +240,127 @@ describe("RiasecResultsPage", () => {
     expect(getStoredProfileSnapshotId()).toBe("snapshot-1");
     expect(getStoredExploreGatingContext()).toEqual({
       segment: "launcher",
-      wantsAid: false,
+      seeksAid: false,
       currentGoal: "skill_building",
     });
   });
 
-  it("shows confidence but none of the interest-quiz/English/summary copy, and an empty selections placeholder", async () => {
+  it("opens on the Report Card segment via ?tab=reportCard — its only entry point, ExplorePathPage's Report card link — and shows the Assessment section but no quiz/confidence line or English/summary copy, plus an empty selections placeholder", async () => {
     setStoredUserId("user-id");
     setStoredJourneySessionId("session-id");
     setStoredAssessmentRunId("run-1");
     scoreAssessmentRun.mockResolvedValue({ result: RESULT });
-    renderAt("/riasec-results");
-
-    expect(await screen.findByText("Confidence: Normal")).toBeInTheDocument();
-    expect(screen.queryByText(/interest quiz/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/mini-iip/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/english/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/summary/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/natural doer/i)).not.toBeInTheDocument();
-
-    expect(screen.getByText("Your Selections & Explorations")).toBeInTheDocument();
-    expect(
-      screen.getByText("Careers and colleges you explore will show up here."),
-    ).toBeInTheDocument();
-  });
-
-  it("shows the segment badge once it's known (a repeat visit), and omits it otherwise", async () => {
-    setStoredUserId("user-id");
-    setStoredJourneySessionId("session-id");
-    setStoredAssessmentRunId("run-1");
-    scoreAssessmentRun.mockResolvedValue({ result: RESULT });
-    setStoredExploreGatingContext({ segment: "launcher", wantsAid: false, currentGoal: undefined });
-    renderAt("/riasec-results");
-
-    expect(await screen.findByText("launcher")).toBeInTheDocument();
-  });
-
-  it("omits the segment badge on a first visit, before any profile snapshot exists", async () => {
-    setStoredUserId("user-id");
-    setStoredJourneySessionId("session-id");
-    setStoredAssessmentRunId("run-1");
-    scoreAssessmentRun.mockResolvedValue({ result: RESULT });
-    renderAt("/riasec-results");
+    renderAt("/riasec-results?tab=reportCard");
 
     expect(await screen.findByText("Assessment")).toBeInTheDocument();
-    expect(screen.queryByText(/explorer|pathfinder|launcher/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/confidence/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/interest quiz/i)).not.toBeInTheDocument();
+    // Score-only content isn't rendered on this segment.
+    expect(screen.queryByText("Personality Type Trait Strength!")).not.toBeInTheDocument();
+    expect(screen.queryByText(/english/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/natural doer/i)).not.toBeInTheDocument();
+
+    expect(screen.getByText("Your selections & explorations")).toBeInTheDocument();
+    // No profile snapshot yet on a first visit, so nothing to read matches from.
+    expect(screen.getByText("Open Explore Path to see your top matches here.")).toBeInTheDocument();
   });
 
-  it("shows Download and Talk to counsellor as disabled placeholders — no backend behind either yet", async () => {
+  it("shows the student's name, segment, stage and location in the report header", async () => {
     setStoredUserId("user-id");
     setStoredJourneySessionId("session-id");
     setStoredAssessmentRunId("run-1");
     scoreAssessmentRun.mockResolvedValue({ result: RESULT });
-    renderAt("/riasec-results");
+    renderAt("/riasec-results?tab=reportCard");
 
-    expect(await screen.findByRole("button", { name: /download/i })).toBeDisabled();
+    expect(await screen.findByText("Asha")).toBeInTheDocument();
+    expect(screen.getByText("Pathfinder")).toBeInTheDocument();
+    expect(screen.getByText("Chennai, Tamil Nadu, India")).toBeInTheDocument();
+    // Profile tags: age, city, state.
+    expect(screen.getByText("17 years")).toBeInTheDocument();
+    expect(screen.getByText("Tamil Nadu, India")).toBeInTheDocument();
+  });
+
+  it("lists the top careers, streams and pathways as titles only once a snapshot exists (pathfinder)", async () => {
+    setStoredUserId("user-id");
+    setStoredJourneySessionId("session-id");
+    setStoredAssessmentRunId("run-1");
+    localStorage.setItem("yuvapath.profileSnapshotId", "snapshot-1");
+    setStoredExploreGatingContext({ segment: "pathfinder", seeksAid: true, currentGoal: undefined });
+    scoreAssessmentRun.mockResolvedValue({ result: RESULT });
+    renderAt("/riasec-results?tab=reportCard");
+
+    expect(await screen.findByText("Data Scientist")).toBeInTheDocument();
+    expect(await screen.findByText("Science with Mathematics")).toBeInTheDocument();
+    expect(await screen.findByText("B.E./B.Tech. Computer Science")).toBeInTheDocument();
+    // Titles only: the recommendations' 90% fitScore must not appear anywhere.
+    expect(screen.queryByText(/90%/)).not.toBeInTheDocument();
+  });
+
+  it("has no Summary or Suggested next steps sections on the Report Card", async () => {
+    setStoredUserId("user-id");
+    setStoredJourneySessionId("session-id");
+    setStoredAssessmentRunId("run-1");
+    scoreAssessmentRun.mockResolvedValue({ result: RESULT });
+    renderAt("/riasec-results?tab=reportCard");
+
+    expect(await screen.findByText("Assessment")).toBeInTheDocument();
+    expect(screen.queryByText("Summary")).not.toBeInTheDocument();
+    expect(screen.queryByText("Suggested next steps")).not.toBeInTheDocument();
+  });
+
+  it("shows Explore Path, Download and Talk to counsellor on the Report Card — Talk to counsellor stays disabled, no backend yet", async () => {
+    setStoredUserId("user-id");
+    setStoredJourneySessionId("session-id");
+    setStoredAssessmentRunId("run-1");
+    scoreAssessmentRun.mockResolvedValue({ result: RESULT });
+    renderAt("/riasec-results?tab=reportCard");
+
+    expect(await screen.findByRole("button", { name: "Explore Path" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: /download/i })).toBeEnabled();
     expect(screen.getByRole("button", { name: /talk to counsellor/i })).toBeDisabled();
+  });
+
+  it("Explore Path on the Report Card goes to Explore Path, building the snapshot if needed", async () => {
+    setStoredUserId("user-id");
+    setStoredJourneySessionId("session-id");
+    setStoredAssessmentRunId("run-1");
+    scoreAssessmentRun.mockResolvedValue({ result: RESULT });
+    createAssessmentSnapshot.mockResolvedValue({ snapshot: SNAPSHOT });
+    const user = userEvent.setup();
+    renderAt("/riasec-results?tab=reportCard");
+
+    await user.click(await screen.findByRole("button", { name: "Explore Path" }));
+
+    expect(await screen.findByText("Explore Path screen")).toBeInTheDocument();
+  });
+
+  it("Download saves the report as '<first name>-Journey-Report.pdf'", async () => {
+    setStoredUserId("user-id");
+    setStoredJourneySessionId("session-id");
+    setStoredAssessmentRunId("run-1");
+    scoreAssessmentRun.mockResolvedValue({ result: RESULT });
+    const user = userEvent.setup();
+    renderAt("/riasec-results?tab=reportCard");
+
+    await user.click(await screen.findByRole("button", { name: /download/i }));
+
+    await waitFor(() => expect(pdfSave).toHaveBeenCalledWith("Asha-Journey-Report.pdf"));
+    expect(toJpeg).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows an error instead of failing silently if the PDF can't be created", async () => {
+    setStoredUserId("user-id");
+    setStoredJourneySessionId("session-id");
+    setStoredAssessmentRunId("run-1");
+    scoreAssessmentRun.mockResolvedValue({ result: RESULT });
+    toJpeg.mockRejectedValueOnce(new Error("render failed"));
+    const user = userEvent.setup();
+    renderAt("/riasec-results?tab=reportCard");
+
+    await user.click(await screen.findByRole("button", { name: /download/i }));
+
+    expect(await screen.findByText("We couldn't create the PDF. Please try again.")).toBeInTheDocument();
+    expect(pdfSave).not.toHaveBeenCalled();
   });
 
   it("reuses the stored snapshot instead of creating a new one on a repeat visit", async () => {
@@ -216,7 +368,7 @@ describe("RiasecResultsPage", () => {
     setStoredJourneySessionId("session-id");
     setStoredAssessmentRunId("run-1");
     scoreAssessmentRun.mockResolvedValue({ result: RESULT });
-    localStorage.setItem("yuvanext.profileSnapshotId", "existing-snapshot");
+    localStorage.setItem("yuvapath.profileSnapshotId", "existing-snapshot");
     const user = userEvent.setup();
     renderAt("/riasec-results");
 
@@ -247,5 +399,130 @@ describe("RiasecResultsPage", () => {
     await user.click(screen.getByRole("button", { name: "Try again" }));
 
     expect(await screen.findAllByText("RIA")).not.toHaveLength(0);
+  });
+});
+
+
+describe("RiasecResultsPage — Report Card works for every segment", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    queryClient.clear();
+    getUserProfile.mockReset();
+    getIntakeQuestions.mockReset();
+    getCareerRecommendations.mockReset();
+    getStreamRecommendations.mockReset();
+    getPathwayRecommendations.mockReset();
+    getCareerRecommendations.mockResolvedValue(recommendationSet("career", ["Data Scientist", "Nurse"]));
+    getStreamRecommendations.mockResolvedValue(recommendationSet("stream", ["Science with Mathematics"]));
+    getPathwayRecommendations.mockResolvedValue(recommendationSet("pathway", ["B.Sc Nursing"]));
+    setStoredUserId("user-id");
+    setStoredJourneySessionId("session-id");
+    setStoredAssessmentRunId("run-1");
+    localStorage.setItem("yuvapath.profileSnapshotId", "snapshot-1");
+    scoreAssessmentRun.mockResolvedValue({ result: RESULT });
+  });
+
+  function intakeFor(segment: string, answers: Record<string, string>) {
+    const questions = Object.keys(answers).map((key, index) => ({
+      id: `00000000-0000-4000-8000-0000000001${String(index).padStart(2, "0")}`,
+      questionSetId: QUESTION_SET.id,
+      questionSetVersion: "1.0",
+      segment,
+      language: "en",
+      questionKey: key,
+      displayOrder: index + 1,
+      promptText: key,
+      responseType: "single_choice",
+      options: null,
+      placeholderText: null,
+      isSensitive: false,
+      isRequired: true,
+    }));
+    return {
+      questionSet: { ...QUESTION_SET, segment },
+      questions,
+      answers: questions.map((question) => ({
+        questionId: question.id,
+        answer: { value: answers[question.questionKey] },
+      })),
+    };
+  }
+
+  it("explorer: age/city/state and their own intake answers as tags; careers + stream cards, no pathway", async () => {
+    getUserProfile.mockResolvedValue({
+      profile: { ...PROFILE, firstName: "Ravi", segment: "explorer", selfStage: "school", ageAtOnboarding: 13 },
+    });
+    getIntakeQuestions.mockResolvedValue(
+      intakeFor("explorer", {
+        school_board: "state_board",
+        favorite_subject: "Mathematics",
+        flow_activity: "Drawing",
+      }),
+    );
+    setStoredExploreGatingContext({ segment: "explorer", seeksAid: false, currentGoal: undefined });
+    renderAt("/riasec-results?tab=reportCard");
+
+    expect(await screen.findByText("Ravi")).toBeInTheDocument();
+    expect(screen.getByText("Explorer")).toBeInTheDocument();
+    expect(screen.getByText("13 years")).toBeInTheDocument();
+    expect(await screen.findByText("State Board")).toBeInTheDocument();
+    expect(screen.getByText("Mathematics")).toBeInTheDocument();
+    expect(screen.getByText("Drawing")).toBeInTheDocument();
+    expect(await screen.findByText("Data Scientist")).toBeInTheDocument();
+    expect(await screen.findByText("Science with Mathematics")).toBeInTheDocument();
+    expect(screen.queryByText("B.Sc Nursing")).not.toBeInTheDocument();
+    expect(getPathwayRecommendations).not.toHaveBeenCalled();
+  });
+
+  it("pathfinder: intake tags plus career, stream and pathway cards", async () => {
+    getUserProfile.mockResolvedValue({ profile: PROFILE });
+    getIntakeQuestions.mockResolvedValue(
+      intakeFor("pathfinder", { education_stage: "class_12", current_stream: "commerce" }),
+    );
+    setStoredExploreGatingContext({ segment: "pathfinder", seeksAid: false, currentGoal: undefined });
+    renderAt("/riasec-results?tab=reportCard");
+
+    expect(await screen.findByText("Class 12")).toBeInTheDocument();
+    expect(screen.getByText("Commerce")).toBeInTheDocument();
+    expect(await screen.findByText("Data Scientist")).toBeInTheDocument();
+    expect(await screen.findByText("Science with Mathematics")).toBeInTheDocument();
+    expect(await screen.findByText("B.Sc Nursing")).toBeInTheDocument();
+  });
+
+  it("launcher: education level, field of study and goal tags; careers only, no stream or pathway requests", async () => {
+    getUserProfile.mockResolvedValue({
+      profile: { ...PROFILE, firstName: "Meera", segment: "launcher", selfStage: "graduate", ageAtOnboarding: 24 },
+    });
+    getIntakeQuestions.mockResolvedValue(
+      intakeFor("launcher", {
+        education_level: "bachelors",
+        field_of_study: "Computer Science",
+        current_goal: "higher_studies",
+      }),
+    );
+    setStoredExploreGatingContext({ segment: "launcher", seeksAid: false, currentGoal: "higher_studies" });
+    renderAt("/riasec-results?tab=reportCard");
+
+    expect(await screen.findByText("Meera")).toBeInTheDocument();
+    expect(screen.getByText("Launcher")).toBeInTheDocument();
+    expect(await screen.findByText("Bachelors")).toBeInTheDocument();
+    expect(screen.getByText("Computer Science")).toBeInTheDocument();
+    expect(screen.getByText("Higher Studies")).toBeInTheDocument();
+    expect(await screen.findByText("Data Scientist")).toBeInTheDocument();
+    expect(getStreamRecommendations).not.toHaveBeenCalled();
+    expect(getPathwayRecommendations).not.toHaveBeenCalled();
+  });
+
+  it("never shows sensitive intake answers (marks band, constraints) as tags", async () => {
+    getUserProfile.mockResolvedValue({ profile: PROFILE });
+    getIntakeQuestions.mockResolvedValue(
+      intakeFor("pathfinder", { marks_band: "90_plus", constraints: "fees", education_stage: "class_12" }),
+    );
+    setStoredExploreGatingContext({ segment: "pathfinder", seeksAid: false, currentGoal: undefined });
+    renderAt("/riasec-results?tab=reportCard");
+
+    expect(await screen.findByText("Class 12")).toBeInTheDocument();
+    expect(screen.queryByText("90 Plus")).not.toBeInTheDocument();
+    expect(screen.queryByText("Fees")).not.toBeInTheDocument();
   });
 });

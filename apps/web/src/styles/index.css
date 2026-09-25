@@ -151,6 +151,14 @@
  * scrollbar-color covers Firefox and current Chromium/Safari; the ::-webkit- rules cover older
  * WebKit that doesn't yet read scrollbar-color.
  */
+/* A region that still scrolls (wheel, touch, keyboard) but shows no scrollbar at all. */
+.scrollbar-hidden {
+  scrollbar-width: none;
+}
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
 .scrollbar-brand {
   /* Firefox: thumb colour then track colour. It renders its own shape, so the pill ends below
      are a Chromium/WebKit refinement rather than something Firefox can be made to match. */
@@ -551,4 +559,53 @@ input[type="date"].date-placeholder-empty::-webkit-datetime-edit-year-field {
 .career-ring-map .dot-node:hover .dot-label-text,
 .career-ring-map .dot-node[data-selected="true"] .dot-label-text {
   color: var(--brand);
+}
+
+/*
+ * Motion system. One small set of values reused everywhere so interactions feel alike:
+ *   --motion-fast  hover/press/focus feedback
+ *   --motion-base  popups, dropdowns, overlays, content appearing
+ *   --motion-page  route-to-route content fade
+ * Only opacity/transform are animated (no layout properties), and nothing here delays anything:
+ * animations start immediately, and content is never held back to let one play.
+ */
+:root {
+  --motion-fast: 150ms;
+  --motion-base: 200ms;
+  --motion-page: 180ms;
+  --motion-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/*
+ * Route change: every screen's content (everything under its <main> except the header, which
+ * stays put) fades in as the screen mounts. Opacity only, deliberately -- a transform here would
+ * make this wrapper the containing block for the `fixed` spinner/sheets inside it while it plays,
+ * shifting them for a moment. `backwards` fill so nothing lingers once the animation ends.
+ */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+#root main > :not(header) {
+  animation: page-enter var(--motion-page) var(--motion-ease) backwards;
+}
+
+/*
+ * Reduced motion: keep every interaction working but drop the movement. Durations collapse to
+ * ~0 (so animation-end events and final states still resolve) and smooth scrolling is turned
+ * off. The loading spinner is exempt -- a frozen spinner would read as a hung screen.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *:not(.animate-spin),
+  *:not(.animate-spin)::before,
+  *:not(.animate-spin)::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -3,7 +3,7 @@ import type {
   AidSchemeCatalogRecord,
   MatchingConfig,
   ProfileSnapshotForRecommendations,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { buildAidRecommendationSet, scoreAidSchemes } from "./aid-recommendations.js";
 
 const createdAt = "2026-07-28T00:00:00.000Z";

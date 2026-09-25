@@ -196,7 +196,7 @@ export function Combobox({
       {isOpen ? (
         <ul
           role="listbox"
-          className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md"
+          className="origin-top animate-in fade-in zoom-in-95 slide-in-from-top-1 duration-150 absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md"
         >
           {options.map((option, index) => (
             <li

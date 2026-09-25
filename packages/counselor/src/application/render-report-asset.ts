@@ -5,7 +5,7 @@ import {
   RenderReportAssetRequestSchema,
   UuidSchema,
   type GeneratedAssetResponse,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { CounselorNotFoundError } from "./errors.js";
 import type { CounselorRepository, ReportRenderer } from "./ports/index.js";
 

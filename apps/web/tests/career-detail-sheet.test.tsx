@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import type { RecommendationItem } from "@yuvanext/contracts";
+import type { RecommendationItem } from "@yuvapath/contracts";
 import { CareerDetailSheet } from "@/features/recommendations/components/CareerDetailSheet";
 
 const ITEM: RecommendationItem = {

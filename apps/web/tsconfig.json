@@ -8,7 +8,7 @@
     "types": ["vite/client"],
     "noEmit": true,
     "paths": {
-      "@yuvanext/*": ["../../packages/*/src/index.ts"],
+      "@yuvapath/*": ["../../packages/*/src/index.ts"],
       "@/*": ["./src/*"]
     }
   },

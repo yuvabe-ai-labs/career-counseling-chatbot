@@ -1,7 +1,7 @@
 import type {
   CatalogImportRequest,
   CatalogImportResponse,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 
 export interface CatalogImportCoordinator {
   start(

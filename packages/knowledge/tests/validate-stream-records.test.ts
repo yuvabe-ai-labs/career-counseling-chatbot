@@ -216,3 +216,243 @@ describe("validateStreamRecords — careerPathways (knowledge.career_pathways)",
     }
   });
 });
+
+describe("validateStreamRecords — careerStreams (knowledge.career_streams, Iteration 1)", () => {
+  const streamOptionId = "d0000000-0000-4000-8000-000000000001";
+
+  function recordsWithStreamOption() {
+    return {
+      ...baseRecords(),
+      streamOptions: [
+        {
+          id: streamOptionId,
+          streamCode: "science-mathematics",
+          title: "Science with Mathematics",
+          description: "Foundations in mathematics and science.",
+          status: "active",
+        },
+      ],
+    };
+  }
+
+  it("accepts a valid career-stream link", () => {
+    const result = validateStreamRecords(
+      {
+        ...recordsWithStreamOption(),
+        careerStreams: [
+          { careerId, streamOptionId, relationshipType: "primary", weight: 0.8, source: "curated", displayOrder: 1 },
+        ],
+      },
+      datasetVersionId,
+    );
+
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects a career-stream link to an unknown stream option", () => {
+    const result = validateStreamRecords(
+      {
+        ...recordsWithStreamOption(),
+        careerStreams: [
+          {
+            careerId,
+            streamOptionId: "00000000-0000-4000-8000-000000000000",
+            relationshipType: "primary",
+            weight: 0.8,
+            source: "curated",
+            displayOrder: 1,
+          },
+        ],
+      },
+      datasetVersionId,
+    );
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.issues.map((issue) => issue.code)).toContain("ORPHAN_REFERENCE");
+    }
+  });
+
+  it("accepts a career-stream link to a stream option outside this batch when supplied via knownStreamOptionIds", () => {
+    const result = validateStreamRecords(
+      {
+        ...baseRecords(), // no streamOptions in this batch at all
+        careerStreams: [
+          { careerId, streamOptionId, relationshipType: "primary", weight: 0.8, source: "curated", displayOrder: 1 },
+        ],
+      },
+      datasetVersionId,
+      [],
+      [],
+      [streamOptionId],
+    );
+
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects a career-stream link to a career outside a supplied known-career list", () => {
+    const result = validateStreamRecords(
+      {
+        ...recordsWithStreamOption(),
+        careerStreams: [
+          { careerId, streamOptionId, relationshipType: "primary", weight: 0.8, source: "curated", displayOrder: 1 },
+        ],
+      },
+      datasetVersionId,
+      ["some-other-career-id"],
+    );
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.issues.map((issue) => issue.code)).toContain("ORPHAN_REFERENCE");
+    }
+  });
+
+  it("rejects a duplicate career-stream link", () => {
+    const result = validateStreamRecords(
+      {
+        ...recordsWithStreamOption(),
+        careerStreams: [
+          { careerId, streamOptionId, relationshipType: "primary", weight: 0.8, source: "curated", displayOrder: 1 },
+          { careerId, streamOptionId, relationshipType: "alternative", weight: 0.4, source: "curated", displayOrder: 2 },
+        ],
+      },
+      datasetVersionId,
+    );
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.issues.map((issue) => issue.code)).toContain("DUPLICATE_LINK");
+    }
+  });
+
+  it("defaults careerStreams to an empty array when omitted (backward compatible)", () => {
+    const result = validateStreamRecords(baseRecords(), datasetVersionId);
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.careerStreams).toEqual([]);
+    }
+  });
+});
+
+describe("validateStreamRecords — streamPathways (knowledge.stream_pathways, Iteration 2)", () => {
+  const streamOptionId = "d0000000-0000-4000-8000-000000000001";
+
+  function recordsWithStreamOption() {
+    return {
+      ...baseRecords(),
+      streamOptions: [
+        {
+          id: streamOptionId,
+          streamCode: "science-mathematics",
+          title: "Science with Mathematics",
+          description: "Foundations in mathematics and science.",
+          status: "active",
+        },
+      ],
+    };
+  }
+
+  it("accepts a valid stream-pathway link", () => {
+    const result = validateStreamRecords(
+      {
+        ...recordsWithStreamOption(),
+        streamPathways: [
+          { streamOptionId, pathwayId, relationshipType: "primary", weight: 0.85, source: "curated", displayOrder: 1 },
+        ],
+      },
+      datasetVersionId,
+    );
+
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects a stream-pathway link to an unknown pathway", () => {
+    const result = validateStreamRecords(
+      {
+        ...recordsWithStreamOption(),
+        pathways: [],
+        streamPathways: [
+          {
+            streamOptionId,
+            pathwayId: "00000000-0000-4000-8000-000000000000",
+            relationshipType: "primary",
+            weight: 0.85,
+            source: "curated",
+            displayOrder: 1,
+          },
+        ],
+      },
+      datasetVersionId,
+    );
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.issues.map((issue) => issue.code)).toContain("ORPHAN_REFERENCE");
+    }
+  });
+
+  it("accepts a stream-pathway link to a pathway outside this batch when supplied via knownPathwayIds", () => {
+    const result = validateStreamRecords(
+      {
+        ...recordsWithStreamOption(),
+        pathways: [], // pathway not in this batch at all
+        streamPathways: [
+          { streamOptionId, pathwayId, relationshipType: "primary", weight: 0.85, source: "curated", displayOrder: 1 },
+        ],
+      },
+      datasetVersionId,
+      [],
+      [],
+      [],
+      [pathwayId],
+    );
+
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects a stream-pathway link to a stream option outside a supplied known-stream-option list", () => {
+    const result = validateStreamRecords(
+      {
+        ...baseRecords(), // no streamOptions in this batch at all, knownStreamOptionIds omitted
+        streamPathways: [
+          { streamOptionId, pathwayId, relationshipType: "primary", weight: 0.85, source: "curated", displayOrder: 1 },
+        ],
+      },
+      datasetVersionId,
+    );
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.issues.map((issue) => issue.code)).toContain("ORPHAN_REFERENCE");
+    }
+  });
+
+  it("rejects a duplicate stream-pathway link", () => {
+    const result = validateStreamRecords(
+      {
+        ...recordsWithStreamOption(),
+        streamPathways: [
+          { streamOptionId, pathwayId, relationshipType: "primary", weight: 0.85, source: "curated", displayOrder: 1 },
+          { streamOptionId, pathwayId, relationshipType: "alternative", weight: 0.5, source: "curated", displayOrder: 2 },
+        ],
+      },
+      datasetVersionId,
+    );
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.issues.map((issue) => issue.code)).toContain("DUPLICATE_LINK");
+    }
+  });
+
+  it("defaults streamPathways to an empty array when omitted (backward compatible)", () => {
+    const result = validateStreamRecords(baseRecords(), datasetVersionId);
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.streamPathways).toEqual([]);
+    }
+  });
+});

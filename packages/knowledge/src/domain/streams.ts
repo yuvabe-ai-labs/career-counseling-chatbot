@@ -1,7 +1,7 @@
 import type {
   Segment,
   StreamResultItem,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 
 export type StreamLookup = {
   topTwo: string;

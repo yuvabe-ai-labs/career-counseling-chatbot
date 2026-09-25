@@ -1,7 +1,7 @@
 import {
   CollegeSchema,
   type College,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import type {
   CollegeFilters,
   CollegeRepository,

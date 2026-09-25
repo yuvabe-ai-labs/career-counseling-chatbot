@@ -1,4 +1,4 @@
-import type { UpsertUserProfileRequest, UserProfile } from "@yuvanext/contracts";
+import type { UpsertUserProfileRequest, UserProfile } from "@yuvapath/contracts";
 import {
   canResumeJourneySession,
   isJourneySessionExpired,
@@ -77,10 +77,10 @@ export class UserProfileService {
       ageBand: deriveAgeBand(age),
       city: input.profile.city,
       state: input.profile.state,
+      homeDistrict: input.profile.homeDistrict,
       countryCode: input.profile.countryCode.toUpperCase(),
       segment: deriveSegment({ age, selfStage: input.profile.selfStage }),
       selfStage: input.profile.selfStage,
-      wantsAid: input.profile.wantsAid,
       profileStatus: "active",
       now: now.toISOString(),
     });

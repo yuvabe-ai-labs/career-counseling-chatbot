@@ -1,4 +1,4 @@
-# YuvaNext Module 4: End-to-End Endpoint and Workflow Guide
+# YuvaPath Module 4: End-to-End Endpoint and Workflow Guide
 
 Mentor handoff | Phase A Career Counseling POC | 13 August 2026
 
@@ -97,7 +97,7 @@ Expected success:
 ```json
 {
   "status": "ok",
-  "service": "yuvanext-api",
+  "service": "yuvapath-api",
   "database": { "status": "connected" },
   "modules": []
 }

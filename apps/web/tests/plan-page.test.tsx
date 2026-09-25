@@ -68,7 +68,7 @@ function renderPage() {
   setStoredUserId("user-id");
   setStoredJourneySessionId("session-id");
   setStoredProfileSnapshotId("snapshot-id");
-  setStoredExploreGatingContext({ segment: "launcher", wantsAid: false, currentGoal: "job" });
+  setStoredExploreGatingContext({ segment: "launcher", seeksAid: false, currentGoal: "job" });
   return render(
     <QueryClientProvider client={queryClient}>
       <SessionProvider>

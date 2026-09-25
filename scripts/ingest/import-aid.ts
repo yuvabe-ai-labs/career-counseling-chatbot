@@ -1,9 +1,9 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import process from "node:process";
-import { AidDatasetManifestSchema } from "@yuvanext/contracts";
-import { createDatabasePool } from "@yuvanext/database";
-import { importAidDataset, PostgresAidDatasetPublisher } from "@yuvanext/knowledge";
+import { AidDatasetManifestSchema } from "@yuvapath/contracts";
+import { createDatabasePool } from "@yuvapath/database";
+import { importAidDataset, PostgresAidDatasetPublisher } from "@yuvapath/knowledge";
 
 process.loadEnvFile(resolve(process.env.INIT_CWD ?? process.cwd(), ".env"));
 if (!process.argv.includes("--publish")) throw new Error("Import refused: pass --publish to allow database writes");

@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import type { RecommendationItem } from "@yuvanext/contracts";
+import type { RecommendationItem } from "@yuvapath/contracts";
 import { describe, expect, it, vi } from "vitest";
 import { RingMap } from "@/features/recommendations/components/RingMap";
 

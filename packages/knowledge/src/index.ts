@@ -1,4 +1,4 @@
-import type { ModuleDescriptor } from "@yuvanext/contracts";
+import type { ModuleDescriptor } from "@yuvapath/contracts";
 
 export * from "./domain/college.js";
 export * from "./domain/dataset.js";
@@ -46,6 +46,7 @@ export * from "./infrastructure/postgres-career-dataset-publisher.js";
 export * from "./infrastructure/postgres-stream-dataset-publisher.js";
 export * from "./infrastructure/postgres-aid-dataset-publisher.js";
 export * from "./infrastructure/gemini-catalog-drafter.js";
+export * from "./infrastructure/fetch-source-content.js";
 export * from "./infrastructure/postgres-knowledge-reader.js";
 export * from "./infrastructure/local-catalog-import-coordinator.js";
 export * from "./http/register-knowledge-routes.js";
@@ -53,6 +54,6 @@ export * from "./http/register-knowledge-routes.js";
 export const knowledgeModule: ModuleDescriptor = {
   code: "m3",
   name: "Knowledge",
-  packageName: "@yuvanext/knowledge",
+  packageName: "@yuvapath/knowledge",
   status: "in_progress",
 };

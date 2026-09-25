@@ -12,17 +12,25 @@
 //   tsx scripts/ingest/promote-ai-catalog.ts --run <runId>
 import { createHash, randomUUID } from "node:crypto";
 import process from "node:process";
-import { createDatabasePool } from "@yuvanext/database";
+import { createDatabasePool } from "@yuvapath/database";
 import {
   createPostgresAiGenerationStore,
+  importAidDataset,
   importCollegeDataset,
   importStreamDataset,
+  PostgresAidDatasetPublisher,
   PostgresCollegeDatasetPublisher,
   PostgresStreamDatasetPublisher,
-} from "@yuvanext/knowledge";
+} from "@yuvapath/knowledge";
 import type {
+  AidCriterion,
+  AidDatasetRecords,
+  AidScheme,
+  AidSchemeDraft,
   AiGenerationItem,
   CareerPathwayLink,
+  CareerStreamDraftLink,
+  CareerStreamLink,
   CollegeDatasetRecords,
   CollegeDraft,
   CollegeProgram,
@@ -30,7 +38,9 @@ import type {
   Pathway,
   PathwayDraft,
   StreamDatasetRecords,
-} from "@yuvanext/contracts";
+  StreamPathwayDraftLink,
+  StreamPathwayLink,
+} from "@yuvapath/contracts";
 import type { Pool } from "pg";
 
 const loadLocalEnvironment = (): void => {
@@ -66,7 +76,7 @@ function buildSource(runId: string) {
     sourceKey: `ai-generated-run-${runId}`,
     name: "AI-generated catalog draft (Gemini), human-reviewed",
     sourceType: "ai_generated_reviewed",
-    publisher: "YuvaNext",
+    publisher: "YuvaPath",
     trustLevel: "ai_generated_reviewed",
     status: "active" as const,
     baseUrl: null,
@@ -200,6 +210,8 @@ async function promotePathwayItems(
       educationRoutes: [],
       pathways,
       careerPathways,
+      careerStreams: [],
+      streamPathways: [],
       streamOptions: [],
       streamMaps: [],
       streamMapItems: [],
@@ -411,6 +423,317 @@ async function promoteCollegeItems(pool: Pool, runId: string, items: AiGeneratio
   }
 }
 
+async function promoteCareerStreamItems(pool: Pool, runId: string, items: AiGenerationItem[]): Promise<void> {
+  const careerStreamItems = items.filter((item) => item.proposedEntityType === "career_stream");
+  if (careerStreamItems.length === 0) return;
+
+  const streamOptionsResult = await pool.query<{ id: string; stream_code: string }>(
+    `select id, stream_code from knowledge.stream_options where status = 'active'`,
+  );
+  const streamOptionIdByCode = new Map(streamOptionsResult.rows.map((row) => [row.stream_code, row.id]));
+
+  const careerStreams: CareerStreamLink[] = [];
+  const promotedIdByItemId = new Map<string, string>();
+  const resolvedCareerIds = new Set<string>();
+
+  for (const item of careerStreamItems) {
+    if (item.promotedEntityId) continue; // already promoted by an earlier, partially-completed run
+
+    const draft = item.proposedPayloadJson as unknown as CareerStreamDraftLink & { careerId: string };
+    const streamOptionId = streamOptionIdByCode.get(draft.streamCode);
+    if (!streamOptionId) {
+      console.warn(`  Skipping career-stream link (item ${item.id}): unknown streamCode "${draft.streamCode}".`);
+      continue;
+    }
+
+    resolvedCareerIds.add(draft.careerId);
+    careerStreams.push({
+      careerId: draft.careerId,
+      streamOptionId,
+      relationshipType: draft.relationshipType,
+      weight: draft.weight,
+      source: "gemini_drafted",
+      displayOrder: careerStreams.length + 1,
+    });
+    // career_streams has no entity id of its own beyond the (careerId, streamOptionId) pair
+    // itself — reuse the stream option id as the "promoted entity" marker, same role
+    // promotedEntityId plays for every other kind (a pointer proving this item landed).
+    promotedIdByItemId.set(item.id, streamOptionId);
+  }
+
+  if (careerStreams.length === 0) {
+    console.log("  All career-stream items in this run were already promoted; nothing new to do.");
+    return;
+  }
+
+  const records: StreamDatasetRecords = {
+    educationRoutes: [],
+    pathways: [],
+    careerPathways: [],
+    careerStreams,
+    streamPathways: [],
+    streamOptions: [],
+    streamMaps: [],
+    streamMapItems: [],
+  };
+  const recordsText = JSON.stringify(records);
+  const checksumSha256 = createHash("sha256").update(recordsText).digest("hex");
+  const datasetVersionId = randomUUID();
+  const manifest = {
+    schemaVersion: 1 as const,
+    datasetKey: "ai-career-streams",
+    version: `run-${runId}`,
+    datasetVersionId,
+    recordsFile: "records.json",
+    recordCounts: {
+      educationRoutes: 0,
+      pathways: 0,
+      careerPathways: 0,
+      careerStreams: careerStreams.length,
+      streamOptions: 0,
+      streamMaps: 0,
+      streamMapItems: 0,
+    },
+    checksumSha256,
+    reviewStatus: "approved" as const,
+    createdAt: nowIso(),
+    source: buildSource(runId),
+  };
+
+  const report = await importStreamDataset(manifest, recordsText, new PostgresStreamDatasetPublisher(pool), {
+    knownCareerIds: [...resolvedCareerIds],
+    knownStreamOptionIds: [...streamOptionIdByCode.values()],
+  });
+  if (report.status === "rejected") {
+    throw new Error(`Career-stream promotion rejected: ${JSON.stringify(report.issues)}`);
+  }
+  console.log(`  Promoted ${careerStreams.length} career-stream link(s).`);
+
+  const store = createPostgresAiGenerationStore(pool);
+  for (const [itemId, streamOptionId] of promotedIdByItemId) {
+    await store.markItemPromoted(itemId, streamOptionId);
+  }
+}
+
+async function promoteStreamPathwayItems(pool: Pool, runId: string, items: AiGenerationItem[]): Promise<void> {
+  const streamPathwayItems = items.filter((item) => item.proposedEntityType === "stream_pathway");
+  if (streamPathwayItems.length === 0) return;
+
+  const pathwaysResult = await pool.query<{ id: string; pathway_code: string }>(
+    `select id, pathway_code from knowledge.pathways where publication_status = 'published'`,
+  );
+  const pathwayIdByCode = new Map(pathwaysResult.rows.map((row) => [row.pathway_code, row.id]));
+
+  const streamPathways: StreamPathwayLink[] = [];
+  const promotedIdByItemId = new Map<string, string>();
+  const resolvedStreamOptionIds = new Set<string>();
+
+  for (const item of streamPathwayItems) {
+    if (item.promotedEntityId) continue; // already promoted by an earlier, partially-completed run
+
+    const draft = item.proposedPayloadJson as unknown as StreamPathwayDraftLink & { streamOptionId: string };
+    const pathwayId = pathwayIdByCode.get(draft.pathwayCode);
+    if (!pathwayId) {
+      console.warn(`  Skipping stream-pathway link (item ${item.id}): unknown pathwayCode "${draft.pathwayCode}".`);
+      continue;
+    }
+
+    resolvedStreamOptionIds.add(draft.streamOptionId);
+    streamPathways.push({
+      streamOptionId: draft.streamOptionId,
+      pathwayId,
+      relationshipType: draft.relationshipType,
+      weight: draft.weight,
+      source: "gemini_drafted",
+      displayOrder: streamPathways.length + 1,
+    });
+    // Same reasoning as promoteCareerStreamItems: stream_pathways has no entity id of its own
+    // beyond the (streamOptionId, pathwayId) pair — reuse pathwayId as the "promoted entity"
+    // marker.
+    promotedIdByItemId.set(item.id, pathwayId);
+  }
+
+  if (streamPathways.length === 0) {
+    console.log("  All stream-pathway items in this run were already promoted; nothing new to do.");
+    return;
+  }
+
+  const records: StreamDatasetRecords = {
+    educationRoutes: [],
+    pathways: [],
+    careerPathways: [],
+    careerStreams: [],
+    streamPathways,
+    streamOptions: [],
+    streamMaps: [],
+    streamMapItems: [],
+  };
+  const recordsText = JSON.stringify(records);
+  const checksumSha256 = createHash("sha256").update(recordsText).digest("hex");
+  const datasetVersionId = randomUUID();
+  const manifest = {
+    schemaVersion: 1 as const,
+    datasetKey: "ai-stream-pathways",
+    version: `run-${runId}`,
+    datasetVersionId,
+    recordsFile: "records.json",
+    recordCounts: {
+      educationRoutes: 0,
+      pathways: 0,
+      careerPathways: 0,
+      careerStreams: 0,
+      streamPathways: streamPathways.length,
+      streamOptions: 0,
+      streamMaps: 0,
+      streamMapItems: 0,
+    },
+    checksumSha256,
+    reviewStatus: "approved" as const,
+    createdAt: nowIso(),
+    source: buildSource(runId),
+  };
+
+  const report = await importStreamDataset(manifest, recordsText, new PostgresStreamDatasetPublisher(pool), {
+    knownStreamOptionIds: [...resolvedStreamOptionIds],
+    knownPathwayIds: [...pathwayIdByCode.values()],
+  });
+  if (report.status === "rejected") {
+    throw new Error(`Stream-pathway promotion rejected: ${JSON.stringify(report.issues)}`);
+  }
+  console.log(`  Promoted ${streamPathways.length} stream-pathway link(s).`);
+
+  const store = createPostgresAiGenerationStore(pool);
+  for (const [itemId, pathwayId] of promotedIdByItemId) {
+    await store.markItemPromoted(itemId, pathwayId);
+  }
+}
+
+function slugifyAidCode(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 100);
+}
+
+async function promoteAidSchemeItems(pool: Pool, runId: string, items: AiGenerationItem[]): Promise<void> {
+  const aidSchemeItems = items.filter((item) => item.proposedEntityType === "aid_scheme");
+  if (aidSchemeItems.length === 0) return;
+
+  // aid_code has a real unique constraint (unlike id, which every table's own on-conflict upsert
+  // uses) — two independently-drafted schemes with similar names can still collide, so disambig-
+  // uate deterministically rather than fail the whole batch, same reasoning as
+  // promotePathwayItems' uniquePathwayCode above.
+  const existingCodesResult = await pool.query<{ aid_code: string }>(`select aid_code from knowledge.aid_schemes`);
+  const usedAidCodes = new Set(existingCodesResult.rows.map((row) => row.aid_code));
+
+  function uniqueAidCode(candidate: string, itemId: string): string {
+    const base = candidate || `aid-scheme-${itemId.slice(0, 8)}`;
+    if (!usedAidCodes.has(base)) {
+      usedAidCodes.add(base);
+      return base;
+    }
+    const disambiguated = `${base}-${itemId.slice(0, 8)}`;
+    usedAidCodes.add(disambiguated);
+    return disambiguated;
+  }
+
+  const schemes: AidScheme[] = [];
+  const criteria: AidCriterion[] = [];
+  const promotedIdByItemId = new Map<string, string>();
+  const datasetVersionId = randomUUID();
+  const promotedAt = nowIso();
+
+  for (const item of aidSchemeItems) {
+    if (item.promotedEntityId) continue; // already promoted by an earlier, partially-completed run
+
+    const draft = item.proposedPayloadJson as unknown as AidSchemeDraft & { sourceUrl?: string };
+    if (!draft.applicationUrl) {
+      // Belt-and-braces: generate-ai-catalog-drafts.ts already skips staging any draft missing
+      // this (required, non-nullable, in the real table) — re-checked here in case a staged
+      // payload was hand-edited back to null between staging and approval.
+      console.warn(`  Skipping aid scheme "${draft.name}" (item ${item.id}): no application URL.`);
+      continue;
+    }
+
+    const schemeId = randomUUID();
+    const aidCode = uniqueAidCode(slugifyAidCode(`${draft.name}-${draft.provider}`), item.id);
+    schemes.push({
+      id: schemeId,
+      aidCode,
+      name: draft.name,
+      providerType: draft.providerType,
+      provider: draft.provider,
+      level: draft.level,
+      states: draft.states,
+      eligibilitySummary: draft.eligibilitySummary,
+      benefitSummary: draft.benefitSummary,
+      amountText: draft.amountText,
+      applicationUrl: draft.applicationUrl,
+      portalName: draft.portalName,
+      applyWindowStart: draft.applyWindowStart,
+      applyWindowEnd: draft.applyWindowEnd,
+      // Never auto-verified — a further explicit human action verifies it, same convention as
+      // colleges/programs (plan §13). lastVerifiedAt is required (non-nullable) by the schema
+      // regardless — set to the promotion timestamp, not a real verification event;
+      // verificationStatus is what actually signals no human has checked this yet.
+      verificationStatus: "unverified",
+      lastVerifiedAt: promotedAt,
+      datasetVersionId,
+    });
+    promotedIdByItemId.set(item.id, schemeId);
+
+    for (const criterion of draft.criteria) {
+      criteria.push({
+        id: randomUUID(),
+        aidSchemeId: schemeId,
+        criterionType: criterion.criterionType,
+        operator: criterion.operator,
+        value: criterion.value,
+        isRequired: criterion.isRequired,
+        sourceText: criterion.sourceText,
+        criterionVersion: `ai-run-${runId}`,
+      });
+    }
+  }
+
+  if (schemes.length === 0) {
+    console.log(
+      "  All aid scheme items in this run were already promoted (or lacked a URL); nothing new to do.",
+    );
+    return;
+  }
+
+  const records: AidDatasetRecords = { schemes, criteria };
+  const recordsText = JSON.stringify(records);
+  const checksumSha256 = createHash("sha256").update(recordsText).digest("hex");
+  const manifest = {
+    schemaVersion: 1 as const,
+    datasetKey: "ai-aid-schemes",
+    version: `run-${runId}`,
+    datasetVersionId,
+    recordsFile: "records.json",
+    recordCount: schemes.length + criteria.length,
+    recordCounts: { schemes: schemes.length, criteria: criteria.length },
+    checksumSha256,
+    reviewStatus: "approved" as const,
+    createdAt: nowIso(),
+    source: buildSource(runId),
+  };
+
+  const report = await importAidDataset(manifest, recordsText, new PostgresAidDatasetPublisher(pool));
+  if (report.status === "rejected") {
+    throw new Error(`Aid scheme promotion rejected: ${JSON.stringify(report.issues)}`);
+  }
+  console.log(`  Promoted ${schemes.length} aid scheme(s), ${criteria.length} criterion/criteria.`);
+
+  const store = createPostgresAiGenerationStore(pool);
+  for (const [itemId, schemeId] of promotedIdByItemId) {
+    await store.markItemPromoted(itemId, schemeId);
+  }
+}
+
 async function promoteOneRun(pool: Pool, store: ReturnType<typeof createPostgresAiGenerationStore>, runId: string): Promise<void> {
   const generationRun = await store.getRun(runId);
   if (!generationRun) {
@@ -425,6 +748,9 @@ async function promoteOneRun(pool: Pool, store: ReturnType<typeof createPostgres
 
   await promotePathwayItems(pool, runId, items);
   await promoteCollegeItems(pool, runId, items);
+  await promoteCareerStreamItems(pool, runId, items);
+  await promoteStreamPathwayItems(pool, runId, items);
+  await promoteAidSchemeItems(pool, runId, items);
 
   await store.updateRunStatus(runId, "approved");
 }

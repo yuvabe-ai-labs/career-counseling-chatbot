@@ -4,9 +4,9 @@ import process from "node:process";
 import type {
   CatalogImportRequest,
   CatalogImportResponse,
-} from "@yuvanext/contracts";
-import { CatalogImportResponseSchema } from "@yuvanext/contracts";
-import type { createDatabasePool } from "@yuvanext/database";
+} from "@yuvapath/contracts";
+import { CatalogImportResponseSchema } from "@yuvapath/contracts";
+import type { createDatabasePool } from "@yuvapath/database";
 import type { CatalogImportCoordinator } from "../application/start-catalog-import.js";
 import { importAidDataset } from "../application/import-aid-dataset.js";
 import { importCareerDataset } from "../application/import-career-dataset.js";

@@ -4,7 +4,7 @@ import {
   ProfileSnapshotResponseSchema,
   UuidSchema,
   type ProfileSnapshotResponse,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { z } from "zod";
 import type { Express, NextFunction, Request, Response } from "express";
 import {

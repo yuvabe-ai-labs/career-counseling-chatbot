@@ -1,4 +1,4 @@
-import type { ProfileSnapshotResponse } from "@yuvanext/contracts";
+import type { ProfileSnapshotResponse } from "@yuvapath/contracts";
 import {
   getStoredProfileSnapshotId,
   setStoredExploreGatingContext,
@@ -25,7 +25,7 @@ export function readIntakeAnswer(
 
 /**
  * The one piece of state Explore Path actually needs that nothing creates automatically:
- * `profileSnapshotId` + the gating context (segment/wantsAid/currentGoal), both only ever
+ * `profileSnapshotId` + the gating context (segment/seeksAid/currentGoal), both only ever
  * produced by `createAssessmentSnapshot` — a non-idempotent call (a fresh snapshot row every
  * time), so this only ever calls it when nothing is stored yet.
  *
@@ -44,7 +44,7 @@ export async function ensureProfileSnapshot(
   setStoredProfileSnapshotId(snapshot.snapshotId);
   setStoredExploreGatingContext({
     segment: snapshot.segment,
-    wantsAid: snapshot.wantsAid,
+    seeksAid: readIntakeAnswer(snapshot.intakeSummary, "seeks_aid") === "yes",
     currentGoal: readIntakeAnswer(snapshot.intakeSummary, "current_goal"),
   });
 }

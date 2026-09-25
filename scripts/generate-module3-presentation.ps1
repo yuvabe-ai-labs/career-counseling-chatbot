@@ -61,7 +61,7 @@ function Add-Header {
 
 function Add-Footer {
   param($slide, [int]$number)
-  Add-TextBox $slide "YuvaNext Phase A POC" 44 512 250 18 10 $muted $false | Out-Null
+  Add-TextBox $slide "YuvaPath Phase A POC" 44 512 250 18 10 $muted $false | Out-Null
   Add-TextBox $slide ([string]$number) 890 512 28 18 10 $muted $true 3 | Out-Null
 }
 
@@ -101,7 +101,7 @@ try {
   $hero = $slides[0].Shapes.AddShape(1, 0, 0, 960, 540)
   $hero.Fill.ForeColor.RGB = $darkGreen
   $hero.Line.Visible = 0
-  Add-TextBox $slides[0] "YUVANEXT" 58 62 300 28 14 $mint $true | Out-Null
+  Add-TextBox $slides[0] "YUVAPATH" 58 62 300 28 14 $mint $true | Out-Null
   Add-TextBox $slides[0] "Grounded Knowledge`nPlatform" 58 128 650 120 42 $white $true | Out-Null
   Add-TextBox $slides[0] "Module 3 | Versioned, verified career and education data" 62 277 650 40 20 $mint $false | Out-Null
   Add-Box $slides[0] "Official sources -> Reviewed data -> Safe APIs" 62 365 560 58 $mint $mint 18 | Out-Null

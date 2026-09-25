@@ -1,10 +1,10 @@
-import { assessmentModule } from "@yuvanext/assessment";
-import { counselorModule } from "@yuvanext/counselor";
-import { evaluationModule } from "@yuvanext/evaluation";
-import { knowledgeModule } from "@yuvanext/knowledge";
-import { recommendationsModule } from "@yuvanext/recommendations";
-import { safetyModule } from "@yuvanext/safety";
-import type { ModuleDescriptor } from "@yuvanext/contracts";
+import { assessmentModule } from "@yuvapath/assessment";
+import { counselorModule } from "@yuvapath/counselor";
+import { evaluationModule } from "@yuvapath/evaluation";
+import { knowledgeModule } from "@yuvapath/knowledge";
+import { recommendationsModule } from "@yuvapath/recommendations";
+import { safetyModule } from "@yuvapath/safety";
+import type { ModuleDescriptor } from "@yuvapath/contracts";
 
 export const modules: ModuleDescriptor[] = [
   assessmentModule,

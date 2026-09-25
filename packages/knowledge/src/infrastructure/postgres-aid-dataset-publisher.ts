@@ -1,4 +1,4 @@
-import { withTransaction, type createDatabasePool } from "@yuvanext/database";
+import { withTransaction, type createDatabasePool } from "@yuvapath/database";
 import type { AidDatasetPublisher } from "../application/import-aid-dataset.js";
 import { DatasetVersionConflictError } from "./postgres-college-dataset-publisher.js";
 

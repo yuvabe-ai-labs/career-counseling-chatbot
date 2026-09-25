@@ -7,7 +7,7 @@ import type {
   ProfileSnapshot,
   Segment,
   UserProfile,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import type { ScoredResponseInput } from "../domain/scoring.js";
 
 export type AssessmentVersionRecord = {
@@ -95,6 +95,12 @@ export type AssessmentRepository = {
     userId: string;
     instrumentCode: InstrumentCode;
   }): Promise<AssessmentResult | null>;
+  /** The student's latest RIASEC-family result (any of ip_60/mini_ip_30/photo_ip — whichever
+   *  instrument their segment actually used — never "wip", which is a separate work-values
+   *  instrument), regardless of instrument code. Backs the counselor-facing student report
+   *  (CounselorStudentService.getStudentReport), which doesn't know in advance which RIASEC
+   *  instrument a given student took. */
+  findLatestRiasecResultForUser(userId: string): Promise<AssessmentResult | null>;
   getIntakeSummary(input: { userId: string; sessionId: string }): Promise<Record<string, unknown>>;
   getNextProfileVersion(userId: string): Promise<number>;
   createAssessmentSnapshot(input: NewAssessmentSnapshot): Promise<ProfileSnapshot>;

@@ -1,4 +1,4 @@
-import type { CareerToolResult } from "@yuvanext/contracts";
+import type { CareerToolResult } from "@yuvapath/contracts";
 import {
   CatalogEntityNotFoundError,
   type CareerRepository,

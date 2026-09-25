@@ -11,7 +11,7 @@ import {
   type InstrumentCode,
   type ProfileSnapshot,
   type Segment,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import type { Pool } from "pg";
 import type {
   AssessmentRepository,
@@ -326,6 +326,19 @@ export class PgAssessmentRepository implements AssessmentRepository {
     return row ? mapResult(row) : null;
   }
 
+  async findLatestRiasecResultForUser(userId: string): Promise<AssessmentResult | null> {
+    const result = await this.pool.query<ResultRow>(
+      `select *
+       from assessment.assessment_results
+       where user_id = $1 and instrument_code != 'wip'
+       order by created_at desc
+       limit 1`,
+      [userId],
+    );
+    const row = result.rows[0];
+    return row ? mapResult(row) : null;
+  }
+
   async getIntakeSummary(input: { userId: string; sessionId: string }): Promise<Record<string, unknown>> {
     const result = await this.pool.query<{ question_key: string; answer_json: unknown }>(`
       select iq.question_key, ia.answer_json
@@ -348,11 +361,11 @@ export class PgAssessmentRepository implements AssessmentRepository {
   async createAssessmentSnapshot(input: NewAssessmentSnapshot): Promise<ProfileSnapshot> {
     await this.pool.query(`
       insert into assessment.profile_snapshots (
-        id, user_id, profile_version, segment, age_band, city, state, self_stage, wants_aid,
+        id, user_id, profile_version, segment, age_band, city, state, home_district, self_stage,
         intake_summary_json, result_summary_json, algorithm_version, snapshot_schema_version, payload_hash, created_at
       )
       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
-    `, [input.id, input.userId, input.profileVersion, input.profile.segment, input.profile.ageBand, input.profile.city, input.profile.state, input.profile.selfStage, input.profile.wantsAid, input.intakeSummary, input.resultSummary, input.algorithmVersion, input.snapshotSchemaVersion, input.payloadHash, input.createdAt]);
+    `, [input.id, input.userId, input.profileVersion, input.profile.segment, input.profile.ageBand, input.profile.city, input.profile.state, input.profile.homeDistrict ?? null, input.profile.selfStage, input.intakeSummary, input.resultSummary, input.algorithmVersion, input.snapshotSchemaVersion, input.payloadHash, input.createdAt]);
     for (const sourceResult of input.sourceResults) {
       await this.pool.query(
         `insert into assessment.profile_snapshot_results (profile_snapshot_id, assessment_result_id, result_role, display_order) values ($1,$2,$3,$4)`,
@@ -367,8 +380,8 @@ export class PgAssessmentRepository implements AssessmentRepository {
       ageBand: input.profile.ageBand,
       city: input.profile.city,
       state: input.profile.state,
+      homeDistrict: input.profile.homeDistrict,
       selfStage: input.profile.selfStage,
-      wantsAid: input.profile.wantsAid,
       intakeSummary: input.intakeSummary,
       riasec: (input.resultSummary as { riasec?: unknown }).riasec,
       values: (input.resultSummary as { values?: unknown }).values,

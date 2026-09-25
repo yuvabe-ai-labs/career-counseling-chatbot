@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YuvaNext — Prototype v10 · Identity Bubble</title>
+<title>YuvaPath — Prototype v10 · Identity Bubble</title>
 <style>
   :root{--brand:#1f7a5c;--brand2:#2ea87e;--bg:#f4f8f5;--ink:#1c2b26;--soft:#6b7f77;--warn:#fff4e0;--safe:#eef2ff;
         --R:#c96f2f;--I:#3b6fd8;--A:#b23bd8;--S:#2ea87e;--E:#d84f3b;--C:#8a7a2f;}
@@ -148,7 +148,7 @@
 <body>
 
 <div class="demo-bar">
-  <b>YuvaNext v10</b>
+  <b>YuvaPath v10</b>
   <div class="viewtoggle">
     <button id="v-app" class="active" onclick="setView('app')">💬 Student app</button>
     <button id="v-dash" onclick="setView('dash')">🖥️ Counselor</button>
@@ -167,7 +167,7 @@
 
 <div class="shell" id="appview">
   <div class="chatpane">
-    <header class="app"><div class="logo">Y</div><div><strong>YuvaNext</strong><small>by Yuvabe Education · Auroville</small></div></header>
+    <header class="app"><div class="logo">Y</div><div><strong>YuvaPath</strong><small>by Yuvabe Education · Auroville</small></div></header>
     <div class="banner" id="banner">⏳ Results won't save until a parent approves — <u>resend?</u></div>
     <div class="progress" id="prog"><span id="prog-label"></span><div class="bar"><div class="fill" id="prog-fill"></div></div><span id="prog-count"></span></div>
     <main id="chat"></main>
@@ -183,7 +183,7 @@
 
 <div class="dash" id="dashview">
   <header><div style="width:34px;height:34px;border-radius:50%;background:#fff;color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:800;">Y</div>
-    <div><strong>YuvaNext · Counselor</strong><div style="font-size:11px;opacity:.8">Read-only dashboard (D11) · Auroville pilot</div></div>
+    <div><strong>YuvaPath · Counselor</strong><div style="font-size:11px;opacity:.8">Read-only dashboard (D11) · Auroville pilot</div></div>
     <div class="who">counselor@yuvabe.com · 2FA ✓</div></header>
   <div class="dtabs">
     <button id="t-ov" class="active" onclick="dtab('ov')">Overview</button>
@@ -268,7 +268,7 @@ function setPersona(p){persona=p;['p-exp','p-path','p-lau'].forEach(id=>document
 function restart(){reset();setView('app');landing();}
 function banner(on){document.getElementById('banner').style.display=on?'block':'none';}
 function tag(t){document.getElementById('stagetag').textContent=t;}
-function bot(html,delay=320){return new Promise(r=>{const ty=document.createElement('div');ty.className='typing';ty.textContent='YuvaNext is typing…';chat.appendChild(ty);chat.scrollTop=1e6;setTimeout(()=>{ty.remove();el('msg bot',html);r();},delay);});}
+function bot(html,delay=320){return new Promise(r=>{const ty=document.createElement('div');ty.className='typing';ty.textContent='YuvaPath is typing…';chat.appendChild(ty);chat.scrollTop=1e6;setTimeout(()=>{ty.remove();el('msg bot',html);r();},delay);});}
 function user(t){el('msg user','').textContent=t;}
 function el(cls,html){const d=document.createElement('div');d.className=cls;d.innerHTML=html;chat.appendChild(d);chat.scrollTop=1e6;return d;}
 function chips(opts){return new Promise(res=>{const w=document.createElement('div');w.className='chips';opts.forEach(o=>{const c=document.createElement('button');c.className='chip';c.textContent=o;c.onclick=()=>{w.remove();user(o);res(o);};w.appendChild(c);});chat.appendChild(w);chat.scrollTop=1e6;});}
@@ -354,7 +354,7 @@ function cvReport(){S.stageCv='report';step(5);document.querySelectorAll('.stepp
  cv.innerHTML=`<div style="position:absolute;inset:0;overflow-y:auto;padding:18px 22px">
   <div style="background:#fff;border-radius:20px;box-shadow:0 12px 36px rgba(20,60,45,.15);overflow:hidden;max-width:640px;margin:0 auto">
    <div style="background:linear-gradient(135deg,#153a2d,var(--brand2));color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center">
-    <div><div style="font-size:10.5px;opacity:.85;letter-spacing:1px">YUVANEXT · JOURNEY REPORT</div><div style="font-size:20px;font-weight:800">${S.name}</div><div style="font-size:11.5px;opacity:.9">${segN} · ${S.city||''}, ${S.state||''} · ${new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</div></div>
+    <div><div style="font-size:10.5px;opacity:.85;letter-spacing:1px">YUVAPATH · JOURNEY REPORT</div><div style="font-size:20px;font-weight:800">${S.name}</div><div style="font-size:11.5px;opacity:.9">${segN} · ${S.city||''}, ${S.state||''} · ${new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</div></div>
     <div style="font-size:34px;font-weight:800;letter-spacing:4px">${S.code}</div></div>
    <div style="padding:12px 18px;border-bottom:1px dashed #e4ece7"><div style="font-size:10.5px;letter-spacing:1px;color:var(--soft);margin-bottom:6px">PROFILE</div>
     <div class="factchips" style="justify-content:flex-start;margin:0">${(S.facts||[]).map(f=>`<span>${f}</span>`).join('')}</div></div>
@@ -538,7 +538,7 @@ function cvCareerFocus(g){sel('career',g.h,'fit '+g.fit);
 
 /* ============ FLOWS ============ */
 async function landing(){tag('S-01 → S-04');cvWelcome();step(1);
- await bot('Vanakkam! 🌱 I’m <b>YuvaNext</b> — I help students discover directions that fit them. Fun exercises, not exams.<br><i>No marks needed · private · free</i>');
+ await bot('Vanakkam! 🌱 I’m <b>YuvaPath</b> — I help students discover directions that fit them. Fun exercises, not exams.<br><i>No marks needed · private · free</i>');
  await bot('One promise: I help you <b>discover</b> directions, not decide your life. What should I call you?');
  const names={explorer:'Anandi',pathfinder:'Karthik',launcher:'Priya'};
  await chips([names[persona]]);S.name=names[persona];cvProfile();

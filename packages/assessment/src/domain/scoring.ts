@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { AssessmentResult, InstrumentCode, RiasecScale, WorkValueScale } from "@yuvanext/contracts";
+import type { AssessmentResult, InstrumentCode, RiasecScale, WorkValueScale } from "@yuvapath/contracts";
 
 export type ScoredResponseInput = {
   itemId: string;

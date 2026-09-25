@@ -1,8 +1,8 @@
-# YuvaNext Phase A MVP Data Model
+# YuvaPath Phase A MVP Data Model
 
 ## 1. Purpose
 
-This document defines the database tables implemented for the YuvaNext Phase A MVP. The five module data-model documents remain the target design for the complete product.
+This document defines the database tables implemented for the YuvaPath Phase A MVP. The five module data-model documents remain the target design for the complete product.
 
 The MVP is a strict subset of the target model:
 
@@ -275,7 +275,7 @@ Module migrations remain independently owned, but integration fixes the final or
 
 ## 13. Visual models
 
-Use the [combined Phase A MVP DBML](yuvanext-phase-a-mvp.dbml) for cross-module review. It contains all 69 project-owned tables and every field defined by the target module documents.
+Use the [combined Phase A MVP DBML](yuvapath-phase-a-mvp.dbml) for cross-module review. It contains all 69 project-owned tables and every field defined by the target module documents.
 
 Use the detailed module view assigned to each owner for implementation review:
 

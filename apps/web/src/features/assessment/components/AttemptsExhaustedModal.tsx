@@ -47,7 +47,7 @@ export function AttemptsExhaustedModal({ onRestart }: AttemptsExhaustedModalProp
       role="alertdialog"
       aria-modal="true"
       aria-labelledby="attempts-exhausted-heading"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(30,27,75,0.15)] p-6 backdrop-blur-[4px]"
+      className="fixed inset-0 z-50 flex animate-in items-center justify-center bg-[rgba(30,27,75,0.15)] p-6 backdrop-blur-[4px] fade-in duration-150"
     >
       <div
         ref={containerRef}

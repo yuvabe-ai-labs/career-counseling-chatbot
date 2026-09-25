@@ -1,4 +1,4 @@
-import { PathwayRecommendationSetResponseSchema } from "@yuvanext/contracts";
+import { PathwayRecommendationSetResponseSchema } from "@yuvapath/contracts";
 import { apiRequest } from "@/lib/api-client";
 
 /**

@@ -16,7 +16,7 @@ import type {
   SendConversationMessageRequest,
   StartConversationRequest,
   WidgetDirective,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 
 // Export only synthetic, versioned fixtures. Real user data is forbidden here.
 export const FIXTURE_SCHEMA_VERSION = 1 as const;
@@ -58,7 +58,6 @@ export const validProfileSnapshot = {
   city: "Synthetic City",
   state: "Synthetic State",
   selfStage: "higher_secondary",
-  wantsAid: true,
   intakeSummary: { preferredLearningMode: "practical" },
   riasec: {
     rawScores: { R: 3, I: 5, A: 2, S: 4, E: 1, C: 3 },

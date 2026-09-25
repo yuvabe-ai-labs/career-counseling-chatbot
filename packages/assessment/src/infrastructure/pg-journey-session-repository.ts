@@ -1,5 +1,5 @@
-import type { JourneySession } from "@yuvanext/contracts";
-import { JourneySessionSchema } from "@yuvanext/contracts";
+import type { JourneySession } from "@yuvapath/contracts";
+import { JourneySessionSchema } from "@yuvapath/contracts";
 import type { Pool } from "pg";
 import { journeySessionUserNotFound } from "../application/errors.js";
 import type {

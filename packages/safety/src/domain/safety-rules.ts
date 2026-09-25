@@ -1,4 +1,4 @@
-import type { ResolvedSafetyCheckRequest, SafetyDecision } from "@yuvanext/contracts";
+import type { ResolvedSafetyCheckRequest, SafetyDecision } from "@yuvapath/contracts";
 import {
   SAFETY_POLICY_VERSION,
   getApprovedSafetyMessage,

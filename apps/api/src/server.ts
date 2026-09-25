@@ -32,7 +32,7 @@ const { app, databasePool } = await createRuntimeApp();
 
 const displayHost = env.HOST === "0.0.0.0" ? "localhost" : env.HOST;
 const server = app.listen(env.PORT, env.HOST, () => {
-  process.stdout.write(`YuvaNext API listening on http://${displayHost}:${env.PORT}\n`);
+  process.stdout.write(`YuvaPath API listening on http://${displayHost}:${env.PORT}\n`);
   process.stdout.write(`Swagger UI: http://${displayHost}:${env.PORT}/docs\n`);
 });
 

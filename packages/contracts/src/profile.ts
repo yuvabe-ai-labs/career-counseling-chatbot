@@ -4,6 +4,7 @@ import {
   IsoTimestampSchema,
   SegmentSchema,
   StateSchema,
+  TnDistrictSchema,
   UuidSchema,
 } from "./common.js";
 
@@ -12,7 +13,6 @@ export const EducationStageSchema = z.enum([
   "higher_secondary",
   "college",
   "graduate",
-  "working",
 ]);
 export type EducationStage = z.infer<typeof EducationStageSchema>;
 
@@ -32,10 +32,14 @@ export const UserProfileSchema = z.object({
   ageBand: AgeBandSchema,
   city: z.string().trim().min(1).max(160),
   state: StateSchema,
+  // Optional — not collected at signup (see UpsertUserProfileRequestSchema's own comment); the
+  // student's district for College recommendations is instead picked directly on that screen,
+  // per-request (CollegeRecommendationRouteRequestSchema.homeDistrict). Kept here as a genuinely
+  // nullable column so this schema still parses whether or not a value was ever set.
+  homeDistrict: TnDistrictSchema.optional(),
   countryCode: z.string().length(2),
   segment: SegmentSchema,
   selfStage: EducationStageSchema,
-  wantsAid: z.boolean(),
   profileStatus: z.enum(["active", "deletion_pending", "deleted"]),
   createdAt: IsoTimestampSchema,
   updatedAt: IsoTimestampSchema,
@@ -50,9 +54,13 @@ export const UpsertUserProfileRequestSchema = z
     ageAtOnboarding: z.number().int().min(0).max(120).optional(),
     city: z.string().trim().min(1).max(160),
     state: StateSchema,
+    // Optional — no longer collected at signup (moved to a dynamic picker on the College
+    // recommendations screen, see CollegeRecommendationRouteRequestSchema.homeDistrict). Kept
+    // here, unused by any current caller, in case a future "save my district to my profile"
+    // feature wants to persist it — UserProfileSchema above already tolerates its absence.
+    homeDistrict: TnDistrictSchema.optional(),
     countryCode: z.string().trim().length(2).default("IN"),
     selfStage: EducationStageSchema,
-    wantsAid: z.boolean().default(false),
   })
   .refine((input) => input.dateOfBirth || input.ageAtOnboarding !== undefined, {
     message: "Either dateOfBirth or ageAtOnboarding is required.",

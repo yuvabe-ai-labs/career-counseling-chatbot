@@ -1,4 +1,4 @@
-import { StreamResultItemSchema } from "@yuvanext/contracts";
+import { StreamResultItemSchema } from "@yuvapath/contracts";
 import type {
   StreamLookup,
   StreamRepository,

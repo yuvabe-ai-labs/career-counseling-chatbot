@@ -4,7 +4,7 @@ import type {
   ResolvedStaffQueueActionRequest,
   StaffQueueActionResponse,
   StaffQueueItem,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { handoffPriorityByReason } from "./staff-queue.js";
 
 const syntheticActionedUserId = "71111111-1111-4111-8111-111111111111";

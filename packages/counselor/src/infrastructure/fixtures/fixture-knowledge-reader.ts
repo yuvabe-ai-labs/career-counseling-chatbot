@@ -2,7 +2,7 @@ import {
   RetrievedEvidenceSchema,
   type CatalogEntityType,
   type RetrievedEvidence,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import type {
   KnowledgeReader,
   ReadCatalogCollectionInput,

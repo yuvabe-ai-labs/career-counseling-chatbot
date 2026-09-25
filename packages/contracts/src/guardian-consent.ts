@@ -28,7 +28,7 @@ export type GuardianConsent = z.infer<typeof GuardianConsentSchema>;
 
 /**
  * Both request/verify (student flow, RequestIdentityOtpRequestSchema in auth.ts) and
- * guardian consent are email/SMTP-based — see @yuvanext/assessment's EmailProvider. `studentEmail`
+ * guardian consent are email/SMTP-based — see @yuvapath/assessment's EmailProvider. `studentEmail`
  * is required only to enforce guardian ≠ student (never persisted; the student's own identity
  * email is verified separately during onboarding).
  */
@@ -47,7 +47,7 @@ export type VerifyGuardianConsentRequest = z.infer<typeof VerifyGuardianConsentR
 
 /**
  * Body for the guardian-initiated decline route (POST /guardian-consents/{consentId}/decline).
- * Unlike request/verify, this route carries no x-yuvanext-user-id — the guardian has no
+ * Unlike request/verify, this route carries no x-yuvapath-user-id — the guardian has no
  * student session, so the opaque token (sent to the guardian alongside the OTP) is the only
  * proof of authorization, together with the consentId in the URL.
  */

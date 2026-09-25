@@ -1,4 +1,4 @@
-import type { ModuleDescriptor } from "@yuvanext/contracts";
+import type { ModuleDescriptor } from "@yuvapath/contracts";
 export {
   registerSafetyRoutes,
   type ResolveSafetyUserId,
@@ -39,6 +39,6 @@ export * from "./infrastructure/postgres-approved-safety-copy-reader.js";
 export const safetyModule: ModuleDescriptor = {
   code: "m5-safety",
   name: "Safety and Operations",
-  packageName: "@yuvanext/safety",
+  packageName: "@yuvapath/safety",
   status: "in_progress",
 };

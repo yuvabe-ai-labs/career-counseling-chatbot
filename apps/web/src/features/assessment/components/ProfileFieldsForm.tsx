@@ -9,7 +9,6 @@ import {
   Map,
   MapPin,
   User,
-  //Wallet,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -45,7 +44,7 @@ function FieldError({ message }: { message?: string | undefined }) {
  * Step 1 of onboarding — adapted from the prototype's StepOne.tsx, restyled to
  * match the Figma "career" file (node 139:3934, "Tell us about yourself" /
  * "Signup" card, which specs a plain "How old are you?" number field). Adds
- * `selfStage` and `wantsAid`, which that Figma frame doesn't show but
+ * `selfStage`, which that Figma frame doesn't show but
  * `UpsertUserProfileRequestSchema` (packages/contracts/src/profile.ts) requires/accepts.
  *
  * The age field was changed from a typed number to a date-of-birth picker — a deliberate
@@ -271,19 +270,6 @@ export function ProfileFieldsForm({
             />
           </div>
         </div>
-
-        {/*<label className="flex cursor-pointer items-start gap-2 text-sm text-foreground">
-            <input
-              type="checkbox"
-              checked={value.wantsAid}
-              onChange={(event) => set("wantsAid", event.target.checked)}
-              className="mt-0.5 size-3.5 shrink-0 accent-[var(--color-brand)]"
-            />
-            <span className="flex items-center gap-1.5">
-              <Wallet className="size-3.5 shrink-0 text-brand" aria-hidden="true" />
-              I&apos;m interested in financial aid / scholarship options
-            </span>
-          </label>*/}
       </div>
 
       <div className={formSectionClass}>

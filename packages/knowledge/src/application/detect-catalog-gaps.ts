@@ -19,6 +19,8 @@ export type CatalogGap =
   | { type: "no_stream_candidates"; topTwoCode: string }
   | { type: "thin_stream_candidates"; topTwoCode: string; count: number; threshold: number }
   | { type: "no_pathway_for_career"; careerId: string; careerTitle: string }
+  | { type: "no_stream_for_career"; careerId: string; careerTitle: string }
+  | { type: "no_pathway_for_stream"; streamOptionId: string; streamTitle: string }
   | { type: "no_discipline_mapping"; pathwayId: string; pathwayTitle: string }
   | { type: "no_verified_colleges"; state: string; disciplineCode: string }
   | { type: "thin_colleges_in_scope"; state: string; disciplineCode: string; count: number; threshold: number }
@@ -37,6 +39,10 @@ export type DetectCatalogGapsOptions = {
   collegeCoverageTargets?: ReadonlyArray<{ state: string; disciplineCode: string }>;
   /** Cap how many "career has no pathway" gaps are returned in one call (default 100). */
   maxPathwayGaps?: number;
+  /** Cap how many "career has no stream link" gaps are returned in one call (default 100). */
+  maxStreamLinkGaps?: number;
+  /** Cap how many "stream has no pathway link" gaps are returned in one call (default 100). */
+  maxStreamPathwayGaps?: number;
 };
 
 export async function detectCatalogGaps(
@@ -46,15 +52,26 @@ export async function detectCatalogGaps(
   const thinStreamThreshold = options.thinStreamThreshold ?? 2;
   const thinCollegeThreshold = options.thinCollegeThreshold ?? 5;
 
-  const [streamGaps, pathwayGaps, disciplineMappingGaps, collegeGaps, programGaps] = await Promise.all([
-    detectStreamGaps(pool, thinStreamThreshold),
-    detectPathwayGaps(pool, options.maxPathwayGaps ?? 100),
-    detectDisciplineMappingGaps(pool),
-    detectCollegeCoverageGaps(pool, thinCollegeThreshold, options.collegeCoverageTargets ?? []),
-    detectMissingCollegeProgramGaps(pool),
-  ]);
+  const [streamGaps, pathwayGaps, careerStreamGaps, streamPathwayGaps, disciplineMappingGaps, collegeGaps, programGaps] =
+    await Promise.all([
+      detectStreamGaps(pool, thinStreamThreshold),
+      detectPathwayGaps(pool, options.maxPathwayGaps ?? 100),
+      detectCareerStreamGaps(pool, options.maxStreamLinkGaps ?? 100),
+      detectStreamPathwayGaps(pool, options.maxStreamPathwayGaps ?? 100),
+      detectDisciplineMappingGaps(pool),
+      detectCollegeCoverageGaps(pool, thinCollegeThreshold, options.collegeCoverageTargets ?? []),
+      detectMissingCollegeProgramGaps(pool),
+    ]);
 
-  return [...streamGaps, ...pathwayGaps, ...disciplineMappingGaps, ...collegeGaps, ...programGaps];
+  return [
+    ...streamGaps,
+    ...pathwayGaps,
+    ...careerStreamGaps,
+    ...streamPathwayGaps,
+    ...disciplineMappingGaps,
+    ...collegeGaps,
+    ...programGaps,
+  ];
 }
 
 async function detectStreamGaps(pool: Pool, threshold: number): Promise<CatalogGap[]> {
@@ -100,6 +117,42 @@ async function detectPathwayGaps(pool: Pool, limit: number): Promise<CatalogGap[
     type: "no_pathway_for_career" as const,
     careerId: row.id,
     careerTitle: row.title,
+  }));
+}
+
+async function detectCareerStreamGaps(pool: Pool, limit: number): Promise<CatalogGap[]> {
+  const result = await pool.query<{ id: string; title: string }>(
+    `select career.id, career.title
+    from knowledge.careers career
+    left join knowledge.career_streams cs on cs.career_id = career.id
+    where career.publication_status = 'published' and cs.stream_option_id is null
+    order by career.title asc
+    limit $1`,
+    [limit],
+  );
+
+  return result.rows.map((row) => ({
+    type: "no_stream_for_career" as const,
+    careerId: row.id,
+    careerTitle: row.title,
+  }));
+}
+
+async function detectStreamPathwayGaps(pool: Pool, limit: number): Promise<CatalogGap[]> {
+  const result = await pool.query<{ id: string; title: string }>(
+    `select stream.id, stream.title
+    from knowledge.stream_options stream
+    left join knowledge.stream_pathways sp on sp.stream_option_id = stream.id
+    where stream.status = 'active' and sp.pathway_id is null
+    order by stream.title asc
+    limit $1`,
+    [limit],
+  );
+
+  return result.rows.map((row) => ({
+    type: "no_pathway_for_stream" as const,
+    streamOptionId: row.id,
+    streamTitle: row.title,
   }));
 }
 

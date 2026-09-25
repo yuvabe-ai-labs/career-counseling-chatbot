@@ -1,4 +1,4 @@
-import type { SafetyTier } from "@yuvanext/contracts";
+import type { SafetyTier } from "@yuvapath/contracts";
 
 export const SAFETY_POLICY_VERSION = "mock-safety-md-v1";
 export const SAFETY_RULE_SET_VERSION = "mock-safety-md-rules-v1";

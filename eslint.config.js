@@ -32,6 +32,23 @@ export default tseslint.config(
     },
   },
   {
+    // One-off, already-applied data-migration scripts that read untyped JSON manifests/rows. Only the
+    // `any`-related rules are relaxed here; every other rule still applies to them.
+    files: [
+      "scripts/ingest/apply-tn-catalogue.ts",
+      "scripts/ingest/apply-tn-stream-catalogue.ts",
+      "scripts/ingest/remove-ai-pathways.ts",
+    ],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unsafe-argument": "off",
+      "@typescript-eslint/no-unsafe-return": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+    },
+  },
+  {
     // apps/web is browser code (React/JSX, DOM globals) — layered on top of the
     // shared TS rules above rather than duplicating them.
     files: ["apps/web/**/*.{ts,tsx}"],

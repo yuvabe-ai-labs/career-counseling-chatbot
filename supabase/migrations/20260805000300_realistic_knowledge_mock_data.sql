@@ -171,7 +171,7 @@ WITH data(i, code, name, eligibility, benefit, amount) AS (
     (10,'SYN-LOGISTICS','Future Logistics Learner Grant','Students pursuing supply-chain and logistics education.','Course-fee assistance.','Up to INR 20,000')
 )
 UPDATE knowledge.aid_schemes a
-SET aid_code=data.code, name=data.name, provider='YuvaNext Demonstration Foundation',
+SET aid_code=data.code, name=data.name, provider='YuvaPath Demonstration Foundation',
     eligibility_summary=data.eligibility, benefit_summary=data.benefit,
     amount_text=data.amount, application_url='https://example.com/aid/' || data.i,
     portal_name='Demonstration Scholarship Portal'
@@ -183,8 +183,8 @@ SET source_text='Synthetic household-income criterion for demonstration only; no
 WHERE id::text LIKE 'fc000000-0000-4000-8000-%';
 
 UPDATE knowledge.knowledge_sources
-SET name='YuvaNext synthetic India knowledge fixture ' || right(id::text, 2),
-    publisher='YuvaNext POC - synthetic data only',
+SET name='YuvaPath synthetic India knowledge fixture ' || right(id::text, 2),
+    publisher='YuvaPath POC - synthetic data only',
     trust_level='synthetic'
 WHERE id::text LIKE 'f1000000-0000-4000-8000-%';
 

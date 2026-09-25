@@ -1,4 +1,4 @@
-import type { CityListQuery, CityListResponse } from "@yuvanext/contracts";
+import type { CityListQuery, CityListResponse } from "@yuvapath/contracts";
 import type { LocationRepository } from "../domain/location.js";
 
 export async function getCities(

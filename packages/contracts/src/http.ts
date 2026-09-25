@@ -12,7 +12,7 @@ export const ApiErrorSchema = z.object({
 
 export const HealthResponseSchema = z.object({
   status: z.enum(["ok", "degraded"]),
-  service: z.literal("yuvanext-api"),
+  service: z.literal("yuvapath-api"),
   timestamp: z.string().datetime(),
   database: z.object({
     status: z.enum(["connected", "disconnected", "not_configured", "not_required"]),

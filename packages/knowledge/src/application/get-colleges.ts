@@ -1,7 +1,7 @@
 import type {
   CollegeListQuery,
   CollegeListResponse,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import type { CollegeRepository } from "../domain/college.js";
 import { listColleges } from "./list-colleges.js";
 

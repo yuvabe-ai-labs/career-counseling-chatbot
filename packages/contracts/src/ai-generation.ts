@@ -13,7 +13,12 @@
 //    fails Zod validation before the payload is ever written to a staging row.
 import { z } from "zod";
 import { IsoTimestampSchema, UuidSchema } from "./common.js";
-import { CareerPathwayRelationshipTypeSchema, QualificationLevelSchema } from "./catalog.js";
+import {
+  AidStudentCategorySchema,
+  CareerPathwayRelationshipTypeSchema,
+  CareerStreamRelationshipTypeSchema,
+  QualificationLevelSchema,
+} from "./catalog.js";
 
 // ---------------------------------------------------------------------------
 // Staging rows
@@ -26,6 +31,9 @@ export const AiGenerationTargetTableSchema = z.enum([
   "colleges",
   "college_programs",
   "stream_map_items",
+  "career_streams",
+  "stream_pathways",
+  "aid_schemes",
 ]);
 export type AiGenerationTargetTable = z.infer<typeof AiGenerationTargetTableSchema>;
 
@@ -63,6 +71,9 @@ export const AiGenerationProposedEntityTypeSchema = z.enum([
   "college",
   "college_program",
   "stream_map_item",
+  "career_stream",
+  "stream_pathway",
+  "aid_scheme",
 ]);
 export type AiGenerationProposedEntityType = z.infer<typeof AiGenerationProposedEntityTypeSchema>;
 
@@ -188,3 +199,124 @@ export const StreamMapItemDraftBatchSchema = z
   })
   .strict();
 export type StreamMapItemDraftBatch = z.infer<typeof StreamMapItemDraftBatchSchema>;
+
+/**
+ * Career → Stream link drafts (docs/architecture/career-stream-mapping-iteration-1-plan.md).
+ * Scoped per seed career, same shape as draftPathways — Gemini never sees or invents a
+ * career_id/stream_option_id; `streamCode` must be copied from the trusted-context stream
+ * option list it was given, exactly like PathwayDraftCareerLink.careerOnetCode above.
+ */
+export const CareerStreamDraftLinkSchema = z
+  .object({
+    streamCode: z.string().trim().min(1).max(80),
+    relationshipType: CareerStreamRelationshipTypeSchema,
+    // A structural affinity value describing the catalog, not a student fit score — same
+    // framing as PathwayDraftDisciplineLink.relevanceWeight above.
+    weight: z.number().min(0).max(1),
+  })
+  .strict();
+export type CareerStreamDraftLink = z.infer<typeof CareerStreamDraftLinkSchema>;
+
+export const CareerStreamDraftBatchSchema = z
+  .object({
+    careerStreams: z.array(CareerStreamDraftLinkSchema).min(1).max(6),
+  })
+  .strict();
+export type CareerStreamDraftBatch = z.infer<typeof CareerStreamDraftBatchSchema>;
+
+/**
+ * Stream → Pathway link drafts (docs/architecture/stream-pathway-mapping-iteration-2-plan.md).
+ * Scoped per seed stream, same shape/reasoning as CareerStreamDraftLinkSchema above —
+ * `pathwayCode` must be copied from the trusted-context pathway list it was given.
+ */
+export const StreamPathwayDraftLinkSchema = z
+  .object({
+    pathwayCode: z.string().trim().min(1).max(80),
+    relationshipType: CareerStreamRelationshipTypeSchema,
+    weight: z.number().min(0).max(1),
+  })
+  .strict();
+export type StreamPathwayDraftLink = z.infer<typeof StreamPathwayDraftLinkSchema>;
+
+export const StreamPathwayDraftBatchSchema = z
+  .object({
+    streamPathways: z.array(StreamPathwayDraftLinkSchema).min(1).max(6),
+  })
+  .strict();
+export type StreamPathwayDraftBatch = z.infer<typeof StreamPathwayDraftBatchSchema>;
+
+/**
+ * TN UG scholarship/financial-aid draft, extracted from one fetched official source page.
+ * Deliberately excludes id, aidCode, verificationStatus, lastVerifiedAt, and datasetVersionId —
+ * all backend-assigned, same convention as every other draft type in this file — and excludes
+ * any fit score/rank/eligibility decision: Gemini extracts facts stated in the source, it never
+ * decides who a scheme is recommended to.
+ */
+export const AidSchemeDraftCriterionSchema = z
+  .object({
+    criterionType: z.enum(["annual_income_max", "student_category"]),
+    operator: z.enum(["lte", "in"]),
+    value: z.union([
+      z.object({ amount: z.number().nonnegative() }).strict(),
+      z.object({ values: z.array(AidStudentCategorySchema).min(1) }).strict(),
+    ]),
+    isRequired: z.boolean(),
+    // The exact source sentence/clause this criterion was extracted from — required, not
+    // optional: an eligibility rule with no traceable source text is exactly the kind of
+    // plausible-sounding-but-unverifiable claim the extraction rules exist to prevent.
+    sourceText: z.string().trim().min(1).max(500),
+  })
+  .strict();
+export type AidSchemeDraftCriterion = z.infer<typeof AidSchemeDraftCriterionSchema>;
+
+/**
+ * Scope classification Gemini must commit to, kept separate from the free-text `level`
+ * description below — this is what scope validation actually gates on (only ug_only /
+ * ug_and_other_levels survive; not_ug is always rejected before staging), rather than the
+ * generator trying to pattern-match arbitrary free text.
+ */
+export const AidSchemeDraftEducationScopeSchema = z.enum(["ug_only", "ug_and_other_levels", "not_ug"]);
+export type AidSchemeDraftEducationScope = z.infer<typeof AidSchemeDraftEducationScopeSchema>;
+
+export const AidSchemeDraftSchema = z
+  .object({
+    name: z.string().trim().min(1).max(240),
+    providerType: z.string().trim().min(1).max(80).nullable(),
+    provider: z.string().trim().min(1).max(200),
+    // Free-text description exactly as stated by the source (e.g. "Undergraduate", "UG & PG") —
+    // copied through to aid_schemes.level as-is. educationScope above is the real scope gate.
+    level: z.string().trim().min(1).max(100),
+    educationScope: AidSchemeDraftEducationScopeSchema,
+    states: z.array(z.string().trim().min(1).max(120)).min(1),
+    eligibilitySummary: z.string().trim().min(1).max(1000).nullable(),
+    benefitSummary: z.string().trim().min(1).max(1000).nullable(),
+    amountText: z.string().trim().min(1).max(200).nullable(),
+    // Nullable here even though aid_schemes.application_url is NOT NULL in the real table: an
+    // extraction that genuinely can't confirm a dedicated application URL (common for schemes
+    // applied for in person, e.g. at a district welfare office) must be able to say so honestly
+    // rather than invent one. The generator (generate-ai-catalog-drafts.ts) falls back to the
+    // already-confirmed source page URL in that case — never Gemini's choice, always the
+    // caller's own fetched URL — so the real table's NOT NULL constraint is satisfied without
+    // ever fabricating a destination.
+    applicationUrl: z
+      .string()
+      .url()
+      .refine((url) => url.startsWith("https://"), { message: "Aid application URL must use HTTPS" })
+      .nullable(),
+    portalName: z.string().trim().min(1).max(160).nullable(),
+    applyWindowStart: z.string().date().nullable(),
+    applyWindowEnd: z.string().date().nullable(),
+    criteria: z.array(AidSchemeDraftCriterionSchema).max(6),
+  })
+  .strict();
+export type AidSchemeDraft = z.infer<typeof AidSchemeDraftSchema>;
+
+export const AidSchemeDraftBatchSchema = z
+  .object({
+    // A single official page routinely lists several distinct schemes (e.g. the TN DCE
+    // scholarships page) — Gemini must extract every distinct one, not collapse the page into
+    // one entry.
+    schemes: z.array(AidSchemeDraftSchema).min(1).max(8),
+  })
+  .strict();
+export type AidSchemeDraftBatch = z.infer<typeof AidSchemeDraftBatchSchema>;

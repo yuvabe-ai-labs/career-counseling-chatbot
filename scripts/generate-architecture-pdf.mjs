@@ -1,14 +1,14 @@
 import fs from "node:fs";
 
-const output = new URL("../docs/yuvanext-project-architecture.pdf", import.meta.url);
+const output = new URL("../docs/yuvapath-project-architecture.pdf", import.meta.url);
 const W = 595.28, H = 841.89, M = 46;
 const green = "0.03 0.36 0.28", dark = "0.09 0.20 0.17", grey = "0.38 0.46 0.43";
 let pages = [], ops = [], y = 0, pageNo = 0;
 const esc = s => String(s).replaceAll("\\", "\\\\").replaceAll("(", "\\(").replaceAll(")", "\\)").replaceAll(/[–—]/g, "-").replaceAll("→", "->");
 const drawText = (s,x,yy,size=9.6,font="F1",color=dark) => ops.push(`${color} rg BT /${font} ${size} Tf 1 0 0 1 ${x} ${yy} Tm (${esc(s)}) Tj ET`);
 const rect = (x,yy,w,h,c) => ops.push(`${c} rg ${x} ${yy} ${w} ${h} re f`);
-function finishPage(){ if(!ops.length)return; drawText(`YuvaNext architecture report  |  Page ${pageNo}`,M,24,8,"F1",grey); pages.push(ops.join("\n")); ops=[]; }
-function newPage(){ finishPage(); pageNo++; rect(0,H-72,W,72,green); drawText("YUVANEXT",M,H-34,17,"F2","1 1 1"); drawText("Project architecture and data governance",M,H-53,10,"F1","0.82 1 0.93"); y=H-99; }
+function finishPage(){ if(!ops.length)return; drawText(`YuvaPath architecture report  |  Page ${pageNo}`,M,24,8,"F1",grey); pages.push(ops.join("\n")); ops=[]; }
+function newPage(){ finishPage(); pageNo++; rect(0,H-72,W,72,green); drawText("YUVAPATH",M,H-34,17,"F2","1 1 1"); drawText("Project architecture and data governance",M,H-53,10,"F1","0.82 1 0.93"); y=H-99; }
 function ensure(n=30){ if(y-n<44)newPage(); }
 function wrap(s,max=91){ const words=String(s).split(/\s+/); let a=[],l=""; for(const w of words){const n=l?`${l} ${w}`:w;if(n.length>max){if(l)a.push(l);l=w}else l=n}if(l)a.push(l);return a; }
 function title(s){ensure(44); drawText(s,M,y,15,"F2",green); y-=23;}
@@ -20,7 +20,7 @@ function tableRows(rows){for(const [a,b] of rows){ensure(29);drawText(a,M+5,y,8.
 
 newPage();
 drawText("COMPREHENSIVE TECHNICAL REPORT",M,y,9,"F2",green); y-=31;
-drawText("YuvaNext Project Architecture",M,y,25,"F2",dark); y-=30;
+drawText("YuvaPath Project Architecture",M,y,25,"F2",dark); y-=30;
 para("Knowledge sources, acquisition, verification, validation, database schema, API payloads, and the policy for Indian occupations without reliable RIASEC data.",{size:12,gap:16,max:76});
 rect(M,y-73,W-2*M,80,"0.92 0.98 0.96");
 drawText("IMPLEMENTED BASELINE",M+16,y-18,10,"F2",green);
@@ -58,7 +58,7 @@ sub("Official scholarship sources");
 para("Financial-aid records should come from the National Scholarship Portal, ministries, departments, state portals and official scheme notifications. Keep eligibility rules, application URL, applicable state, opening/closing dates and last verification date.");
 
 title("4. Recommended acquisition mechanism");
-code(["Official API / export / publication", " -> immutable raw file and source metadata", " -> transformation into YuvaNext JSON", " -> automatic validation and duplicate checks", " -> human/domain review", " -> checksumSha256 + manifest.json", " -> transactional Supabase import", " -> audit report and published catalog"]);
+code(["Official API / export / publication", " -> immutable raw file and source metadata", " -> transformation into YuvaPath JSON", " -> automatic validation and duplicate checks", " -> human/domain review", " -> checksumSha256 + manifest.json", " -> transactional Supabase import", " -> audit report and published catalog"]);
 para("External sources should be collected offline. Student-facing API requests should query Supabase rather than depend on external sites in real time.");
 
 newPage(); title("5. Validation, verification and publication controls");
@@ -184,7 +184,7 @@ bullet("Entity-level source provenance and narrative/RAG documents were deferred
 newPage(); title("12. Indian occupations and missing RIASEC data");
 para("RIASEC means Realistic, Investigative, Artistic, Social, Enterprising and Conventional. O*NET RIASEC information reflects a US occupational taxonomy and must not be copied blindly to Indian occupations.");
 sub("Indian occupation with no O*NET match");
-bullet("Create a stable YuvaNext UUID and slug.");
+bullet("Create a stable YuvaPath UUID and slug.");
 bullet("Store the verified Indian NCO code when one exists.");
 bullet("Set onetCode to null; never invent an O*NET code.");
 bullet("Store Indian pathways, education and locally sourced context.");

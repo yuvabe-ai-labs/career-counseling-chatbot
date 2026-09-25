@@ -1,4 +1,4 @@
-import type { Segment } from "@yuvanext/contracts";
+import type { Segment } from "@yuvapath/contracts";
 
 export type ApprovedCopy = {
   key: string;

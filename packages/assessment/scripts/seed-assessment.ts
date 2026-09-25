@@ -36,7 +36,7 @@ type SeedItem = {
 
 const instrument = {
   code: "mini_ip_30",
-  name: "YuvaNext Mini Interest Profiler 30",
+  name: "YuvaPath Mini Interest Profiler 30",
   construct: "interest",
   version: "1.0",
   language: "en",
@@ -44,7 +44,7 @@ const instrument = {
   ageMax: 99,
   batchSize: 10,
   scoringAlgorithmVersion: "riasec-deterministic-v1",
-  contentLicenseRef: "yuvanext-mock-content-v1",
+  contentLicenseRef: "yuvapath-mock-content-v1",
   reviewStatus: "mock",
 } as const;
 

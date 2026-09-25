@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft, Atom, Building2, Palette, type LucideIcon } from "lucide-react";
 import { Navigate, useNavigate } from "react-router-dom";
-import type { RecommendationItem } from "@yuvanext/contracts";
+import type { RecommendationItem } from "@yuvapath/contracts";
 import streamCardArts from "@/assets/stream-card-arts.png";
 import streamCardCommerce from "@/assets/stream-card-commerce.png";
 import streamCardScience from "@/assets/stream-card-science.png";
@@ -54,6 +54,9 @@ function resolveStreamVisualStyle(title: string, index: number): StreamVisualSty
   return STREAM_VISUAL_STYLES[index % STREAM_VISUAL_STYLES.length]!;
 }
 
+// MVP: only the top 3 streams are shown.
+const STREAM_LIMIT = 3;
+
 /**
  * Figma node 611:93 ("streams"). Same shell/back-button pattern as PlanPage, over the shared
  * flow-card container (flow-card.ts) rather than CareerPage's ring-map treatment: streams
@@ -79,11 +82,14 @@ export function StreamPage() {
     return <Navigate to="/riasec-results" replace />;
   }
 
-  const items = recommendationQuery.data?.items ?? [];
-  const hideMatchPercent = gatingContext.segment === "explorer";
+  // MVP: only the top 3 streams, in the backend's own ranked order (no re-ranking here).
+  const items = (recommendationQuery.data?.items ?? []).slice(0, STREAM_LIMIT);
 
   return (
-    <main className="flex min-h-screen flex-col bg-page">
+    // h-screen + overflow-hidden: same fixed-viewport shell as sign-in/sign-up (AuthLayout) and
+    // Explore Path — the card is capped at 751px and centred, with the inner wrapper as the scroll
+    // fallback, instead of sizing to content and leaving the page to scroll.
+    <main className="flex h-screen flex-col overflow-hidden bg-page">
       <AppHeader />
       <div className={flowCardBandClass}>
         {recommendationQuery.isPending ? (
@@ -95,7 +101,13 @@ export function StreamPage() {
           // is actually ready — never a partially-populated card in between.
           <LoadingState />
         ) : (
-          <div className={cn(flowCardClass, "border border-border")}>
+          <div
+            className={cn(
+              flowCardClass,
+              "border border-border flex h-full max-h-[751px] flex-col overflow-hidden",
+            )}
+          >
+            <div className="scrollbar-hidden flex min-h-0 flex-1 flex-col overflow-y-auto">
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -134,7 +146,6 @@ export function StreamPage() {
                         icon={style.icon}
                         image={style.image}
                         imageClassName={style.imageClassName}
-                        hideMatchPercent={hideMatchPercent}
                         onSelect={setSelectedItem}
                       />
                     );
@@ -150,13 +161,13 @@ export function StreamPage() {
             <p className="mt-6 text-center font-display text-sm leading-[1.4] text-muted-foreground">
               "Explore your options. Shape your future."
             </p>
+            </div>
           </div>
         )}
       </div>
 
       <StreamDetailSheet
         item={selectedItem}
-        hideMatchPercent={hideMatchPercent}
         onClose={() => setSelectedItem(null)}
       />
     </main>

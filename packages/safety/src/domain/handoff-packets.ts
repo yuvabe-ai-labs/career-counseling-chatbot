@@ -1,4 +1,4 @@
-import type { HandoffPacket, ResolvedCreateHandoffRequest } from "@yuvanext/contracts";
+import type { HandoffPacket, ResolvedCreateHandoffRequest } from "@yuvapath/contracts";
 
 export function createSyntheticHandoffPacket(request: ResolvedCreateHandoffRequest): HandoffPacket {
   return {

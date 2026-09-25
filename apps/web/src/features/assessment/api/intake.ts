@@ -3,7 +3,7 @@ import {
   IntakeQuestionsResponseSchema,
   UpsertIntakeAnswerRequestSchema,
   type UpsertIntakeAnswerRequest,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { apiRequest } from "@/lib/api-client";
 
 /**

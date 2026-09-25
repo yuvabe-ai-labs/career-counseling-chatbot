@@ -103,9 +103,12 @@ async function completeStepOneAsMinor(user: ReturnType<typeof userEvent.setup>) 
 // These hoisted mocks are shared across every test in this file (vi.hoisted), and
 // tests/setup.ts only resets the DOM (cleanup()) between tests, not mock call history — clear
 // it explicitly so call-count assertions (e.g. "reopening doesn't call the backend again") mean
-// what they say, rather than accumulating across every prior test in this file.
+// what they say, rather than accumulating across every prior test in this file. Also clears
+// localStorage — OnboardingPage now redirects an already-signed-in visitor straight to /home, so
+// a userId/journeySessionId left over from another test file's own setup must not leak in here.
 beforeEach(() => {
   vi.clearAllMocks();
+  localStorage.clear();
 });
 
 function setupCommonMocks() {

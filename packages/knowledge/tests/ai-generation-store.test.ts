@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   computeInputHash,
+  normalizeAidSchemeNaturalKey,
   normalizeCollegeNaturalKey,
   normalizeCollegeProgramNaturalKey,
   normalizePathwayNaturalKey,
@@ -54,5 +55,33 @@ describe("natural-key normalization", () => {
     const diploma = normalizePathwayNaturalKey({ title: "Data Science", educationRouteCode: "diploma" });
 
     expect(degree).not.toBe(diploma);
+  });
+
+  it("normalizes an aid scheme's case/whitespace so near-duplicates collide", () => {
+    const a = normalizeAidSchemeNaturalKey({
+      name: "  Post-Metric Scholarship for SC/ST ",
+      provider: "Adi Dravidar Welfare Department",
+    });
+    const b = normalizeAidSchemeNaturalKey({
+      name: "post-metric scholarship for sc/st",
+      provider: "ADI DRAVIDAR WELFARE DEPARTMENT",
+    });
+
+    expect(a).toBe(b);
+  });
+
+  it("treats the same scheme name from a different provider as a distinct aid scheme", () => {
+    // Two different departments legitimately run similarly-named "Post-Metric Scholarship"
+    // schemes — collapsing on name alone would silently drop a real, distinct scheme.
+    const adiDravidar = normalizeAidSchemeNaturalKey({
+      name: "Post-Metric Scholarship",
+      provider: "Adi Dravidar Welfare Department",
+    });
+    const bcMbc = normalizeAidSchemeNaturalKey({
+      name: "Post-Metric Scholarship",
+      provider: "Backward Classes Welfare Department",
+    });
+
+    expect(adiDravidar).not.toBe(bcMbc);
   });
 });

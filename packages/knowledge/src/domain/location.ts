@@ -1,4 +1,4 @@
-import type { CityRecord, StateRecord } from "@yuvanext/contracts";
+import type { CityRecord, StateRecord } from "@yuvapath/contracts";
 
 export type StateSearchFilters = {
   query?: string;

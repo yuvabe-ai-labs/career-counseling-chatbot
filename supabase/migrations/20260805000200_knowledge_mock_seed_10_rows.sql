@@ -11,7 +11,7 @@ SELECT
   ('f1000000-0000-4000-8000-' || lpad(i::text, 12, '0'))::uuid,
   'mock-source-' || i,
   '[MOCK] Knowledge source ' || i,
-  'synthetic_fixture', NULL, 'YuvaNext POC', NULL,
+  'synthetic_fixture', NULL, 'YuvaPath POC', NULL,
   'synthetic', 'active', '2026-08-05T00:00:00Z', '2026-08-05T00:00:00Z'
 FROM generate_series(1, 10) AS i
 ON CONFLICT (source_key) DO NOTHING;
@@ -202,7 +202,7 @@ INSERT INTO knowledge.aid_schemes
 SELECT
   ('fb000000-0000-4000-8000-' || lpad(i::text, 12, '0'))::uuid,
   'MOCK-AID-' || i, '[MOCK] Student aid scheme ' || i,
-  'synthetic', 'YuvaNext POC', 'undergraduate', ARRAY['Tamil Nadu'],
+  'synthetic', 'YuvaPath POC', 'undergraduate', ARRAY['Tamil Nadu'],
   'Synthetic eligibility rule ' || i || '.', 'Synthetic benefit ' || i || '.',
   '[MOCK] Up to INR ' || (10000 + i * 1000),
   'https://example.com/mock-aid-' || i, '[MOCK] Test portal',

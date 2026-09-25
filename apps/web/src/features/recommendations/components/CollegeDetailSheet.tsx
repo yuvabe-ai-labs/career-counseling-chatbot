@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { X } from "lucide-react";
-import type { CollegeFitExplanation, RecommendationItem } from "@yuvanext/contracts";
+import type { CollegeEligibilityExplanation, CollegeOwnership, RecommendationItem } from "@yuvapath/contracts";
 import { cn } from "@/lib/utils";
 
 type CollegeDetailSheetProps = {
@@ -8,43 +8,22 @@ type CollegeDetailSheetProps = {
   onClose: () => void;
 };
 
-const RING_LABEL: Record<NonNullable<RecommendationItem["ring"]>, string> = {
-  inner: "Your state",
-  middle: "Neighboring state",
-  outer: "Other option",
+export const OWNERSHIP_LABEL: Record<CollegeOwnership, string> = {
+  government: "Government",
+  government_aided: "Government Aided",
+  private: "Private",
+  other: "Other",
 };
 
-const STATE_BAND_LABEL: Record<CollegeFitExplanation["stateBand"], string> = {
-  selected: "In your selected state",
-  neighboring: "In a neighboring state",
-  other: "Elsewhere in India",
-};
-
-const COLLEGE_TYPE_LABEL: Record<CollegeFitExplanation["collegeType"], string> = {
-  regular: "Regular college",
-  vocational: "Vocational institute",
-  polytechnic: "Polytechnic",
-  iti: "ITI",
-  open_university: "Open university",
-};
-
-function isCollegeExplanation(
+export function isCollegeExplanation(
   explanation: RecommendationItem["explanation"],
-): explanation is CollegeFitExplanation {
-  return typeof explanation === "object" && explanation !== null && "disciplineAlignment" in explanation;
+): explanation is CollegeEligibilityExplanation {
+  return typeof explanation === "object" && explanation !== null && "instituteKind" in explanation;
 }
 
-const FIT_ROWS: { key: keyof CollegeFitExplanation; label: string }[] = [
-  { key: "disciplineAlignment", label: "Discipline Fit" },
-  { key: "stateFit", label: "Location Fit" },
-  { key: "accessRouteFit", label: "Access Route" },
-];
-
 /**
- * College is the only other recommendation kind besides career that produces real
- * inner/middle/outer rings (home state / neighboring states / other — see
- * college-recommendations.ts's resolveStateBand()), so this mirrors CareerDetailSheet's ring
- * badge, with college-specific fit fields (CollegeFitExplanation) instead.
+ * Shows the real catalogue facts for one college in the picked district (institute kind,
+ * ownership, district) and which programme type(s)/admission route(s) made it eligible.
  */
 export function CollegeDetailSheet({ item, onClose }: CollegeDetailSheetProps) {
   const [dragOffset, setDragOffset] = useState(0);
@@ -86,14 +65,7 @@ export function CollegeDetailSheet({ item, onClose }: CollegeDetailSheetProps) {
       {item ? (
         <>
           <div className="flex items-center gap-3">
-            <div>
-              <h2 className="font-display text-xl font-bold text-foreground">{item.title}</h2>
-              {item.ring ? (
-                <span className="mt-1 inline-block rounded-lg bg-[#DDF6EE] px-2 py-1 font-display text-xs font-bold text-[#148765]">
-                  {RING_LABEL[item.ring]}
-                </span>
-              ) : null}
-            </div>
+            <h2 className="font-display text-xl font-bold text-foreground">{item.title}</h2>
             <button
               type="button"
               onClick={onClose}
@@ -108,26 +80,23 @@ export function CollegeDetailSheet({ item, onClose }: CollegeDetailSheetProps) {
             <>
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className="rounded-full bg-page px-3 py-1 font-display text-xs font-semibold text-foreground">
-                  {STATE_BAND_LABEL[explanation.stateBand]}
+                  {explanation.instituteKind}
                 </span>
                 <span className="rounded-full bg-page px-3 py-1 font-display text-xs font-semibold text-foreground">
-                  {COLLEGE_TYPE_LABEL[explanation.collegeType]}
+                  {OWNERSHIP_LABEL[explanation.ownership]}
+                </span>
+                <span className="rounded-full bg-page px-3 py-1 font-display text-xs font-semibold text-foreground">
+                  {explanation.district}
                 </span>
               </div>
 
-              <div className="mt-5 grid grid-cols-3 gap-x-6 gap-y-4">
-                {FIT_ROWS.map(({ key, label }) => {
-                  const value = explanation[key];
-                  if (typeof value !== "number") return null;
-                  return (
-                    <div key={key}>
-                      <p className="font-display text-xs text-muted-foreground">{label}</p>
-                      <p className="font-display text-lg font-bold text-foreground">
-                        {Math.round(value * 100)}%
-                      </p>
-                    </div>
-                  );
-                })}
+              <div className="mt-4 space-y-1">
+                <p className="font-display text-xs text-muted-foreground">
+                  Offers: {explanation.matchedProgramTypes.join(", ")}
+                </p>
+                <p className="font-display text-xs text-muted-foreground">
+                  Admission: {explanation.matchedAdmissionRoutes.join("; ")}
+                </p>
               </div>
 
               <p className="mt-5 font-display text-xs text-muted-foreground">

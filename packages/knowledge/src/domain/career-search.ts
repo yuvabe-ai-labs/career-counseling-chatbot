@@ -1,4 +1,4 @@
-import type { Career } from "@yuvanext/contracts";
+import type { Career } from "@yuvapath/contracts";
 
 export type CareerSearchFilters = {
   query?: string;

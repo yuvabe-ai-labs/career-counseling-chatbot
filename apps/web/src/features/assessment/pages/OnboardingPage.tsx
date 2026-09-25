@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import type { EducationStage } from "@yuvanext/contracts";
+import { Navigate, useNavigate } from "react-router-dom";
+import type { EducationStage } from "@yuvapath/contracts";
 import { ApiRequestError } from "@/lib/api-client";
 import { getErrorMessage } from "@/lib/error-messages";
 import {
@@ -96,6 +96,14 @@ export function OnboardingPage() {
   const resendPendingConsent = useResendPendingGuardianConsent();
   const verifyPendingConsent = useVerifyPendingGuardianConsent();
   const signUp = useSignUpWithPassword();
+
+  // A genuinely signed-in visitor (real userId + journeySessionId, the same predicate every
+  // post-auth page's own guard uses) landing back on /sign-up — e.g. a stale tab, browser back
+  // button, or typing the URL while already logged in — shouldn't see a fresh signup form with a
+  // header that confusingly shows their account/Sign out. Send them where they actually are.
+  if (session.userId && session.journeySessionId) {
+    return <Navigate to="/home" replace />;
+  }
 
   const isSigningUp =
     checkEmailAvailability.isPending ||
@@ -350,7 +358,6 @@ export function OnboardingPage() {
           state: profile.state,
           countryCode: "IN",
           selfStage: profile.selfStage as EducationStage,
-          wantsAid: profile.wantsAid,
         },
       });
       session.setProfile(savedProfile);

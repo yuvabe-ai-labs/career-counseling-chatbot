@@ -15,7 +15,7 @@ if (envPath) {
 
 const apiBaseUrl = process.env.API_BASE_URL ?? "http://localhost:3000";
 const runId = process.env.ASSESSMENT_RUN_ID;
-const userId = process.env.YUVANEXT_USER_ID;
+const userId = process.env.YUVAPATH_USER_ID;
 const answerMode = process.env.ANSWER_MODE ?? "random";
 
 if (!runId) {
@@ -23,7 +23,7 @@ if (!runId) {
 }
 
 if (!userId) {
-  throw new Error("YUVANEXT_USER_ID is required.");
+  throw new Error("YUVAPATH_USER_ID is required.");
 }
 
 type AssessmentItem = {
@@ -45,7 +45,7 @@ type NextResponse = {
 const headers = {
   accept: "application/json",
   "content-type": "application/json",
-  "x-yuvanext-user-id": userId,
+  "x-yuvapath-user-id": userId,
 };
 
 const responseByScale: Record<string, number> = {

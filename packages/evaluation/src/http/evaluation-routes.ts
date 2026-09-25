@@ -6,7 +6,7 @@ import {
   type EvaluationRunResponse,
   type OpenAPIRegistry,
   type ResolvedEvaluationRunRequest,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import type { Express } from "express";
 import { getSyntheticEvaluationRun, runSyntheticEvaluation } from "../domain/evaluation-runs.js";
 import type { EvaluationRunRepository } from "../infrastructure/evaluation-run-repository.js";

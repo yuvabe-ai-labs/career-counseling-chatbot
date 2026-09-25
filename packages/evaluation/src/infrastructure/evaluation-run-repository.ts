@@ -5,8 +5,8 @@ import type {
   ResolvedEvaluationRunRequest,
   EvaluationRunResponse,
   EvaluationRunSummary,
-} from "@yuvanext/contracts";
-import { withTransaction } from "@yuvanext/database";
+} from "@yuvapath/contracts";
+import { withTransaction } from "@yuvapath/database";
 import { runSyntheticEvaluation } from "../domain/evaluation-runs.js";
 
 type EvaluationRunRow = {

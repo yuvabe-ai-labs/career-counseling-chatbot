@@ -25,7 +25,7 @@ function bullet(value) { para(`-  ${value}`, 10.5, 14, 10); }
 function newPage(title) {
   if (ops.length) pages.push(ops.join("\n")); ops = [];
   rect(0, H - 122, W, 122, green);
-  text("YUVANEXT KNOWLEDGE MODULE 3", margin, H - 42, 9, "F2", "0.72 0.96 0.87");
+  text("YUVAPATH KNOWLEDGE MODULE 3", margin, H - 42, 9, "F2", "0.72 0.96 0.87");
   text(title, margin, H - 76, 24, "F2", "1 1 1");
   text("Dataset integrity and version-control clarification", margin, H - 99, 11, "F1", "0.90 1 0.96");
   y = H - 158;
@@ -86,7 +86,7 @@ bullet("Same version and different checksum: reject the import and investigate t
 bullet("Approved changed content: create a new dataset version and a new checksum.");
 bullet("Correct checksum but unverified facts: do not publish until source and human review pass.");
 
-text("YuvaNext Career Counselling Chatbot  |  Knowledge Module 3", margin, 34, 8.5, "F1", "0.40 0.48 0.45");
+text("YuvaPath Career Counselling Chatbot  |  Knowledge Module 3", margin, 34, 8.5, "F1", "0.40 0.48 0.45");
 pages.push(ops.join("\n"));
 
 const objects = [];

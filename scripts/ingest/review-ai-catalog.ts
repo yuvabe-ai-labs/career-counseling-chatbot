@@ -8,9 +8,28 @@
 //   tsx scripts/ingest/review-ai-catalog.ts --list
 //   tsx scripts/ingest/review-ai-catalog.ts --approve <itemId>
 //   tsx scripts/ingest/review-ai-catalog.ts --reject <itemId> --note "why"
+//   tsx scripts/ingest/review-ai-catalog.ts --approve-all
+//
+// --approve-all (docs/architecture/career-stream-coverage-fill-plan.md Phase 0): bulk-approves
+// every pending_review career_stream item EXCEPT a duplicate-match warning (matchedExistingId
+// set). Scoped to career_stream only, never pathway/college/stream_pathway items — those still
+// go through --list/--approve one at a time. This doesn't weaken any existing safeguard: an
+// unknown streamCode is already dropped before staging (generate-ai-catalog-drafts.ts) and
+// re-checked again at promotion time (promote-ai-catalog.ts), with a DB foreign key as the last
+// line of defense either way — --approve-all only skips the human keystroke for links that
+// already passed all of that.
+//
+// Originally also held back non-"primary" relationshipType links ("alternative"/
+// "cross_disciplinary") for a human look. Dropped that carve-out after a live run: at ~140
+// careers processed it had already produced 123 pending items, extrapolating to 700-800+ across
+// the full ~860-career backfill — not reviewable one at a time. A spot-check of a sample found
+// the same quality bar as the auto-approved primary links (valid stream codes, sensible
+// weight-to-tier correlation), and the same 3 structural safeguards above still apply regardless
+// of relationshipType — so the user chose to extend auto-approval to all relationship types
+// rather than keep hitting this same growing-backlog decision on every future run.
 import process from "node:process";
-import { createDatabasePool } from "@yuvanext/database";
-import { createPostgresAiGenerationStore } from "@yuvanext/knowledge";
+import { createDatabasePool } from "@yuvapath/database";
+import { createPostgresAiGenerationStore } from "@yuvapath/knowledge";
 
 const loadLocalEnvironment = (): void => {
   try {
@@ -69,6 +88,26 @@ const run = async (): Promise<void> => {
       return;
     }
 
+    if (args.includes("--approve-all")) {
+      const items = await store.listPendingItems();
+      const careerStreamItems = items.filter((item) => item.proposedEntityType === "career_stream");
+      const needsReview = careerStreamItems.filter((item) => item.matchedExistingId != null);
+      const autoApprove = careerStreamItems.filter((item) => !needsReview.includes(item));
+
+      for (const item of autoApprove) {
+        await store.updateItemReview(item.id, { reviewStatus: "approved" });
+      }
+
+      console.log(
+        `${autoApprove.length} career_stream item(s) auto-approved, ${needsReview.length} left pending (duplicate match) — run --list to review ${needsReview.length > 0 ? "them" : "the rest"}.`,
+      );
+      const otherPending = items.length - careerStreamItems.length;
+      if (otherPending > 0) {
+        console.log(`(${otherPending} pending item(s) of other entity types were left untouched.)`);
+      }
+      return;
+    }
+
     const approveId = readFlag(args, "approve");
     if (approveId) {
       await store.updateItemReview(approveId, { reviewStatus: "approved" });
@@ -84,7 +123,9 @@ const run = async (): Promise<void> => {
       return;
     }
 
-    throw new Error("Pass --list, --approve <itemId>, or --reject <itemId> [--note \"...\"]");
+    throw new Error(
+      "Pass --list, --approve <itemId>, --approve-all, or --reject <itemId> [--note \"...\"]",
+    );
   } finally {
     await pool.end();
   }

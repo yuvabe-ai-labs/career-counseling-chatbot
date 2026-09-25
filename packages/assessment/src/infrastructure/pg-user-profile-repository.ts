@@ -1,4 +1,4 @@
-import { UserProfileSchema, type UserProfile } from "@yuvanext/contracts";
+import { UserProfileSchema, type UserProfile } from "@yuvapath/contracts";
 import type { Pool } from "pg";
 import type {
   UpsertUserProfileRecord,
@@ -12,10 +12,10 @@ type UserProfileRow = {
   age_band: string;
   city: string;
   state: string;
+  home_district: string | null;
   country_code: string;
   segment: string;
   self_stage: string;
-  wants_aid: boolean;
   profile_status: "active" | "deletion_pending" | "deleted";
   created_at: Date;
   updated_at: Date;
@@ -30,10 +30,10 @@ const mapUserProfileRow = (row: UserProfileRow): UserProfile =>
     ageBand: row.age_band,
     city: row.city,
     state: row.state,
+    homeDistrict: row.home_district ?? undefined,
     countryCode: row.country_code,
     segment: row.segment,
     selfStage: row.self_stage,
-    wantsAid: row.wants_aid,
     profileStatus: row.profile_status,
     createdAt: row.created_at.toISOString(),
     updatedAt: row.updated_at.toISOString(),
@@ -53,10 +53,10 @@ export class PgUserProfileRepository implements UserProfileRepository {
           age_band,
           city,
           state,
+          home_district,
           country_code,
           segment,
           self_stage,
-          wants_aid,
           profile_status,
           created_at,
           updated_at,
@@ -69,10 +69,10 @@ export class PgUserProfileRepository implements UserProfileRepository {
           age_band = excluded.age_band,
           city = excluded.city,
           state = excluded.state,
+          home_district = excluded.home_district,
           country_code = excluded.country_code,
           segment = excluded.segment,
           self_stage = excluded.self_stage,
-          wants_aid = excluded.wants_aid,
           profile_status = 'active',
           updated_at = excluded.updated_at,
           deleted_at = null
@@ -85,10 +85,10 @@ export class PgUserProfileRepository implements UserProfileRepository {
         input.ageBand,
         input.city,
         input.state,
+        input.homeDistrict ?? null,
         input.countryCode,
         input.segment,
         input.selfStage,
-        input.wantsAid,
         input.profileStatus,
         input.now,
       ],

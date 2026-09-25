@@ -4,7 +4,7 @@ import type {
   ResolvedEvaluationRunRequest,
   EvaluationRunResponse,
   EvaluationRunSummary,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 
 const syntheticCompletedAt = "2026-07-30T12:30:05.000Z";
 

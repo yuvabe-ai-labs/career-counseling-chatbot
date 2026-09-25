@@ -1,4 +1,4 @@
-import { AssessmentApplicationError, type IdentityUserDirectory } from "@yuvanext/assessment";
+import { AssessmentApplicationError, type IdentityUserDirectory } from "@yuvapath/assessment";
 import type { Pool } from "pg";
 
 export type IdentityAdminClient = {
@@ -56,7 +56,7 @@ export type SupabaseIdentityDirectoryOptions = {
 /**
  * Implements IdentityUserDirectory (packages/assessment) against real Supabase Auth. This is
  * what closes Gap 1's FK-violation problem: every other Module 1 route requires
- * x-yuvanext-user-id to already exist in auth.users, and nothing previously created that row.
+ * x-yuvapath-user-id to already exist in auth.users, and nothing previously created that row.
  *
  * Looks up an existing auth.users row directly via SQL first (cheap, avoids the admin API's
  * already-registered error path on the common "returning user" case), falling back to

@@ -9,7 +9,7 @@ import type {
   JourneyState,
   ReportSnapshot,
   StartConversationResponse,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 
 export type StoredStartResult = {
   userId: string;

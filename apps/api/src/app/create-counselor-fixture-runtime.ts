@@ -17,14 +17,14 @@ import {
   RenderReportAssetService,
   StartConversationService,
   type CounselorHttpDependencies,
-} from "@yuvanext/counselor";
+} from "@yuvapath/counselor";
 import {
   validHandoffPacket,
   validProfileSnapshot,
   validRecommendationSet,
   validRetrievedEvidence,
   validSafetyDecision,
-} from "@yuvanext/test-fixtures";
+} from "@yuvapath/test-fixtures";
 
 export const createCounselorFixtureRuntime = (
   bearerToken: string,

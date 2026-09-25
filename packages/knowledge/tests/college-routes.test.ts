@@ -2,7 +2,7 @@ import {
   CollegeListResponseSchema,
   CollegeSchema,
   createOpenApiRegistry,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import express from "express";
 import request from "supertest";
 import { describe, expect, it } from "vitest";

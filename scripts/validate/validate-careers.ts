@@ -1,8 +1,8 @@
 import process from "node:process";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { CareerDatasetManifestSchema } from "@yuvanext/contracts";
-import { validateCareerDataset } from "@yuvanext/knowledge";
+import { CareerDatasetManifestSchema } from "@yuvapath/contracts";
+import { validateCareerDataset } from "@yuvapath/knowledge";
 
 const defaultDatasetDirectory =
   "data/seed/knowledge/careers/2026-07-30";

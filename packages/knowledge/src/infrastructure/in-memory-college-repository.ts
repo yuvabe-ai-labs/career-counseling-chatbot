@@ -3,7 +3,7 @@ import type {
   CollegeProgram,
   Discipline,
   PathwayDiscipline,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import type {
   CollegeFilters,
   CollegeRepository,

@@ -2,8 +2,8 @@ import {
   FixtureRecommendationSetReader,
   GetRecommendationSetService,
   type RecommendationHttpDependencies,
-} from "@yuvanext/recommendations";
-import { validProfileSnapshot, validRecommendationSet } from "@yuvanext/test-fixtures";
+} from "@yuvapath/recommendations";
+import { validProfileSnapshot, validRecommendationSet } from "@yuvapath/test-fixtures";
 
 export const createRecommendationFixtureRuntime = (
   bearerToken: string,

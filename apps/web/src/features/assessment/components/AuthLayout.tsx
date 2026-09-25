@@ -42,7 +42,7 @@ export function AuthLayout({
               edge, so trimming it symmetrically hands 16px back to the card without unbalancing
               anything. overflow-y-auto stays as the genuine small-viewport fallback — the fix
               for the scrollbar at desktop size is the tighter rhythm, not hiding the overflow. */}
-          <div className="flex min-h-0 flex-col overflow-y-auto px-6 py-4 lg:px-0">
+          <div className="scrollbar-hidden flex min-h-0 flex-col overflow-y-auto px-6 py-4 lg:px-0">
             {/* Only this — the form content — transitions between states; the card, the columns
                 and the illustration around it never move. */}
             <div

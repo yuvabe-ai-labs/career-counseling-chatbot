@@ -9,18 +9,18 @@ import {
   StartAssessmentRunRequestSchema,
   SubmitAssessmentResponseRequestSchema,
   UuidSchema,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import type { Express, RequestHandler } from "express";
 import { z } from "zod";
 import { AssessmentApplicationError } from "../application/errors.js";
 import type { AssessmentService } from "../application/assessment-service.js";
 
-const ActorHeaderSchema = z.object({ "x-yuvanext-user-id": UuidSchema });
+const ActorHeaderSchema = z.object({ "x-yuvapath-user-id": UuidSchema });
 const SessionParamsSchema = z.object({ sessionId: UuidSchema });
 const RunParamsSchema = z.object({ runId: UuidSchema });
 const SnapshotParamsSchema = z.object({ sessionId: UuidSchema, runId: UuidSchema });
 
-const getActorUserId = (headers: unknown): string => ActorHeaderSchema.parse(headers)["x-yuvanext-user-id"];
+const getActorUserId = (headers: unknown): string => ActorHeaderSchema.parse(headers)["x-yuvapath-user-id"];
 
 const sendError = (response: Parameters<RequestHandler>[1], error: unknown): void => {
   if (error instanceof z.ZodError) {

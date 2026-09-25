@@ -5,7 +5,6 @@ import {
   module2DemoCareers,
   module2DemoColleges,
   module2DemoConfig,
-  module2DemoNeighboringStates,
   module2DemoPathways,
   module2DemoPlanTemplates,
   module2DemoProfile,
@@ -21,10 +20,10 @@ describe("Module 2 demo fixture flow", () => {
   it("contains the MVP fixture coverage required by the Module 2 POC", () => {
     expect(module2DemoCareers).toHaveLength(18);
     expect(new Set(module2DemoColleges.map((college) => college.state)).size).toBeGreaterThanOrEqual(5);
-    expect(module2DemoColleges.some((college) => college.collegeType === "open_university")).toBe(true);
+    expect(module2DemoColleges.some((college) => college.instituteKind === "Open University")).toBe(true);
     expect(
       module2DemoColleges.some((college) =>
-        ["vocational", "polytechnic", "iti"].includes(college.collegeType),
+        ["Vocational Institute", "Polytechnic College", "ITI"].includes(college.instituteKind),
       ),
     ).toBe(true);
     expect(module2DemoAidSchemes).toHaveLength(5);
@@ -46,6 +45,7 @@ describe("Module 2 demo fixture flow", () => {
       recommendationId: "demo-streams",
       profile: module2DemoProfile,
       streams: module2DemoStreams,
+      rankedCareerIds: careerSet.items.map((item) => item.entityId),
       config: module2DemoConfig,
       createdAt: MODULE_2_DEMO_CREATED_AT,
     });
@@ -63,8 +63,6 @@ describe("Module 2 demo fixture flow", () => {
       profile: module2DemoProfile,
       colleges: module2DemoColleges,
       targetDisciplineIds: module2DemoTargetDisciplineIds,
-      selectedState: "Tamil Nadu",
-      neighboringStates: module2DemoNeighboringStates,
       config: module2DemoConfig,
       createdAt: MODULE_2_DEMO_CREATED_AT,
     });

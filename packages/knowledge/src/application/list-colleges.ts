@@ -1,4 +1,4 @@
-import type { College } from "@yuvanext/contracts";
+import type { College } from "@yuvapath/contracts";
 import {
   type CollegeFilters,
   type CollegeRepository,

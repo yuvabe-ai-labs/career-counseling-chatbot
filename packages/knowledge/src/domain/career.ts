@@ -2,7 +2,7 @@ import type {
   Career,
   CareerInterestProfile,
   CareerProfile,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 
 export type CareerCatalogEntry = {
   career: Career;

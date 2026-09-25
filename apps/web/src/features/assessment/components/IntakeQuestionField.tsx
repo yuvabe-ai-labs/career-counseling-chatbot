@@ -1,4 +1,4 @@
-import type { IntakeQuestion } from "@yuvanext/contracts";
+import type { IntakeQuestion } from "@yuvapath/contracts";
 import { Combobox } from "@/components/ui/combobox";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";

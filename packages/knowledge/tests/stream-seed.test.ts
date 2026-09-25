@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { StreamDatasetManifestSchema } from "@yuvanext/contracts";
+import { StreamDatasetManifestSchema } from "@yuvapath/contracts";
 import { describe, expect, it } from "vitest";
 import { validateStreamRecords } from "../src/index.js";
 

@@ -3,8 +3,8 @@ import {
   UuidSchema,
   type CatalogEntity,
   type RetrievedEvidence,
-} from "@yuvanext/contracts";
-import type { createDatabasePool } from "@yuvanext/database";
+} from "@yuvapath/contracts";
+import type { createDatabasePool } from "@yuvapath/database";
 import type {
   KnowledgeReader,
   ReadKnowledgeCollectionInput,

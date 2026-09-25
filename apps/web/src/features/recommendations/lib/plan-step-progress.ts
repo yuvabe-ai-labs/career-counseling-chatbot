@@ -7,7 +7,7 @@
  * plan but naturally resets if the student's recommended template changes.
  */
 
-const STORAGE_KEY = "yuvanext.planStepsDone";
+const STORAGE_KEY = "yuvapath.planStepsDone";
 
 function readDoneKeys(): Set<string> {
   try {

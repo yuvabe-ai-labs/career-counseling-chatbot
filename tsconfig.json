@@ -14,7 +14,7 @@
     "declaration": true,
     "sourceMap": true,
     "paths": {
-      "@yuvanext/*": ["./packages/*/src/index.ts"]
+      "@yuvapath/*": ["./packages/*/src/index.ts"]
     },
     "types": ["node"]
   },

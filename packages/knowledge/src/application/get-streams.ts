@@ -1,7 +1,7 @@
 import type {
   StreamListQuery,
   StreamListResponse,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import type { StreamRepository } from "../domain/streams.js";
 
 export type GetStreamsOptions = {

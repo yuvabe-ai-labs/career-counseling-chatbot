@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-This document explains how the onboarding and assessment journey demonstrated in `YuvaNext_Prototype.html` maps to the Phase A backend and Supabase data model.
+This document explains how the onboarding and assessment journey demonstrated in `YuvaPath_Prototype.html` maps to the Phase A backend and Supabase data model.
 
 Use it to answer:
 
@@ -15,7 +15,7 @@ Use it to answer:
 
 Related sources:
 
-- [HTML prototype](../../YuvaNext_Prototype.html)
+- [HTML prototype](../../YuvaPath_Prototype.html)
 - [Module 1 target data model](module-1-assessment-data-model.md)
 - [Module 1 MVP DBML](module-1-assessment-mvp.dbml)
 - [Phase A MVP data model](phase-a-mvp-data-model.md)
@@ -24,10 +24,10 @@ The HTML file is a concept prototype and states that it stores no real data. The
 
 ## 2. One database and two relevant schemas
 
-Module 1 does not use a separate database. It uses the shared YuvaNext Supabase PostgreSQL database.
+Module 1 does not use a separate database. It uses the shared YuvaPath Supabase PostgreSQL database.
 
 ```text
-YuvaNext Supabase project
+YuvaPath Supabase project
 ├── auth.users                     Supabase-managed login identity
 └── assessment.*                   Module 1 application tables
 ```
@@ -39,7 +39,7 @@ auth.users
     = Who is authenticated?
 
 assessment.user_profiles
-    = What student information does YuvaNext need?
+    = What student information does YuvaPath need?
 
 assessment.journey_sessions
     = Which product journey is currently happening?
@@ -171,7 +171,7 @@ The Assessment schema stores only `auth.users.id` as `user_id`. It does not copy
 
 ## 7. Step 3: create the product journey session
 
-After authentication, Express creates a YuvaNext product session.
+After authentication, Express creates a YuvaPath product session.
 
 ### Table: `assessment.journey_sessions`
 
@@ -295,7 +295,6 @@ state           Tamil Nadu
 country_code         IN
 segment              explorer
 self_stage           school
-wants_aid            false
 profile_status       active
 created_at           2026-07-24T07:04:10Z
 updated_at           2026-07-24T07:04:10Z
@@ -324,7 +323,6 @@ This answers where prototype values are stored:
 | India                  | `user_profiles.country_code = IN`             |
 | Explorer               | `user_profiles.segment`                       |
 | School/Class 8 context | `user_profiles.self_stage` plus intake answer |
-| Wants aid              | `user_profiles.wants_aid`                     |
 
 The profile stores current student facts. It does not store assessment responses, scores, recommendations or chat messages.
 
@@ -649,7 +647,6 @@ age_band                   minor_14_15
 city                       Auroville
 state                 Tamil Nadu
 self_stage                 school
-wants_aid                  false
 intake_summary_json        { "schoolBoard": "CBSE", "favouriteSubject": "science" }
 result_summary_json        { "riasecCode": "IAS", "topScales": ["I", "A", "S"] }
 algorithm_version          profile-builder-v1

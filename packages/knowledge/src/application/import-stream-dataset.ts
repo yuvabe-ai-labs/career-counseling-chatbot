@@ -3,7 +3,7 @@ import {
   StreamDatasetManifestSchema,
   type StreamDatasetManifest,
   type StreamDatasetRecords,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import {
   validateStreamRecords,
   type StreamValidationIssue,
@@ -45,6 +45,18 @@ export type ImportStreamDatasetOptions = {
    */
   knownCareerIds?: readonly string[];
   knownEducationRouteIds?: readonly string[];
+  /**
+   * Same reasoning as knownCareerIds, for careerStreams links: a career_streams row in this
+   * batch may reference a stream_option_id already published in an earlier batch rather than
+   * one included in this same payload's streamOptions array.
+   */
+  knownStreamOptionIds?: readonly string[];
+  /**
+   * Same reasoning again, for streamPathways links (Iteration 2): a stream_pathways row in this
+   * batch may reference a pathway_id already published in an earlier batch rather than one
+   * included in this same payload's pathways array.
+   */
+  knownPathwayIds?: readonly string[];
 };
 
 export async function importStreamDataset(
@@ -90,6 +102,8 @@ export async function importStreamDataset(
     manifest.datasetVersionId,
     options.knownCareerIds ?? [],
     options.knownEducationRouteIds ?? [],
+    options.knownStreamOptionIds ?? [],
+    options.knownPathwayIds ?? [],
   );
   const issues: StreamImportReport["issues"] = validation.success
     ? []

@@ -1,4 +1,4 @@
-import type { ProfileSnapshot } from "@yuvanext/contracts";
+import type { ProfileSnapshot } from "@yuvapath/contracts";
 import { describe, expect, it, vi } from "vitest";
 import { PostgresAssessmentSnapshotReader } from "../src/index.js";
 
@@ -13,7 +13,6 @@ const profile: ProfileSnapshot = {
   city: "Synthetic City",
   state: "Synthetic State",
   selfStage: "higher_secondary",
-  wantsAid: true,
   intakeSummary: { preferredLearningMode: "practical" },
   riasec: {
     rawScores: { R: 3, I: 5, A: 2, S: 4, E: 1, C: 3 },
@@ -40,7 +39,6 @@ const profileRow = {
   city: profile.city,
   state: profile.state,
   self_stage: profile.selfStage,
-  wants_aid: profile.wantsAid,
   intake_summary_json: profile.intakeSummary,
   result_summary_json: { riasec: profile.riasec },
   algorithm_version: profile.algorithmVersion,

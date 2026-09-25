@@ -1,5 +1,5 @@
 
-# YuvaNext SAFETY.md
+# YuvaPath SAFETY.md
 
 Status: MOCK SAMPLE ONLY - NOT SIGNED FOR PRODUCTION LAUNCH
 

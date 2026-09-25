@@ -13,7 +13,7 @@ import {
   VerifyIdentityOtpRequestSchema,
   VerifyIdentityOtpResponseSchema,
   UuidSchema,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import type { Express, RequestHandler } from "express";
 import { z } from "zod";
 import { AssessmentApplicationError } from "../application/errors.js";
@@ -41,9 +41,9 @@ export type RegisterIdentityRoutesOptions = {
 };
 
 /**
- * Identity-bootstrap routes (Module 1, Gap 1): none of these require x-yuvanext-user-id or a
+ * Identity-bootstrap routes (Module 1, Gap 1): none of these require x-yuvapath-user-id or a
  * bearer token, since their whole purpose is to produce one. Every other Module 1 route is
- * unchanged — the frontend uses VerifyIdentityOtpResponse.userId as x-yuvanext-user-id.
+ * unchanged — the frontend uses VerifyIdentityOtpResponse.userId as x-yuvapath-user-id.
  */
 export const registerIdentityRoutes = (
   app: Express,

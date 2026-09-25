@@ -5,7 +5,7 @@ import type {
   IntakeQuestion,
   UpsertIntakeAnswerRequest,
   UserProfile,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import {
   canResumeJourneySession,
   isJourneySessionExpired,

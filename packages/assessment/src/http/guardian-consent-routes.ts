@@ -13,7 +13,7 @@ import {
   UuidSchema,
   VerifyGuardianConsentRequestSchema,
   VerifyPendingGuardianConsentRequestSchema,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import type { Express, RequestHandler } from "express";
 import { z } from "zod";
 import { AssessmentApplicationError } from "../application/errors.js";
@@ -21,13 +21,13 @@ import type { GuardianConsentService } from "../application/guardian-consent-ser
 import type { GuardianDeclineTokenStore } from "../application/guardian-decline-token-store.js";
 import type { GuardianOtpStore } from "../application/guardian-otp-store.js";
 
-const ActorHeaderSchema = z.object({ "x-yuvanext-user-id": UuidSchema });
+const ActorHeaderSchema = z.object({ "x-yuvapath-user-id": UuidSchema });
 const SessionParamsSchema = z.object({ sessionId: UuidSchema });
 const ConsentDebugParamsSchema = z.object({ sessionId: UuidSchema, consentId: UuidSchema });
 const ConsentIdParamsSchema = z.object({ consentId: UuidSchema });
 
 const getActorUserId = (headers: unknown): string =>
-  ActorHeaderSchema.parse(headers)["x-yuvanext-user-id"];
+  ActorHeaderSchema.parse(headers)["x-yuvapath-user-id"];
 
 const sendError = (response: Parameters<RequestHandler>[1], error: unknown): void => {
   if (error instanceof z.ZodError) {
@@ -317,7 +317,7 @@ export const registerGuardianConsentRoutes = (
   });
 
   // Guardian-initiated (Gap 6): intentionally NOT nested under /journey-sessions/{sessionId}/...
-  // and carries no x-yuvanext-user-id — the guardian has no student session. The consentId in
+  // and carries no x-yuvapath-user-id — the guardian has no student session. The consentId in
   // the URL plus the opaque token (sent to the guardian's email alongside the OTP) is the only
   // authorization.
   registry.registerPath({

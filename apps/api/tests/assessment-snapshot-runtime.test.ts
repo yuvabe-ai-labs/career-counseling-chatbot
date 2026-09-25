@@ -1,5 +1,5 @@
-import { ProfileSnapshotResponseSchema } from "@yuvanext/contracts";
-import { validProfileSnapshot } from "@yuvanext/test-fixtures";
+import { ProfileSnapshotResponseSchema } from "@yuvapath/contracts";
+import { validProfileSnapshot } from "@yuvapath/test-fixtures";
 import request from "supertest";
 import { describe, expect, it } from "vitest";
 import { createApp } from "../src/app/create-app.js";

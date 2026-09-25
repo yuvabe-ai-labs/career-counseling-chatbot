@@ -1,6 +1,6 @@
-import { ApiErrorSchema } from "@yuvanext/contracts";
+import { ApiErrorSchema } from "@yuvapath/contracts";
 import type { z } from "zod";
-import { getStoredUserId } from "./storage";
+import { getStoredCounselorUserId, getStoredUserId } from "./storage";
 
 const API_BASE_URL: string =
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "http://localhost:3000";
@@ -28,11 +28,14 @@ type RequestOptions = {
   /** Query params to append. Undefined values are omitted. */
   query?: Record<string, string | undefined>;
   /**
-   * Attach the `x-yuvanext-user-id` header from stored identity state.
-   * Defaults to true; set false for routes reachable before identity exists
-   * (e.g. `POST /sessions/anonymous`) or for the one bearer-auth route.
+   * Attach an identity header from stored session state. `true` (the default) attaches
+   * `x-yuvapath-user-id` from the student session; `false` attaches nothing, for routes
+   * reachable before identity exists (e.g. `POST /sessions/anonymous`) or the one bearer-auth
+   * route; `"counselor"` attaches `x-yuvapath-counselor-id` from the separate counselor
+   * session instead — the two are never mixed (see storage.ts's own comment on
+   * COUNSELOR_USER_ID_KEY).
    */
-  auth?: boolean;
+  auth?: boolean | "counselor";
 };
 
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
@@ -71,8 +74,8 @@ function buildUrl(path: string, query?: Record<string, string | undefined>): str
 }
 
 /**
- * Calls the YuvaNext API and validates the response against a contract schema
- * from `@yuvanext/contracts` — the same Zod schemas the backend itself uses,
+ * Calls the YuvaPath API and validates the response against a contract schema
+ * from `@yuvapath/contracts` — the same Zod schemas the backend itself uses,
  * so the frontend can never silently drift from the real response shape.
  */
 export async function apiRequest<Schema extends z.ZodTypeAny>(
@@ -83,9 +86,12 @@ export async function apiRequest<Schema extends z.ZodTypeAny>(
   const { method = "GET", body, query, auth = true } = options;
 
   const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (auth) {
+  if (auth === "counselor") {
+    const counselorUserId = getStoredCounselorUserId();
+    if (counselorUserId) headers["x-yuvapath-counselor-id"] = counselorUserId;
+  } else if (auth) {
     const userId = getStoredUserId();
-    if (userId) headers["x-yuvanext-user-id"] = userId;
+    if (userId) headers["x-yuvapath-user-id"] = userId;
   }
 
   const init: RequestInit = { method, headers };
@@ -98,7 +104,7 @@ export async function apiRequest<Schema extends z.ZodTypeAny>(
   } catch {
     throw new ApiRequestError(0, {
       code: "network_error",
-      message: "Could not reach the YuvaNext API. Check your connection and try again.",
+      message: "Could not reach the YuvaPath API. Check your connection and try again.",
     });
   }
 

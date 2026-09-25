@@ -183,7 +183,6 @@ type ProfileSnapshot = {
   state: string;
   segment: Segment;
   selfStage: string;
-  wantsAid: boolean;
   intakeSummary: Record<string, unknown>;
   riasec?: {
     scores: Record<"R" | "I" | "A" | "S" | "E" | "C", number>;

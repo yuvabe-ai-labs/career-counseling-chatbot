@@ -17,10 +17,10 @@
   "createdAt": "2026-09-11T00:00:00.000Z",
   "source": {
     "id": "3524e356-f44e-448a-9e19-0c324134b907",
-    "sourceKey": "yuvanext-curated-base-vocabulary",
-    "name": "YuvaNext curated base vocabulary (education routes, streams, RIASEC stream maps)",
+    "sourceKey": "yuvapath-curated-base-vocabulary",
+    "name": "YuvaPath curated base vocabulary (education routes, streams, RIASEC stream maps)",
     "sourceType": "manual_review",
-    "publisher": "YuvaNext",
+    "publisher": "YuvaPath",
     "trustLevel": "internal_reviewed",
     "status": "active",
     "baseUrl": null,

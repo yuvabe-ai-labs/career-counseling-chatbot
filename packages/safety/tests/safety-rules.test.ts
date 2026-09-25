@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SafetyDecisionSchema, type ResolvedSafetyCheckRequest } from "@yuvanext/contracts";
+import { SafetyDecisionSchema, type ResolvedSafetyCheckRequest } from "@yuvapath/contracts";
 import {
   SAFETY_POLICY_VERSION,
   approvedSafetyMessages,

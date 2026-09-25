@@ -1,4 +1,4 @@
-import { GuardianConsentSchema, type GuardianConsent } from "@yuvanext/contracts";
+import { GuardianConsentSchema, type GuardianConsent } from "@yuvapath/contracts";
 import type { Pool } from "pg";
 import type {
   GuardianConsentRepository,

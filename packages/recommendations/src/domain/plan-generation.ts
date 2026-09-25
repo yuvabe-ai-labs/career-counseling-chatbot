@@ -6,7 +6,7 @@ import type {
   ProfileSnapshotForRecommendations,
   RecommendationItem,
   RecommendationSet,
-} from "@yuvanext/contracts";
+} from "@yuvapath/contracts";
 import { stableHash } from "./career-matching.js";
 
 export type PlanTarget = {

@@ -1,10 +1,10 @@
-# YuvaNext
+# YuvaPath
 
 > AI-powered career counseling platform — assessment, recommendations, grounded knowledge, and a conversational counselor experience for students.
 
 ## What this is
 
-YuvaNext is a monorepo for a career-counseling chatbot: students take a RIASEC-style assessment, get deterministic recommendations, explore an entity-grounded knowledge base, and talk to an AI counselor — with safety checks and evaluation baked in.
+YuvaPath is a monorepo for a career-counseling chatbot: students take a RIASEC-style assessment, get deterministic recommendations, explore an entity-grounded knowledge base, and talk to an AI counselor — with safety checks and evaluation baked in.
 
 | Module               | Responsibility                                  |
 | --------------------- | ------------------------------------------------ |
