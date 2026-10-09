@@ -7,20 +7,12 @@ import type {
 } from "../application/email-provider.js";
 
 const SUBJECTS: Record<EmailContext, string> = {
-  identity_otp: "Your YuvaPath verification code",
   guardian_otp: "YuvaPath: approve your child's account",
   counselor_password_reset_otp: "Your YuvaPath counselor password reset code",
 };
 
 const renderBody = (context: EmailContext, templateVars: Record<string, string>): string => {
   switch (context) {
-    case "identity_otp":
-      return [
-        `Your YuvaPath verification code is ${templateVars.OTP ?? ""}.`,
-        "It expires in 5 minutes.",
-        "",
-        "If you didn't request this, you can safely ignore this email.",
-      ].join("\n");
     // No decline content here — decline isn't offered at this stage (planned separately, later,
     // with its own mechanism), so both the initial request and every resend get this same
     // OTP-only body.

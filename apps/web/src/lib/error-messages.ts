@@ -8,11 +8,10 @@ import { ApiRequestError } from "./api-client";
  * backend wording change or an unmapped code never leaks developer-facing text to a user.
  */
 const FRIENDLY_MESSAGES: Record<string, string> = {
-  // Identity / email OTP. pending_signup_not_found is normally invisible — OnboardingPage
+  // Identity / account setup. pending_signup_not_found is normally invisible — OnboardingPage
   // retries once with a fresh session before ever surfacing this — so seeing it means that
   // retry itself failed.
   pending_signup_not_found: "We couldn't start a new verification session. Please refresh the page and try again.",
-  invalid_identity_otp: "That code isn't right, or it's expired. Please check and try again.",
   identity_directory_unavailable: "We're unable to verify accounts right now. Please try again shortly.",
   email_provider_unavailable: "We're unable to send emails right now. Please try again shortly.",
 

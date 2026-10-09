@@ -13,12 +13,15 @@ import {
   useRequestCounselorPasswordResetOtp,
   useVerifyCounselorPasswordResetOtp,
 } from "../hooks/useCounselorAuth";
+import type { StaffAuthRole } from "../api/counselor-auth";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const OTP_LENGTH = 4;
 
 export interface CounselorForgotPasswordFormProps {
   onVerified: (input: { email: string; resetToken: string }) => void;
+  /** Which staff auth flow to call; the regional admin passes "admin". Defaults to counselor. */
+  role?: StaffAuthRole;
 }
 
 /**
@@ -30,7 +33,10 @@ export interface CounselorForgotPasswordFormProps {
  * hard resend cap, no separate "limit reached" state), so the timing logic is inlined here
  * rather than pulled from otp-timing.ts, which is guardian-consent-specific.
  */
-export function CounselorForgotPasswordForm({ onVerified }: CounselorForgotPasswordFormProps) {
+export function CounselorForgotPasswordForm({
+  onVerified,
+  role = "counselor",
+}: CounselorForgotPasswordFormProps) {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
   const [otpSent, setOtpSent] = useState(false);
@@ -42,8 +48,8 @@ export function CounselorForgotPasswordForm({ onVerified }: CounselorForgotPassw
   const otpInputRef = useRef<OtpInputHandle>(null);
   const now = useNow();
 
-  const requestOtp = useRequestCounselorPasswordResetOtp();
-  const verifyOtp = useVerifyCounselorPasswordResetOtp();
+  const requestOtp = useRequestCounselorPasswordResetOtp(role);
+  const verifyOtp = useVerifyCounselorPasswordResetOtp(role);
 
   useEffect(() => {
     if (otpSent) otpInputRef.current?.focus();

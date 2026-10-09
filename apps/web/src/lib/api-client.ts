@@ -1,6 +1,6 @@
 import { ApiErrorSchema } from "@yuvapath/contracts";
 import type { z } from "zod";
-import { getStoredCounselorUserId, getStoredUserId } from "./storage";
+import { getStoredAdminUserId, getStoredCounselorUserId, getStoredUserId } from "./storage";
 
 const API_BASE_URL: string =
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "http://localhost:3000";
@@ -23,7 +23,7 @@ export class ApiRequestError extends Error {
 }
 
 type RequestOptions = {
-  method?: "GET" | "POST" | "PUT" | "DELETE";
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: unknown;
   /** Query params to append. Undefined values are omitted. */
   query?: Record<string, string | undefined>;
@@ -31,11 +31,13 @@ type RequestOptions = {
    * Attach an identity header from stored session state. `true` (the default) attaches
    * `x-yuvapath-user-id` from the student session; `false` attaches nothing, for routes
    * reachable before identity exists (e.g. `POST /sessions/anonymous`) or the one bearer-auth
-   * route; `"counselor"` attaches `x-yuvapath-counselor-id` from the separate counselor
+   * route; `"admin"` attaches `x-yuvapath-admin-id` from the regional-admin session; `"counselor"` attaches `x-yuvapath-counselor-id` from the separate counselor
    * session instead — the two are never mixed (see storage.ts's own comment on
    * COUNSELOR_USER_ID_KEY).
    */
-  auth?: boolean | "counselor";
+  auth?: boolean | "counselor" | "admin";
+  /** Extra request headers, e.g. `Idempotency-Key` on a retryable admin create. */
+  headers?: Record<string, string>;
 };
 
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
@@ -83,16 +85,21 @@ export async function apiRequest<Schema extends z.ZodTypeAny>(
   schema: Schema,
   options: RequestOptions = {},
 ): Promise<z.infer<Schema>> {
-  const { method = "GET", body, query, auth = true } = options;
+  const { method = "GET", body, query, auth = true, headers: extraHeaders } = options;
 
   const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (auth === "counselor") {
+  if (auth === "admin") {
+    const adminUserId = getStoredAdminUserId();
+    if (adminUserId) headers["x-yuvapath-admin-id"] = adminUserId;
+  } else if (auth === "counselor") {
     const counselorUserId = getStoredCounselorUserId();
     if (counselorUserId) headers["x-yuvapath-counselor-id"] = counselorUserId;
   } else if (auth) {
     const userId = getStoredUserId();
     if (userId) headers["x-yuvapath-user-id"] = userId;
   }
+
+  Object.assign(headers, extraHeaders);
 
   const init: RequestInit = { method, headers };
   if (body !== undefined) init.body = JSON.stringify(body);

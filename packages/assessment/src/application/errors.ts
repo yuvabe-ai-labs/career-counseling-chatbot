@@ -18,7 +18,7 @@ export const journeySessionNotFound = (): AssessmentApplicationError =>
 export const journeySessionUserNotFound = (): AssessmentApplicationError =>
   new AssessmentApplicationError(
     "journey_session_user_not_found",
-    "x-yuvapath-user-id does not correspond to a verified identity. Complete /auth/otp/verify first.",
+    "x-yuvapath-user-id does not correspond to a verified identity. Complete /auth/signup first.",
     401,
   );
 
@@ -162,13 +162,6 @@ export const pendingSignupNotFound = (): AssessmentApplicationError =>
     "pending_signup_not_found",
     "Anonymous session was not found or has expired.",
     404,
-  );
-
-export const invalidIdentityOtp = (): AssessmentApplicationError =>
-  new AssessmentApplicationError(
-    "invalid_identity_otp",
-    "Verification code is invalid or expired.",
-    400,
   );
 
 export const guardianConsentDeclineLinkInvalid = (): AssessmentApplicationError =>

@@ -11,7 +11,7 @@ export type PendingSignupStore = {
 };
 
 /**
- * In-memory, matching InMemoryGuardianOtpStore/InMemoryIdentityOtpStore — a pending signup is
+ * In-memory, matching InMemoryGuardianOtpStore — a pending signup is
  * short-lived (see createPendingSignupExpiration) and only ever needed to bridge the landing
  * screen to phone verification, so it doesn't need to survive a server restart.
  */

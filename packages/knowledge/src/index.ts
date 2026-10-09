@@ -1,5 +1,6 @@
 import type { ModuleDescriptor } from "@yuvapath/contracts";
 
+export * from "./domain/admin-catalog.js";
 export * from "./domain/college.js";
 export * from "./domain/dataset.js";
 export * from "./domain/aid-scheme.js";
@@ -49,7 +50,9 @@ export * from "./infrastructure/gemini-catalog-drafter.js";
 export * from "./infrastructure/fetch-source-content.js";
 export * from "./infrastructure/postgres-knowledge-reader.js";
 export * from "./infrastructure/local-catalog-import-coordinator.js";
+export * from "./infrastructure/postgres-admin-catalog-repository.js";
 export * from "./http/register-knowledge-routes.js";
+export * from "./http/register-admin-catalog-routes.js";
 
 export const knowledgeModule: ModuleDescriptor = {
   code: "m3",

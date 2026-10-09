@@ -12,6 +12,7 @@ import {
   setStoredJourneySessionId,
   setStoredUserId,
 } from "@/lib/storage";
+import { AdminSessionProvider } from "@/features/admin";
 import { SessionProvider } from "@/features/assessment";
 import { CounselorSessionProvider } from "@/features/counselor";
 import { LandingPage } from "@/features/landing";
@@ -24,11 +25,13 @@ function renderLanding() {
     <QueryClientProvider client={queryClient}>
       <SessionProvider>
         <CounselorSessionProvider>
-          <MemoryRouter initialEntries={["/"]}>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-            </Routes>
-          </MemoryRouter>
+          <AdminSessionProvider>
+            <MemoryRouter initialEntries={["/"]}>
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+              </Routes>
+            </MemoryRouter>
+          </AdminSessionProvider>
         </CounselorSessionProvider>
       </SessionProvider>
     </QueryClientProvider>,
@@ -94,6 +97,16 @@ describe("LandingPage", () => {
       "href",
       "/counselor/sign-in",
     );
+  });
+
+  it("offers a Regional Admin entry that leads to admin sign-in, or the console when signed in", () => {
+    const { unmount } = renderLanding();
+    expect(screen.getByRole("link", { name: /regional admin/i })).toHaveAttribute("href", "/admin/sign-in");
+    unmount();
+
+    localStorage.setItem("yuvapath.adminUserId", "admin-id");
+    renderLanding();
+    expect(screen.getByRole("link", { name: /regional admin/i })).toHaveAttribute("href", "/admin/home");
   });
 
   it("resumes both sessions while they are valid", () => {

@@ -27,10 +27,9 @@ export const GuardianConsentSchema = z.object({
 export type GuardianConsent = z.infer<typeof GuardianConsentSchema>;
 
 /**
- * Both request/verify (student flow, RequestIdentityOtpRequestSchema in auth.ts) and
- * guardian consent are email/SMTP-based — see @yuvapath/assessment's EmailProvider. `studentEmail`
- * is required only to enforce guardian ≠ student (never persisted; the student's own identity
- * email is verified separately during onboarding).
+ * Guardian consent is email/SMTP-based — see @yuvapath/assessment's EmailProvider. `studentEmail`
+ * is required only to enforce guardian ≠ student (never persisted; registration never verifies
+ * the student's own email at all — see SignUpWithPasswordRequestSchema in auth.ts).
  */
 export const RequestGuardianConsentRequestSchema = z.object({
   guardianEmail: z.string().trim().min(3).max(254).email(),

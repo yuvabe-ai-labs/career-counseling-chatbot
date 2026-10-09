@@ -20,6 +20,8 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export interface CounselorSignInFormProps {
   onSubmit: (input: { email: string; password: string }) => Promise<void>;
   submitting: boolean;
+  /** Where "Forgot password?" goes; the regional admin has its own copy of that flow. */
+  forgotPasswordPath?: string;
 }
 
 /**
@@ -29,7 +31,11 @@ export interface CounselorSignInFormProps {
  * must not look visually distinct from the student ones. Only the copy differs ("Work Email
  * ID"), plus a "Forgot password?" link and no "Sign Up" row — counselors don't self-register.
  */
-export function CounselorSignInForm({ onSubmit, submitting }: CounselorSignInFormProps) {
+export function CounselorSignInForm({
+  onSubmit,
+  submitting,
+  forgotPasswordPath = "/counselor/forgot-password",
+}: CounselorSignInFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -104,7 +110,7 @@ export function CounselorSignInForm({ onSubmit, submitting }: CounselorSignInFor
               Password *
             </Label>
             <Link
-              to="/counselor/forgot-password"
+              to={forgotPasswordPath}
               className="font-display text-xs font-medium text-brand hover:underline"
             >
               Forgot password?

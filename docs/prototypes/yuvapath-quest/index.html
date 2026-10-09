@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YuvaPath — The Quest for Your Horizon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  /* Tokens mirror apps/web/src/styles/index.css (Figma "career" file) so the prototype reads as the same product. */
+  tailwind.config = { theme: { extend: {
+    colors: {
+      brand: '#592ac7', glow: '#8b6cf0', ink: '#1e1b4b', muted: '#6b7280', line: '#e5edf5',
+      page: '#f4f0ff', panel: '#ece6fa', card: '#f8f6fd', gold: '#ffc240', danger: '#db3030', jade: '#16a34a'
+    },
+    fontFamily: { display: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'], sans: ['Poppins', 'ui-sans-serif', 'system-ui', 'sans-serif'] }
+  } } };
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<style>
+  [x-cloak]{display:none!important}
+  /* .bg-hero-gradient from the app */
+  body{background-color:#f4f0ff;background-image:linear-gradient(135deg,#ffffff 0%,#f2eefc 50%,rgba(224,215,250,.37) 100%);background-attachment:fixed}
+  /* White surface card: app's rounded-2xl border-input bg-background + shadow-card token */
+  .glass{background:#fff;border:1px solid #e5edf5;box-shadow:0 24px 60px -24px rgba(89,42,199,.25)}
+  .shadow-soft{box-shadow:0 8px 24px -12px rgba(89,42,199,.22)}
+  .scene{perspective:700px;width:170px;height:170px;display:grid;place-items:center}
+  .tilt{transform-style:preserve-3d;transform:rotateX(-24deg) rotateY(-32deg)}
+  .cube{width:100px;height:100px;position:relative;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.3,1.3,.5,1)}
+  .face{position:absolute;inset:0;display:grid;place-items:center;font:700 30px Inter;color:#fff;border:2px solid rgba(255,255,255,.85);backface-visibility:hidden}
+  .rank-row{transition:transform .7s cubic-bezier(.2,.9,.3,1)}
+  input[type=range]{accent-color:#592ac7}
+  button{cursor:pointer}button:disabled{cursor:not-allowed}
+  /* app button system: pill, 48px, bold, press feedback */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;height:3rem;padding:0 1.5rem;border-radius:9999px;font-weight:700;font-size:1rem;background:#592ac7;color:#fff;transition:background-color .15s,transform .15s,opacity .15s}
+  .btn:hover:not(:disabled){background:rgba(89,42,199,.9)}.btn:active:not(:disabled){transform:scale(.98)}.btn:disabled{opacity:.5}
+  .btn-outline{background:#fff;color:#1e1b4b;border:1px solid #e5edf5}.btn-outline:hover:not(:disabled){background:#f4f0ff}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  @keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+  .floaty{animation:floaty 4s ease-in-out infinite}
+  .pop{animation:pop .45s ease-out both}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body class="text-ink font-sans min-h-screen overflow-x-hidden antialiased">
+<canvas id="bg" class="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-60" aria-hidden="true"></canvas>
+
+<div x-data="quest()" x-init="init()" x-cloak class="relative z-10 min-h-screen flex flex-col">
+
+  <!-- ============ HEADER ============ -->
+  <header class="sticky top-0 z-40 flex h-[84px] shrink-0 items-center justify-between gap-3 border-b border-line bg-gradient-to-b from-[#f8f4ff] via-[#faf8ff] to-[#fdfbff] px-6 sm:px-8">
+    <a href="#" aria-label="yuvaPath home" class="inline-flex w-fit shrink-0 items-baseline font-display text-2xl font-bold tracking-tight sm:text-[28px]"><span class="text-brand">yuva</span><span class="text-ink">Path</span></a>
+    <!-- app's StepIndicator: 32px brand circle = current, white circle = other, 2px connector -->
+    <ol class="hidden sm:flex h-8 items-center gap-2" aria-label="Journey progress">
+      <template x-for="(s,i) in ['Briefing','Quests','Engine Room','Destiny Map']" :key="i">
+        <li class="flex items-center gap-2" :title="s">
+          <span x-show="i>0" class="h-0.5 w-8 shrink-0" :class="stage>i?'bg-brand':'bg-[#1a1a1a]/20'"></span>
+          <span class="grid size-8 shrink-0 place-items-center rounded-full text-[13px] font-semibold transition-colors" :class="stage===i+1?'bg-brand text-white':stage>i+1?'bg-brand/15 text-brand':'bg-white text-brand border border-line'" x-text="stage>i+1?'✓':i+1"></span>
+          <span x-show="stage===i+1" class="font-display text-sm font-semibold" x-text="s"></span>
+        </li>
+      </template>
+    </ol>
+    <div class="flex items-center gap-2 sm:gap-3 text-sm">
+      <div class="hidden md:flex gap-1" aria-label="Badges"><template x-for="b in badges" :key="b.n"><span class="pop text-lg" :title="b.n" x-text="b.e"></span></template></div>
+      <div class="rounded-full border border-line bg-white px-3 py-1.5 font-display text-xs font-medium">Lv <b class="text-brand" x-text="level"></b> · <span x-text="xp"></span> XP</div>
+      <button @click="toggleSound()" class="size-10 rounded-full border border-line bg-white transition-colors hover:border-brand" :aria-label="sound?'Mute sound':'Unmute sound'" x-text="sound?'🔊':'🔇'"></button>
+    </div>
+  </header>
+
+  <!-- Toast -->
+  <div x-show="toast" x-transition class="fixed top-20 left-1/2 -translate-x-1/2 z-50 glass rounded-2xl px-5 py-3 flex items-center gap-3 border-brand/40 shadow-soft" role="status">
+    <span class="text-3xl" x-text="toast?.e"></span>
+    <div><div class="text-[11px] font-semibold uppercase tracking-widest text-brand">Achievement unlocked</div><div class="font-display font-semibold" x-text="toast?.n"></div></div>
+  </div>
+
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
+
+    <!-- ============ STAGE 1 : BRIEFING ============ -->
+    <section x-show="stage===1" x-transition.opacity.duration.500ms>
+      <div class="text-center max-w-3xl mx-auto pt-4 sm:pt-10">
+        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-panel text-xs font-semibold text-brand"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> NSQF Levels 1–10 · NEP 2020 aligned</span>
+        <h1 class="mt-5 font-display font-semibold text-4xl sm:text-5xl lg:text-[52px] leading-[1.15] text-ink">Map Your <span class="text-brand">Future.</span><br>No Exams. <span class="underline decoration-gold decoration-4 underline-offset-[10px]">No Cramming.</span></h1>
+        <p class="mt-5 font-display text-ink/80 text-base sm:text-xl">Welcome, Explorer. This is a <b class="text-white">Cognitive Ability &amp; Profile Discovery</b> quest — <b class="text-white">not a pass/fail exam</b>. Nobody ranks you. There are no "wrong" interests. We simply map how you think, what energises you and what you value, then match it to real Indian career paths.</p>
+        <div class="mt-6 flex flex-wrap justify-center gap-2 text-xs">
+          <span class="rounded-full border border-line bg-white px-3 py-1.5 shadow-soft">⏱ ~10 minutes</span>
+          <span class="rounded-full border border-line bg-white px-3 py-1.5 shadow-soft">🧭 3 Pillars · 13 dimensions</span>
+          <span class="rounded-full border border-line bg-white px-3 py-1.5 shadow-soft">🔒 Runs in your browser — nothing is uploaded</span>
+        </div>
+      </div>
+
+      <div class="mt-10 glass rounded-3xl p-5 sm:p-8 max-w-4xl mx-auto">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <h2 class="font-display text-xl font-semibold">🎮 Warm-Up Arena <span class="text-sm text-muted font-normal">· risk-free practice, nothing is scored</span></h2>
+          <span class="text-xs text-muted" x-text="(wu.patternDone?1:0)+(wu.sliderDone?1:0)+' / 2 complete'"></span>
+        </div>
+        <div class="mt-5 grid md:grid-cols-2 gap-5">
+          <!-- pattern -->
+          <div class="rounded-2xl bg-card border border-line p-4">
+            <div class="text-xs uppercase tracking-widest text-brand">Practice 1 · Pattern</div>
+            <p class="mt-1 text-sm text-ink/80">What comes next in the sequence?</p>
+            <div class="mt-3 flex items-center gap-2 text-lg flex-wrap">
+              <span class="px-3 py-2 rounded-lg bg-card">🔺</span><span class="px-3 py-2 rounded-lg bg-card">🔺🔺</span><span class="px-3 py-2 rounded-lg bg-card">🔺🔺🔺</span>
+              <span class="px-3 py-2 rounded-lg border border-dashed border-brand text-brand" x-text="wu.pick!==null?wu.opts[wu.pick]:'?'"></span>
+            </div>
+            <div class="mt-3 grid grid-cols-2 gap-2">
+              <template x-for="(o,i) in wu.opts" :key="i">
+                <button @click="wuPick(i)" :disabled="wu.patternDone" class="rounded-xl border px-3 py-2 text-sm transition disabled:cursor-default"
+                  :class="wu.pick===i ? (i===wu.ans?'border-jade bg-jade/20':'border-amber-400 bg-amber-400/10') : 'border-line bg-card hover:border-brand hover:bg-brand/10'" x-text="o"></button>
+              </template>
+            </div>
+            <p x-show="wu.patternDone" class="mt-2 text-xs" :class="wu.pick===wu.ans?'text-jade':'text-amber-600'" x-text="wu.pick===wu.ans?'Nice! Each step adds one more 🔺.':'Close! Each step adds one more 🔺 — so four. No penalty here.'"></p>
+          </div>
+          <!-- slider -->
+          <div class="rounded-2xl bg-card border border-line p-4">
+            <div class="text-xs uppercase tracking-widest text-brand">Practice 2 · Priority slider</div>
+            <p class="mt-1 text-sm text-ink/80">In your first job, what matters more?</p>
+            <div class="mt-4 flex justify-between text-xs text-muted"><span>📚 Learning new skills</span><span>💰 Earning fast</span></div>
+            <input type="range" min="0" max="100" x-model.number="wu.slider" @input="wu.touched=true;SFX.tick()" :disabled="wu.sliderDone" class="w-full mt-2" aria-label="Learning versus earning">
+            <p class="text-sm mt-2 text-brand" x-text="wu.slider<35?'Growth-first explorer 🌱':wu.slider>65?'Impact-now achiever ⚡':'Balanced strategist ⚖️'"></p>
+            <button @click="wuLock()" :disabled="!wu.touched||wu.sliderDone" class="mt-3 w-full rounded-xl bg-panel hover:bg-brand/20 border border-line py-2 text-sm disabled:opacity-40 transition" x-text="wu.sliderDone?'Locked in ✓':'Lock it in'"></button>
+          </div>
+        </div>
+        <div class="mt-6 text-center">
+          <button @click="startQuest()" :disabled="!wu.patternDone||!wu.sliderDone"
+            class="btn">
+            <i data-lucide="rocket" class="w-5 h-5"></i> Launch the Quest
+          </button>
+          <p x-show="!wu.patternDone||!wu.sliderDone" class="text-xs text-muted mt-2">Finish both warm-ups to earn your first badge.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ STAGE 2 : ASSESSMENT ============ -->
+    <section x-show="stage===2" x-transition.opacity.duration.400ms>
+      <!-- HUD -->
+      <div class="glass rounded-2xl p-4">
+        <div class="flex items-center gap-3 flex-wrap">
+          <template x-for="(p,i) in [['🧠','Cognitive Capabilities'],['🧭','Activity Passions'],['💎','Workplace Motivators']]" :key="i">
+            <div class="flex items-center gap-2 text-sm" :class="pillar>i+1?'text-jade':pillar===i+1?'text-ink':'text-muted'">
+              <span class="text-lg" x-text="p[0]"></span><span class="hidden sm:inline font-display" x-text="'Pillar '+(i+1)+' · '+p[1]"></span>
+              <span x-show="pillar>i+1">✓</span>
+            </div>
+          </template>
+          <div class="ml-auto flex items-center gap-3 text-sm">
+            <div x-show="streak>=2" class="pop px-2.5 py-1 rounded-full bg-amber-400/15 border border-amber-400/40 text-amber-600 font-display text-xs" x-text="'🔥 '+streak+' streak · x'+combo.toFixed(1)"></div>
+          </div>
+        </div>
+        <div class="mt-3 flex w-full items-center justify-center gap-1 flex-wrap" role="presentation">
+          <template x-for="n in totalSteps" :key="n"><span class="block rounded-full transition-all" :class="[n-1<doneSteps?'bg-brand':'bg-brand/15',(n-1>=doneSteps&&n-1<doneSteps+3)?'size-2.5':'size-2']"></span></template>
+        </div>
+        <div class="mt-2 text-[11px] text-muted text-center" x-text="pct+'% of the journey'"></div>
+      </div>
+
+      <!-- PILLAR 1 -->
+      <div x-show="pillar===1" class="mt-6 grid lg:grid-cols-[1fr_280px] gap-5">
+        <div class="glass rounded-3xl p-5 sm:p-8">
+          <template x-if="pillar===1 && !p1intro && curQ">
+            <div>
+              <div class="flex items-center justify-between text-sm">
+                <span class="px-3 py-1 rounded-full bg-brand/10 text-brand font-display text-xs" x-text="APT[curQ.dim]+' · Q'+(qi+1)+'/'+aptQs.length"></span>
+                <span class="font-display tabular-nums" :class="tLeft<6?'text-danger':'text-brand'" x-text="'⏱ '+tLeft.toFixed(0)+'s'"></span>
+              </div>
+              <div class="mt-2 h-1.5 rounded-full bg-panel overflow-hidden"><div class="h-full transition-[width] duration-100 ease-linear" :class="tLeft<6?'bg-danger':'bg-brand'" :style="{width:(tLeft/tMax*100)+'%'}"></div></div>
+              <h3 class="mt-5 font-display text-xl sm:text-2xl" x-text="curQ.q"></h3>
+
+              <!-- MCQ -->
+              <div x-show="curQ.type==='mcq'" class="mt-5 grid sm:grid-cols-2 gap-3">
+                <template x-for="(o,i) in curQ.opts || []" :key="i">
+                  <button @click="answerApt(i)" :disabled="locked" class="text-left rounded-xl border px-4 py-3 transition"
+                    :class="locked ? (i===curQ.ans?'border-jade bg-jade/20':(fb&&fb.pick===i?'border-danger bg-danger/10':'border-line opacity-50')) : 'border-line bg-card hover:border-brand hover:bg-brand/10 hover:-translate-y-0.5'">
+                    <span class="text-brand font-display mr-2" x-text="'ABCD'[i]"></span><span x-text="o"></span>
+                  </button>
+                </template>
+              </div>
+
+              <!-- CUBE -->
+              <div x-show="curQ.type==='cube'" class="mt-5">
+                <div class="flex flex-wrap items-center justify-center gap-6 sm:gap-10">
+                  <div class="text-center"><div class="scene"><div class="tilt"><div class="cube" :style="{transform:m3d(cube.target)}"><template x-for="f in FACES" :key="f.l"><div class="face" :style="{transform:f.t,background:f.c}" x-text="f.l"></div></template></div></div></div><div class="text-xs text-muted">🎯 Target</div></div>
+                  <div class="text-center"><div class="scene"><div class="tilt"><div class="cube" :style="{transform:m3d(cube.user)}"><template x-for="f in FACES" :key="f.l"><div class="face" :style="{transform:f.t,background:f.c}" x-text="f.l"></div></template></div></div></div><div class="text-xs text-muted">🕹 Yours · <span x-text="cube.moves"></span> moves</div></div>
+                </div>
+                <div class="mt-4 flex flex-wrap justify-center gap-2">
+                  <template x-for="b in [['ym','←'],['xp','↑'],['xm','↓'],['yp','→'],['zm','↺'],['zp','↻']]" :key="b[0]">
+                    <button @click="rotateCube(b[0])" :disabled="locked" class="w-12 h-12 rounded-xl border border-line bg-card hover:border-brand hover:bg-brand/10 text-xl disabled:opacity-40" :aria-label="'Rotate '+b[1]" x-text="b[1]"></button>
+                  </template>
+                  <button @click="answerApt('lock')" :disabled="locked" class="btn">Lock orientation</button>
+                </div>
+                <p class="mt-2 text-center text-xs text-muted">Rotate your cube so every lettered face matches the target.</p>
+              </div>
+
+              <p x-show="fb" class="mt-4 text-sm font-medium" :class="fb&&fb.ok?'text-jade':'text-amber-600'" x-text="fb?fb.msg:''"></p>
+            </div>
+          </template>
+          <template x-if="pillar===1 && p1intro">
+            <div class="text-center py-6">
+              <div class="text-6xl floaty">🧠</div>
+              <h3 class="mt-3 font-display text-2xl font-semibold">Pillar 1 · Cognitive Capabilities</h3>
+              <p class="mt-2 text-ink/80 max-w-xl mx-auto">Eight quick mini-challenges across Numerical, Logical, Verbal and Spatial thinking. Speed adds a small bonus — accuracy matters more. Chain correct answers for combo XP.</p>
+              <button @click="beginP1()" class="btn mt-6">Begin Pillar 1</button>
+            </div>
+          </template>
+        </div>
+        <!-- Brain gauge -->
+        <aside class="glass rounded-3xl p-5 text-center h-fit">
+          <div class="text-xs uppercase tracking-widest text-muted">Brain Processing Gauge</div>
+          <svg viewBox="0 0 120 70" class="w-full mt-2">
+            <path d="M10 62 A50 50 0 0 1 110 62" fill="none" stroke="#ece6fa" stroke-width="10" stroke-linecap="round" pathLength="100"/>
+            <path d="M10 62 A50 50 0 0 1 110 62" fill="none" :stroke="brain>70?'#16a34a':brain>40?'#592ac7':'#8b6cf0'" stroke-width="10" stroke-linecap="round" pathLength="100" :stroke-dasharray="brain+' 100'" style="transition:stroke-dasharray .8s ease,stroke .4s;filter:drop-shadow(0 0 6px currentColor)"/>
+            <text x="60" y="56" text-anchor="middle" fill="#1e1b4b" font-size="20" font-family="Inter" font-weight="700" x-text="Math.round(brain)"></text>
+          </svg>
+          <div class="font-display font-semibold" :class="brain>70?'text-jade':'text-brand'" x-text="brain>75?'Flow state ⚡':brain>50?'Hyper-focus 🎯':brain>25?'Neurons firing 🔆':'Warming up 🌡'"></div>
+          <p class="mt-1 text-xs text-muted">Adapts to your accuracy and speed after every answer.</p>
+          <div class="mt-4 grid grid-cols-4 gap-1 text-[10px]">
+            <template x-for="(d,i) in APT" :key="i"><div><div class="h-10 rounded bg-panel flex items-end overflow-hidden"><div class="w-full bg-brand transition-all duration-700" :style="{height:(aptLive(i)*100)+'%'}"></div></div><div class="mt-1 text-muted" x-text="d.slice(0,3)"></div></div></template>
+          </div>
+        </aside>
+      </div>
+
+      <!-- PILLAR 2 -->
+      <div x-show="pillar===2" class="mt-6 glass rounded-3xl p-5 sm:p-8">
+        <template x-if="pillar===2 && p2intro">
+          <div class="text-center py-6">
+            <div class="text-6xl floaty">🧭</div>
+            <h3 class="mt-3 font-display text-2xl font-semibold">Pillar 2 · Activity Passions</h3>
+            <p class="mt-2 text-ink/80 max-w-xl mx-auto">Twelve activity cards. Swipe <b class="text-jade">right</b> if it sounds energising, <b class="text-danger">left</b> if not, or tap 🤔 for "maybe". Drag the card, use the buttons, or press ← ↑ →.</p>
+            <button @click="p2intro=false;SFX.click()" class="btn mt-6">Begin Pillar 2</button>
+          </div>
+        </template>
+        <template x-if="pillar===2 && !p2intro && ci<cards.length">
+          <div>
+            <div class="text-center text-xs text-muted" x-text="'Card '+(ci+1)+' of '+cards.length"></div>
+            <div class="relative mx-auto mt-4 h-72 w-full max-w-sm select-none" style="touch-action:pan-y">
+              <div class="absolute inset-x-4 top-3 bottom-0 rounded-3xl bg-card border border-line"></div>
+              <div class="absolute inset-x-2 top-1.5 bottom-1.5 rounded-3xl bg-card border border-line"></div>
+              <div @pointerdown="dragStart($event)" class="absolute inset-0 rounded-[1.6rem] bg-white border-2 border-brand/60 shadow-soft grid place-items-center text-center p-6 cursor-grab active:cursor-grabbing"
+                :style="{transform:'translate('+dx+'px,'+dy+'px) rotate('+(dx/14)+'deg)',transition:dragging?'none':'transform .28s ease',background:dx>20?'linear-gradient(rgba(22,163,74,'+Math.min(.18,dx/600)+'),rgba(22,163,74,'+Math.min(.18,dx/600)+')),#fff':dx<-20?'linear-gradient(rgba(219,48,48,'+Math.min(.14,-dx/600)+'),rgba(219,48,48,'+Math.min(.14,-dx/600)+')),#fff':'#fff'}">
+                <div>
+                  <div class="text-6xl" x-text="cards[ci].e"></div>
+                  <p class="mt-4 font-display text-xl" x-text="cards[ci].t"></p>
+                  <p class="mt-1 text-xs text-muted" x-text="cards[ci].tag"></p>
+                </div>
+                <span class="absolute top-4 left-4 text-danger font-display font-bold border-2 border-danger rounded-lg px-2 py-0.5 -rotate-12" :style="{opacity:Math.min(1,Math.max(0,-dx/90))}">NOPE</span>
+                <span class="absolute top-4 right-4 text-jade font-display font-bold border-2 border-jade rounded-lg px-2 py-0.5 rotate-12" :style="{opacity:Math.min(1,Math.max(0,dx/90))}">LOVE</span>
+              </div>
+            </div>
+            <div class="mt-6 flex justify-center gap-4">
+              <button @click="swipe(0)" class="w-14 h-14 rounded-full border border-danger/50 bg-danger/10 hover:bg-danger/25 text-2xl" aria-label="Not for me">✕</button>
+              <button @click="swipe(.5)" class="w-14 h-14 rounded-full border border-amber-400/50 bg-amber-400/10 hover:bg-amber-400/25 text-2xl" aria-label="Maybe">🤔</button>
+              <button @click="swipe(1)" class="w-14 h-14 rounded-full border border-jade/50 bg-jade/10 hover:bg-jade/25 text-2xl" aria-label="Love it">♥</button>
+            </div>
+          </div>
+        </template>
+      </div>
+
+      <!-- PILLAR 3 -->
+      <div x-show="pillar===3" class="mt-6 glass rounded-3xl p-5 sm:p-8">
+        <template x-if="pillar===3">
+          <div>
+            <div class="text-center">
+              <div class="text-5xl floaty">💎</div>
+              <h3 class="mt-2 font-display text-2xl font-semibold">Pillar 3 · Workplace Motivators</h3>
+              <p class="mt-1 text-ink/80 max-w-xl mx-auto text-sm">You have <b class="text-brand">100 energy points</b>. Spend them on what you want most from work. Raising one pulls energy from the others — a tug-of-war.</p>
+            </div>
+            <div class="mt-6 h-10 rounded-2xl overflow-hidden flex border border-line">
+              <template x-for="(v,k) in VAL" :key="k"><div class="grid place-items-center text-xs font-display font-semibold text-white transition-all duration-300 overflow-hidden" :style="{width:pts[k]+'%',background:VALC[k]}" x-text="pts[k]>9?pts[k]:''"></div></template>
+            </div>
+            <div class="mt-6 grid md:grid-cols-3 gap-4">
+              <template x-for="(v,k) in VAL" :key="k">
+                <div class="rounded-2xl bg-card border border-line p-4">
+                  <div class="flex items-center justify-between"><span class="text-2xl" x-text="['💰','🦅','🛡️'][k]"></span><span class="font-display text-2xl" :style="{color:VALC[k]}" x-text="pts[k]"></span></div>
+                  <div class="mt-1 font-display font-semibold" x-text="v"></div>
+                  <div class="text-xs text-muted" x-text="['Pay, perks and growth in income','Own decisions, flexible work, being your own boss','Secure role, predictable career, steady income'][k]"></div>
+                  <input type="range" min="0" max="100" :value="pts[k]" @input="setPoint(k,+$event.target.value)" class="w-full mt-3" :aria-label="v+' points'">
+                </div>
+              </template>
+            </div>
+            <div class="mt-6 text-center">
+              <button @click="finishAssessment()" class="btn ">Commit energy &amp; ignite the engine ⚙️</button>
+            </div>
+          </div>
+        </template>
+      </div>
+    </section>
+
+    <!-- ============ STAGE 3 : ENGINE ROOM ============ -->
+    <section x-show="stage===3" x-transition.opacity.duration.500ms>
+      <div class="text-center">
+        <div class="text-xs uppercase tracking-[.3em] text-brand">The Engine Room</div>
+        <h2 class="mt-2 font-display text-2xl sm:text-4xl font-bold">Analyzing 13-Dimensional Profile Vector…</h2>
+      </div>
+      <div class="mt-8 grid lg:grid-cols-2 gap-5 font-mono text-sm">
+        <div class="glass rounded-2xl p-5 space-y-3">
+          <template x-for="(b,i) in vecBlocks" :key="i">
+            <div x-show="eng.step>i" x-transition class="rounded-xl bg-card border border-line p-3">
+              <div class="text-[11px] text-muted" x-text="b.label"></div>
+              <div class="mt-1 break-words" :style="{color:b.c}" x-text="b.name+' = '+fmt(b.v)"></div>
+            </div>
+          </template>
+          <div x-show="eng.step<3" class="text-muted animate-pulse">▍ generating vector blocks…</div>
+        </div>
+        <div class="glass rounded-2xl p-5">
+          <div class="flex justify-between text-xs text-muted"><span>Block-wise cosine similarity</span><span x-text="eng.scanned.toLocaleString('en-IN')+' / '+TOTAL.toLocaleString('en-IN')+' NCVET/NSQF roles'"></span></div>
+          <div class="mt-2 h-2 rounded-full bg-panel overflow-hidden"><div class="h-full bg-brand hover:bg-brand/90 transition-all duration-100" :style="{width:(eng.scanned/TOTAL*100)+'%'}"></div></div>
+          <div class="mt-3 h-40 overflow-hidden text-[12px] space-y-0.5">
+            <template x-for="(l,i) in eng.log" :key="l.id"><div class="flex justify-between gap-2" :style="{opacity:.35+i*.13}"><span class="truncate text-ink/80" x-text="l.n"></span><span :class="l.s>.9?'text-jade':l.s>.8?'text-brand':'text-muted'" x-text="'cos='+l.s.toFixed(3)"></span></div></template>
+          </div>
+        </div>
+      </div>
+      <div x-show="eng.step>=5" x-transition.duration.700ms class="mt-5 glass rounded-2xl p-5 font-mono text-sm text-center border-brand/30">
+        <div class="text-brand text-base sm:text-lg">FitScore = 0.35·Sim<sub>apt</sub> + 0.45·Sim<sub>int</sub> + 0.20·Sim<sub>val</sub></div>
+        <template x-if="eng.step>=5"><div class="mt-3 text-ink break-words" x-text="'= 0.35·'+engTop.apt.toFixed(3)+' + 0.45·'+engTop.int.toFixed(3)+' + 0.20·'+engTop.val.toFixed(3)+' = '+engTop.fit.toFixed(4)"></div></template>
+        <div x-show="eng.step>=6" x-transition class="mt-2 text-jade">✔ Best vector match: <span x-text="engTop.title"></span></div>
+      </div>
+      <div class="mt-6 text-center">
+        <button @click="reveal()" class="btn" :class="eng.step>=6?'':'btn-outline'" x-text="eng.step>=6?'🌅 Reveal my Destiny Map':'Skip animation'"></button>
+        <p class="mt-3 text-[11px] text-muted">Demo note: the scan animates over 1,547 roles; this prototype ranks a curated sample of 5 NSQF roles.</p>
+      </div>
+    </section>
+
+    <!-- ============ STAGE 4 : DESTINY MAP ============ -->
+    <section x-show="stage===4" x-transition.opacity.duration.600ms>
+      <template x-if="stage===4">
+      <div>
+        <div class="text-center"><div class="text-xs uppercase tracking-[.3em] text-jade">Horizon Unlocked</div>
+          <h2 class="mt-1 font-display text-3xl sm:text-4xl font-bold">Your Destiny Map</h2></div>
+
+        <!-- Top match -->
+        <div class="mt-6 glass rounded-3xl p-5 sm:p-8 relative overflow-hidden border-brand/30">
+          <div class="absolute -top-20 -right-20 w-72 h-72 rounded-full blur-3xl opacity-30" :style="{background:top.hue}"></div>
+          <div class="relative grid md:grid-cols-[1fr_auto] gap-6 items-center">
+            <div>
+              <div class="flex flex-wrap gap-2 text-xs"><span class="px-2.5 py-1 rounded-full bg-brand/15 text-brand">🏆 Top match</span><span class="px-2.5 py-1 rounded-full bg-brand/10 text-brand" x-text="'NSQF Level '+top.nsqf"></span><span class="px-2.5 py-1 rounded-full bg-panel text-ink/80" x-text="top.sector"></span><span x-show="isTweaked" class="px-2.5 py-1 rounded-full bg-amber-400/20 text-amber-600">What-if mode</span></div>
+              <h3 class="mt-3 font-display text-3xl sm:text-4xl font-bold"><span x-text="top.emoji"></span> <span x-text="top.title"></span></h3>
+              <p class="mt-2 text-ink/80 max-w-2xl" x-text="top.why"></p>
+              <div class="mt-3 flex flex-wrap gap-2 text-xs"><template x-for="s in top.skills" :key="s"><span class="px-2.5 py-1 rounded-full border border-line bg-card" x-text="s"></span></template><span class="px-2.5 py-1 rounded-full border border-jade/40 text-jade" x-text="'Entry pay '+top.pay"></span></div>
+            </div>
+            <div class="text-center"><div class="w-36 h-36 sm:w-44 sm:h-44 rounded-full grid place-items-center mx-auto" :style="{background:'conic-gradient('+top.hue+' '+(shownFit*3.6)+'deg, #ece6fa 0)'}"><div class="w-[88%] h-[88%] rounded-full bg-white grid place-items-center"><div><div class="font-display text-3xl sm:text-4xl font-bold" x-text="shownFit.toFixed(1)+'%'"></div><div class="text-[11px] uppercase tracking-widest text-muted">Match</div></div></div></div></div>
+          </div>
+        </div>
+
+        <!-- breakdown + radar -->
+        <div class="mt-5 grid lg:grid-cols-2 gap-5">
+          <div class="glass rounded-3xl p-5 sm:p-6">
+            <h4 class="font-display text-lg font-semibold">Personality Type Trait Strength</h4>
+            <div class="mt-3 flex flex-col gap-1.5">
+              <template x-for="(n,i) in INT" :key="n">
+                <div class="flex items-center justify-between gap-3 py-0.5">
+                  <div class="flex shrink-0 items-center gap-2.5"><span class="flex size-7 shrink-0 items-center justify-center rounded-2xl bg-page"><i :data-lucide="['house','search','palette','users','activity','shield'][i]" class="size-[18px] text-ink"></i></span><p class="w-[110px] font-display text-base font-medium text-ink" x-text="n"></p></div>
+                  <div class="flex flex-1 items-center gap-3"><div class="h-[11px] w-full flex-1 overflow-hidden rounded-full bg-glow/25"><div class="h-full rounded-full bg-brand transition-all duration-700" :style="{width:Math.round(profile.int[i]*100)+'%'}"></div></div><span class="w-9 text-right font-display text-sm font-medium text-ink" x-text="Math.round(profile.int[i]*100)+'%'"></span></div>
+                </div>
+              </template>
+            </div>
+            <h4 class="mt-6 font-display text-lg font-semibold">Pillar breakdown</h4>
+            <div class="mt-4 space-y-4">
+              <template x-for="(m,i) in [['🧠','Cognitive Capability','apt','#592ac7',.35],['🧭','RIASEC Passions','int','#8b6cf0',.45],['💎','Values Alignment','val','#16a34a',.20]]" :key="i">
+                <div><div class="flex justify-between text-sm"><span x-text="m[0]+' '+m[1]"></span><span class="font-display" :style="{color:m[3]}" x-text="(topSims[m[2]]*100).toFixed(1)+'%'"></span></div>
+                  <div class="mt-1 h-3 rounded-full bg-panel overflow-hidden"><div class="h-full rounded-full transition-all duration-700" :style="{width:(topSims[m[2]]*100)+'%',background:m[3],boxShadow:'0 0 12px '+m[3]}"></div></div>
+                  <div class="text-[11px] text-muted mt-0.5" x-text="'weight '+m[4]"></div></div>
+              </template>
+            </div>
+          </div>
+          <div class="glass rounded-3xl p-5 sm:p-6">
+            <h4 class="font-display text-lg font-semibold">You vs. <span x-text="top.title"></span></h4>
+            <svg viewBox="0 0 300 300" class="w-full max-w-xs mx-auto mt-2">
+              <template x-for="r in [.25,.5,.75,1]" :key="r"><polygon :points="radarPts(Array(13).fill(r))" fill="none" stroke="#e5edf5"/></template>
+              <polygon :points="radarPts(roleVec(top))" fill="rgba(255,194,64,.3)" stroke="#d99a00" stroke-width="1.5"/>
+              <polygon :points="radarPts(youVec)" fill="rgba(89,42,199,.18)" stroke="#592ac7" stroke-width="2" style="transition:all .5s"/>
+              <template x-for="(l,i) in AXES" :key="i"><text :x="lx(i)" :y="ly(i)" text-anchor="middle" dominant-baseline="middle" font-size="8.5" fill="#6b7280" x-text="l"></text></template>
+            </svg>
+            <div class="flex justify-center gap-4 text-xs text-muted"><span><span class="text-brand">■</span> You</span><span><span class="text-[#d99a00]">■</span> Role profile</span></div>
+          </div>
+        </div>
+
+        <!-- What-if -->
+        <div class="mt-5 glass rounded-3xl p-5 sm:p-6">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div><h4 class="font-display text-lg font-semibold">🔮 What-If Vector Tweaker</h4><p class="text-xs text-muted">Drag the sliders — watch the rankings re-order in real time.</p></div>
+            <button @click="resetTweak()" x-show="isTweaked" class="text-xs px-3 py-1.5 rounded-full border border-line hover:border-brand">Reset to my real scores</button>
+          </div>
+          <div class="mt-4 grid lg:grid-cols-2 gap-6">
+            <div class="grid sm:grid-cols-2 gap-x-5 gap-y-3 content-start">
+              <template x-for="(n,i) in APT" :key="'a'+i"><label class="block text-xs text-ink/80"><span class="flex justify-between"><span x-text="n"></span><span class="text-brand" x-text="Math.round(tweak.apt[i]*100)"></span></span><input type="range" min="0" max="100" :value="tweak.apt[i]*100" @input="tweak.apt[i]=+$event.target.value/100;SFX.tick()" class="w-full"></label></template>
+              <template x-for="(n,i) in VAL" :key="'v'+i"><label class="block text-xs text-ink/80"><span class="flex justify-between"><span x-text="n"></span><span class="text-jade" x-text="Math.round(tweak.val[i]*100)"></span></span><input type="range" min="0" max="100" :value="tweak.val[i]*100" @input="tweak.val[i]=+$event.target.value/100;SFX.tick()" class="w-full" style="accent-color:#16a34a"></label></template>
+            </div>
+            <div class="relative" style="height:360px">
+              <template x-for="r in ROLES" :key="r.id">
+                <div class="rank-row absolute inset-x-0 h-[64px] rounded-xl bg-card border border-line px-3 py-2" :style="{transform:'translateY('+(rankOf(r.id)*72)+'px)',borderColor:rankOf(r.id)===0?r.hue:''}">
+                  <div class="flex justify-between text-sm"><span class="truncate"><span class="text-muted mr-1" x-text="'#'+(rankOf(r.id)+1)"></span><span x-text="r.emoji+' '+r.title"></span></span><span class="font-display" :style="{color:r.hue}" x-text="(simsOf(r).fit*100).toFixed(1)+'%'"></span></div>
+                  <div class="mt-2 h-2 rounded-full bg-panel overflow-hidden"><div class="h-full rounded-full transition-all duration-500" :style="{width:Math.max(0,(simsOf(r).fit-.6)/.4*100)+'%',background:r.hue}"></div></div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <!-- NEP route builder -->
+        <div class="mt-5 glass rounded-3xl p-5 sm:p-6">
+          <h4 class="font-display text-lg font-semibold">🛤 NEP 2020 Action Plan <span class="text-sm font-normal text-muted">· multiple entry/exit &amp; Academic Bank of Credits</span></h4>
+          <div class="mt-3 flex gap-2" role="tablist">
+            <template x-for="t in [['A','Route A · Academic'],['B','Route B · Vocational']]" :key="t[0]"><button role="tab" @click="route=t[0];SFX.click()" class="px-4 py-2 rounded-full text-sm border transition" :class="route===t[0]?'border-brand bg-brand/15 text-brand':'border-line bg-card text-ink/80 hover:border-brand/40'" x-text="t[1]"></button></template>
+          </div>
+          <ol class="mt-5 grid md:grid-cols-4 gap-3">
+            <template x-for="(s,i) in top.routes[route]" :key="route+i">
+              <li class="pop relative rounded-2xl bg-card border border-line p-4" :style="{animationDelay:(i*90)+'ms'}">
+                <div class="w-7 h-7 rounded-full grid place-items-center text-xs font-display font-bold text-white" :style="{background:top.hue}" x-text="i+1"></div>
+                <div class="mt-2 font-display font-semibold text-sm" x-text="s[0]"></div>
+                <div class="mt-1 text-xs text-muted" x-text="s[1]"></div>
+              </li>
+            </template>
+          </ol>
+        </div>
+
+        <!-- Local grounding -->
+        <div class="mt-5 glass rounded-3xl p-5 sm:p-6">
+          <h4 class="font-display text-lg font-semibold">📍 Local grounding</h4>
+          <div class="mt-3 grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+            <label class="text-xs text-muted">State<select x-model="loc.state" class="mt-1 w-full rounded-lg bg-white border border-line px-2 py-2 text-ink"><template x-for="s in Object.keys(COLLEGES)" :key="s"><option x-text="s"></option></template></select></label>
+            <label class="text-xs text-muted">Category<select x-model="loc.cat" class="mt-1 w-full rounded-lg bg-white border border-line px-2 py-2 text-ink"><template x-for="c in ['General','OBC','SC','ST','EWS','Minority']" :key="c"><option x-text="c"></option></template></select></label>
+            <label class="text-xs text-muted">Family income / yr<select x-model.number="loc.inc" class="mt-1 w-full rounded-lg bg-white border border-line px-2 py-2 text-ink"><option value="2.5">Up to ₹2.5 L</option><option value="4.5">Up to ₹4.5 L</option><option value="8">Up to ₹8 L</option><option value="99">Above ₹8 L</option></select></label>
+            <label class="text-xs text-muted">Gender<select x-model="loc.gender" class="mt-1 w-full rounded-lg bg-white border border-line px-2 py-2 text-ink"><option>Female</option><option>Male</option><option>Other</option></select></label>
+          </div>
+          <div class="mt-5 grid lg:grid-cols-2 gap-5">
+            <div>
+              <div class="text-xs uppercase tracking-widest text-muted">Nearby AISHE-listed institutions</div>
+              <ul class="mt-2 space-y-2">
+                <template x-for="c in colleges" :key="c.n"><li class="rounded-xl bg-card border border-line px-3 py-2.5 flex items-center justify-between gap-2"><div><div class="text-sm" x-text="c.n"></div><div class="text-xs text-muted" x-text="c.t"></div></div><span class="text-[10px] px-2 py-0.5 rounded-full bg-jade/15 text-jade whitespace-nowrap">AISHE ✓ sample</span></li></template>
+              </ul>
+            </div>
+            <div>
+              <div class="text-xs uppercase tracking-widest text-muted">National Scholarship Portal (NSP) schemes</div>
+              <ul class="mt-2 space-y-2">
+                <template x-for="s in schemes" :key="s.n"><li class="rounded-xl border px-3 py-2.5" :class="s.ok?'bg-jade/10 border-jade/40':'bg-card border-line opacity-60'"><div class="flex justify-between gap-2 text-sm"><span x-text="s.n"></span><span class="text-xs whitespace-nowrap" :class="s.ok?'text-jade':'text-muted'" x-text="s.ok?'✔ Likely eligible':'Not matched'"></span></div><div class="text-xs text-muted" x-text="s.ok?s.by:s.reason"></div></li></template>
+              </ul>
+            </div>
+          </div>
+          <p class="mt-4 text-[11px] text-muted">Illustrative mock data for the prototype. Eligibility rules are simplified — always confirm on scholarships.gov.in and the AISHE portal.</p>
+        </div>
+
+        <!-- Level-up -->
+        <div class="mt-5 glass rounded-3xl p-5 sm:p-6">
+          <h4 class="font-display text-lg font-semibold">⚡ Retake &amp; Level-Up Path</h4>
+          <p class="text-sm text-muted">Your weakest cognitive areas are pre-selected. Bookmark the ones you want to train.</p>
+          <div class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <template x-for="(n,i) in APT" :key="i"><button @click="toggleBookmark(i)" class="rounded-2xl border p-3 text-left transition" :class="bookmarks.includes(i)?'border-amber-400 bg-amber-400/10':'border-line bg-card hover:border-brand/40'"><div class="flex justify-between text-xs"><span x-text="n"></span><span x-text="bookmarks.includes(i)?'🔖':'＋'"></span></div><div class="mt-1 font-display text-xl" x-text="Math.round(profile.apt[i]*100)"></div><div class="text-[10px]" :class="weak.includes(i)?'text-amber-600':'text-muted'" x-text="weak.includes(i)?'Growth zone':'Strength'"></div></button></template>
+          </div>
+          <div class="mt-4 flex flex-wrap gap-3">
+            <button @click="openPlan()" class="btn">Launch 30-Day Level-Up Practice</button>
+            <button @click="retake()" class="btn btn-outline">↻ Retake the quest</button>
+          </div>
+        </div>
+      </div>
+      </template>
+    </section>
+  </main>
+
+  <!-- 30-day modal -->
+  <div x-show="planOpen" x-transition.opacity class="fixed inset-0 z-50 bg-ink/50 grid place-items-center p-4" @keydown.escape.window="planOpen=false" @click.self="planOpen=false">
+    <div class="glass bg-white rounded-3xl p-5 sm:p-7 max-w-3xl w-full max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-label="30-day level-up practice plan">
+      <div class="flex items-start justify-between gap-3"><div><h3 class="font-display text-xl font-bold">30-Day Level-Up Practice Mode</h3><p class="text-xs text-muted">Focus: <span class="text-amber-600" x-text="(bookmarks.length?bookmarks:weak).map(i=>APT[i]).join(' + ')"></span> · 10 minutes a day · tap a day when done</p></div><button @click="planOpen=false" class="w-9 h-9 rounded-full bg-panel hover:bg-panel" aria-label="Close">✕</button></div>
+      <div class="mt-3 h-2 rounded-full bg-panel overflow-hidden"><div class="h-full bg-brand transition-all" :style="{width:(doneDays.length/30*100)+'%'}"></div></div>
+      <div class="text-xs text-muted mt-1" x-text="doneDays.length+' / 30 days complete'"></div>
+      <div class="mt-4 grid grid-cols-5 sm:grid-cols-6 gap-2">
+        <template x-for="d in plan" :key="d.day"><button @click="toggleDay(d.day)" class="rounded-xl border p-2 text-left transition" :class="doneDays.includes(d.day)?'border-jade bg-jade/20':d.boss?'border-amber-400/60 bg-amber-400/10':'border-line bg-card hover:border-brand'" :title="d.drill"><div class="text-[10px] text-muted" x-text="'Day '+d.day"></div><div class="text-lg" x-text="doneDays.includes(d.day)?'✅':d.boss?'👑':d.icon"></div></button></template>
+      </div>
+      <div class="mt-4 rounded-xl bg-card border border-line p-3 text-sm"><span class="text-brand">Next up →</span> <span x-text="nextDrill"></span></div>
+    </div>
+  </div>
+
+  <footer class="py-6 text-center text-[11px] text-muted">YuvaPath prototype · sample data only · aligned to NSQF &amp; NEP 2020 · not a substitute for human counselling</footer>
+</div>
+
+<script>
+/* ============ DATA ============ */
+const APT = ['Numerical','Logical','Verbal','Spatial'];
+const INT = ['Realistic','Investigative','Artistic','Social','Enterprising','Conventional'];
+const VAL = ['High Earnings','Independence','Job Stability'];
+const VALC = ['#d97706','#592ac7','#16a34a'];
+const AXES = ['Num','Log','Verb','Spat','Real','Inv','Art','Soc','Ent','Conv','Earn','Indep','Stab'];
+const TOTAL = 1547;
+
+const ROLES = [
+ { id:'da', title:'Data Analyst', nsqf:5, emoji:'📊', hue:'#592ac7', sector:'IT-ITeS · NASSCOM SSC', pay:'₹4–9 LPA',
+   apt:[.9,.85,.7,.5], int:[.3,.9,.3,.2,.4,.7], val:[.6,.5,.7],
+   skills:['SQL','Statistics','Dashboards'],
+   why:'You enjoy finding patterns and reasoning with numbers — the core of turning raw data into decisions for businesses and governments.',
+   routes:{
+    A:[['Class 12 (Science / Maths)','Keep Maths; add Informatics Practices or CS.'],['B.Sc Data Science / B.Voc IT','NSQF L5–6 degree with Academic Bank of Credits.'],['Skill certification','Analytics / SQL certs mapped to the IT-ITeS Data Analyst QP.'],['Junior Data Analyst','Entry role; grow to Senior Analyst / Data Scientist.']],
+    B:[['Vocational Diploma in IT','Class 10/12 + NSQF L4 diploma at a polytechnic or ITI.'],['Lateral entry to B.Voc','Join year 2 using credits stored in ABC.'],['Apprenticeship (NAPS)','Paid on-the-job learning with an analytics team.'],['Data Analyst','Continue with part-time or online degree upskilling.']] } },
+ { id:'ev', title:'Electric Vehicle Assembly Technician', nsqf:4, emoji:'🔋', hue:'#16a34a', sector:'Automotive · ASDC', pay:'₹2.4–4.2 LPA',
+   apt:[.6,.6,.4,.85], int:[.9,.5,.3,.2,.3,.5], val:[.4,.3,.8],
+   skills:['Battery packs','Wiring harness','Quality checks'],
+   why:'Hands-on, spatially minded and happiest building real things — exactly what India\'s fast-growing EV factories need.',
+   routes:{
+    A:[['Class 12 (Science)','PCM helps; any stream can bridge later.'],['Diploma / B.Voc Automotive (EV)','NSQF L5 with multiple exit points.'],['EV technician certification','Battery & charging safety modules.'],['EV Assembly Technician → Supervisor','Move up to line supervisor or service lead.']],
+    B:[['Class 10 + ITI trade','Electrician / Mechanic (EV) at NSQF L3–4.'],['NAPS Apprenticeship','Earn a stipend inside a plant.'],['Lateral entry to Diploma','Credits transfer through ABC.'],['EV Assembly Technician','Specialise in battery, motor or testing.']] } },
+ { id:'re', title:'Renewable Energy Specialist', nsqf:6, emoji:'☀️', hue:'#d97706', sector:'Green Jobs · SCGJ', pay:'₹3.5–8 LPA',
+   apt:[.7,.75,.6,.7], int:[.7,.8,.3,.3,.4,.4], val:[.5,.6,.7],
+   skills:['Solar PV design','Grid basics','Energy audits'],
+   why:'A blend of practical tinkering and analytical thinking — ideal for designing and maintaining India\'s solar and wind capacity.',
+   routes:{
+    A:[['Class 12 (PCM)','Physics and Maths are the foundation.'],['B.Tech / B.Sc Renewable Energy','NSQF L6 programme.'],['Solar PV / Suryamitra certification','Field-ready credential on top of the degree.'],['Renewable Energy Specialist','Project design, O&M or energy consulting.']],
+    B:[['Polytechnic Diploma (Electrical)','NSQF L5 after Class 10.'],['Lateral entry to B.Tech / B.Voc','Enter year 2 or 3 with diploma credits.'],['Industry apprenticeship','Utility-scale solar or wind O&M.'],['Renewable Energy Specialist','Grow into design or project management.']] } },
+ { id:'cs', title:'Cyber Security Officer', nsqf:6, emoji:'🛡️', hue:'#8b6cf0', sector:'IT-ITeS · NASSCOM SSC', pay:'₹5–12 LPA',
+   apt:[.75,.9,.6,.5], int:[.4,.85,.2,.2,.5,.7], val:[.8,.4,.7],
+   skills:['Network security','Threat analysis','Incident response'],
+   why:'Sharp logic plus curiosity about how systems break — the mindset behind defending the country\'s digital infrastructure.',
+   routes:{
+    A:[['Class 12 (PCM / CS)','Computer Science is a plus.'],['B.Sc CS (Cyber) / BCA','NSQF L6 with security electives.'],['Industry certifications','Security fundamentals and ethical-hacking credentials.'],['Cyber Security Officer','SOC analyst → security officer → CISO track.']],
+    B:[['Diploma in Networking / IT','NSQF L5 vocational start.'],['Lateral entry to B.Voc Cyber Security','Credits carried via ABC.'],['SOC internship / apprenticeship','Real incident-monitoring exposure.'],['Cyber Security Officer','Specialise in forensics, audit or cloud security.']] } },
+ { id:'ag', title:'Organic Agri-Entrepreneur', nsqf:5, emoji:'🌾', hue:'#65a30d', sector:'Agriculture · ASCI', pay:'₹3–10 LPA (venture)',
+   apt:[.6,.6,.6,.6], int:[.7,.6,.4,.5,.9,.4], val:[.6,.9,.3],
+   skills:['Organic farming','Agri-marketing','FPO management'],
+   why:'You like leading, building something of your own and working with the land — a strong fit for India\'s growing organic and agri-startup economy.',
+   routes:{
+    A:[['Class 12 (Science / Agriculture)','Biology or Agriculture helps.'],['B.Sc Agriculture / B.Voc Agribusiness','NSQF L5–6 degree.'],['Organic certification training','Learn NPOP / PGS-India compliance.'],['Launch your venture','Start solo, in an FPO, or via agri-startup schemes.']],
+    B:[['Short course at a KVK','Krishi Vigyan Kendra hands-on training.'],['ASCI-aligned vocational diploma','NSQF L4–5 in organic / horticulture.'],['Lateral entry to B.Voc Agribusiness','Credits via ABC.'],['Organic Agri-Entrepreneur','Build a brand and sell direct to consumers.']] } }
+];
+
+const COLLEGES = {
+ 'Tamil Nadu':['Govt. Polytechnic College, Coimbatore|Diploma · AICTE|ev,re','Engineering College, Tiruchirappalli (Univ. affiliated)|B.E. / B.Tech|da,cs,re','Agricultural College & Research Institute, Madurai|B.Sc Agriculture|ag','ITI, Guindy – Chennai|NSQF L3–4 trades|ev,re'],
+ 'Karnataka':['Govt. Polytechnic, Bengaluru|Diploma · AICTE|ev,re,cs','Univ. Dept. of Computer Science, Mysuru|B.Sc / BCA|da,cs','College of Agriculture, Dharwad|B.Sc Agriculture|ag','ITI, Peenya – Bengaluru|NSQF L3–4 trades|ev,re'],
+ 'Maharashtra':['Govt. Polytechnic, Pune|Diploma · AICTE|ev,re,cs','Autonomous Science College, Mumbai|B.Sc Data Science / IT|da,cs','Agricultural College, Kolhapur|B.Sc Agriculture|ag','ITI, Aundh – Pune|NSQF L3–4 trades|ev,re'],
+ 'Uttar Pradesh':['Govt. Polytechnic, Lucknow|Diploma · AICTE|ev,re,cs','State University Dept. of IT, Kanpur|B.Sc / BCA|da,cs','Agricultural University Campus, Meerut|B.Sc Agriculture|ag','ITI, Gorakhpur|NSQF L3–4 trades|ev,re'],
+ 'Bihar':['Govt. Polytechnic, Patna|Diploma · AICTE|ev,re,cs','Science College, Patna|B.Sc / BCA|da,cs','Agricultural College, Sabour|B.Sc Agriculture|ag','ITI, Muzaffarpur|NSQF L3–4 trades|ev,re']
+};
+Object.keys(COLLEGES).forEach(k=>COLLEGES[k]=COLLEGES[k].map(s=>{const [n,t,r]=s.split('|');return {n,t,r:r.split(',')}}));
+
+const SCHEMES = [
+ {n:'PM YASASVI (OBC / EBC / DNT)',by:'Ministry of Social Justice & Empowerment',cats:['OBC'],inc:2.5},
+ {n:'Post-Matric Scholarship for SC',by:'Dept. of Social Justice & Empowerment',cats:['SC'],inc:2.5},
+ {n:'Post-Matric Scholarship for ST',by:'Ministry of Tribal Affairs',cats:['ST'],inc:2.5},
+ {n:'Merit-cum-Means (Minorities)',by:'Ministry of Minority Affairs',cats:['Minority'],inc:2.5},
+ {n:'Central Sector Scheme of Scholarships',by:'Dept. of Higher Education (merit-based)',cats:['*'],inc:4.5},
+ {n:'Pragati Scholarship for Girls (AICTE)',by:'AICTE · technical diploma/degree',cats:['*'],inc:8,gender:'Female'}
+];
+
+const DRILLS = [
+ ['Mental-math sprint: 20 percentages','Ratio & proportion word problems','Number series ladder','Data-table reading: spot the trend','Speed squares & cubes'],
+ ['Syllogism set of 8','Odd-one-out in 10 sets','Seating-arrangement puzzle','Coding-decoding challenge','If-then rule chains'],
+ ['Learn 10 new words, use each in a sentence','Read a 300-word article, summarise in 2 lines','Analogy ladder (15)','Fix 10 grammar slips','Reading-comprehension passage'],
+ ['Rotate-the-cube trainer (10 rounds)','Fold the paper net','Mirror & water-image drill','Isometric sketch of a household object','Tangram puzzle']
+];
+const DRILL_ICON = ['🔢','🧩','📖','📦'];
+
+const FACES = [
+ {l:'A',c:'#592ac7',t:'translateZ(50px)'},{l:'B',c:'#8b6cf0',t:'rotateY(180deg) translateZ(50px)'},
+ {l:'C',c:'#16a34a',t:'rotateY(90deg) translateZ(50px)'},{l:'D',c:'#d97706',t:'rotateY(-90deg) translateZ(50px)'},
+ {l:'E',c:'#db3030',t:'rotateX(90deg) translateZ(50px)'},{l:'F',c:'#2563eb',t:'rotateX(-90deg) translateZ(50px)'}
+];
+const I3=[[1,0,0],[0,1,0],[0,0,1]];
+const ROT={xp:[[1,0,0],[0,0,-1],[0,1,0]],xm:[[1,0,0],[0,0,1],[0,-1,0]],yp:[[0,0,1],[0,1,0],[-1,0,0]],ym:[[0,0,-1],[0,1,0],[1,0,0]],zp:[[0,-1,0],[1,0,0],[0,0,1]],zm:[[0,1,0],[-1,0,0],[0,0,1]]};
+const mmul=(a,b)=>a.map((r,i)=>[0,1,2].map(j=>r[0]*b[0][j]+r[1]*b[1][j]+r[2]*b[2][j]));
+const meq=(a,b)=>a.every((r,i)=>r.every((v,j)=>v===b[i][j]));
+const m3d=R=>`matrix3d(${R[0][0]},${R[1][0]},${R[2][0]},0,${R[0][1]},${R[1][1]},${R[2][1]},0,${R[0][2]},${R[1][2]},${R[2][2]},0,0,0,0,1)`;
+
+const APT_QS = [
+ {dim:0,type:'mcq',time:25,q:'What comes next?  3, 6, 12, 24, ?',opts:['36','48','42','30'],ans:1},
+ {dim:0,type:'mcq',time:30,q:'A bus covers 120 km in 2 hours. At the same speed, how long will 300 km take?',opts:['4 hours','5 hours','6 hours','7.5 hours'],ans:1},
+ {dim:1,type:'mcq',time:30,q:'All drones are machines. No machine is alive. Therefore…',opts:['Some drones are alive','No drone is alive','All living things are drones','Drones are not machines'],ans:1},
+ {dim:1,type:'mcq',time:25,q:'Which number is the odd one out?  16, 25, 36, 48, 49',opts:['16','25','48','49'],ans:2},
+ {dim:2,type:'mcq',time:20,q:'Pick the word closest in meaning to "RESILIENT".',opts:['Quick to recover','Easily broken','Very loud','Lazy'],ans:0},
+ {dim:2,type:'mcq',time:20,q:'Doctor : Hospital  ::  Teacher : ?',opts:['Student','School','Book','Exam'],ans:1},
+ {dim:3,type:'cube',time:45,moves:2,q:'Spatial challenge 1 — match the cube orientation.'},
+ {dim:3,type:'cube',time:60,moves:3,q:'Spatial challenge 2 — a trickier turn.'}
+];
+const SWIPE = [
+ ['🔧','Repair a motorbike engine',0],['☀️','Build a solar-powered water pump',0],
+ ['🔬','Run experiments to find why crops fail',1],['📈','Analyse data to spot hidden patterns',1],
+ ['🎨','Design a poster or short film',2],['🎵','Compose music or write stories',2],
+ ['📚','Teach village children to read',3],['🤝','Counsel a friend through a hard time',3],
+ ['🚀','Pitch a startup idea to investors',4],['🏆','Lead a team to win a competition',4],
+ ['🗂️','Organise records and budgets neatly',5],['🧾','Check accounts line by line for errors',5]
+];
+const ROLE_POOL = ['Solar PV Installer','CNC Machine Operator','Retail Sales Associate','Medical Lab Technician','Graphic Designer','Accounts Executive','Drone Pilot (Agri)','Network Support Engineer','Beauty & Wellness Therapist','Logistics Coordinator','Mobile Repair Technician','Food Processing Operator','Tourist Guide','Plumbing Technician','Early Childhood Educator','Apparel Pattern Maker','AI Prompt Annotator','Banking Correspondent','Handloom Weaver','Cloud Support Associate'];
+
+/* ============ SOUND (Web Audio, no files) ============ */
+const SFX=(()=>{let ctx=null,on=true,last=0;
+ const prime=()=>{try{if(!ctx){const C=window.AudioContext||window.webkitAudioContext;if(C)ctx=new C()}if(ctx&&ctx.state==='suspended')ctx.resume()}catch(e){}};
+ const tone=(f,d=.12,type='sine',vol=.05,delay=0,slide)=>{if(!on||!ctx||ctx.state!=='running')return;const t=ctx.currentTime+delay,o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+d);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(ctx.destination);o.start(t);o.stop(t+d+.03)};
+ return {prime,set:v=>on=v,
+  hover(){const n=performance.now();if(n-last>70){last=n;tone(1400,.035,'square',.012)}},
+  tick(){tone(1000,.04,'square',.015)},
+  click(){tone(520,.1,'triangle',.06,0,900)},
+  good(){[660,880,1320].forEach((f,i)=>tone(f,.15,'sine',.06,i*.07))},
+  bad(){tone(240,.25,'sawtooth',.035,0,110)},
+  unlock(){[523,659,784,1047,1319].forEach((f,i)=>tone(f,.4,'sine',.06,i*.09))},
+  scan(){tone(300+Math.random()*900,.05,'square',.01)},
+  chime(){[784,988,1175,1568].forEach((f,i)=>tone(f,.7,'triangle',.06,i*.14));tone(392,1.2,'sine',.05,0)}};
+})();
+
+/* ============ HELPERS ============ */
+const cos=(a,b)=>{let d=0,x=0,y=0;for(let i=0;i<a.length;i++){d+=a[i]*b[i];x+=a[i]*a[i];y+=b[i]*b[i]}return d/((Math.sqrt(x)*Math.sqrt(y))||1)};
+const avg=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:null;
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const fire=(o={})=>{try{confetti(Object.assign({particleCount:140,spread:90,origin:{y:.6},colors:['#592ac7','#8b6cf0','#ffc240','#16a34a']},o))}catch(e){}};
+
+/* ============ APP ============ */
+function quest(){return {
+ SFX,APT,INT,VAL,VALC,ROLES,AXES,FACES,COLLEGES,TOTAL,
+ stage:1,sound:true,xp:0,badges:[],toast:null,
+ wu:{opts:['🔺🔺🔺🔺','🔺🔺','🟦','🔺🔺🔺🔺🔺'],ans:0,pick:null,patternDone:false,slider:50,touched:false,sliderDone:false},
+ // assessment
+ pillar:1,p1intro:true,p2intro:true,aptQs:APT_QS,qi:0,tLeft:25,tMax:25,locked:false,fb:null,streak:0,brain:10,
+ aptScores:[[],[],[],[]],cube:{user:I3,target:I3,moves:0},
+ cards:[],ci:0,dx:0,dy:0,dragging:false,intAns:[[],[],[],[],[],[]],
+ pts:[34,33,33],
+ // engine / results
+ eng:{step:0,scanned:0,log:[],n:0},tweak:{apt:[0,0,0,0],val:[0,0,0]},shownFit:0,route:'A',
+ loc:{state:'Tamil Nadu',cat:'General',inc:2.5,gender:'Female'},
+ bookmarks:[],planOpen:false,doneDays:[],_timers:[],_tq:null,
+
+ init(){
+  this.cards=shuffle(SWIPE).map(([e,t,d])=>({e,t,d,tag:'Type: '+INT[d]}));
+  document.addEventListener('pointerdown',()=>SFX.prime());
+  document.addEventListener('mouseover',e=>{if(e.target.closest('button,select,label'))SFX.hover()});
+  document.addEventListener('click',e=>{if(e.target.closest('button'))SFX.prime()});
+  window.addEventListener('keydown',e=>{if(this.stage===2&&this.pillar===2&&!this.p2intro){if(e.key==='ArrowLeft')this.swipe(0);if(e.key==='ArrowRight')this.swipe(1);if(e.key==='ArrowUp')this.swipe(.5)}});
+  let raf;const mo=new MutationObserver(()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>window.lucide&&lucide.createIcons())});
+  mo.observe(document.body,{childList:true,subtree:true});window.lucide&&lucide.createIcons();
+ },
+ toggleSound(){this.sound=!this.sound;SFX.set(this.sound);if(this.sound)SFX.click()},
+ get level(){return Math.floor(this.xp/500)+1},
+ addXp(n){this.xp+=Math.round(n)},
+ award(n,e){if(this.badges.find(b=>b.n===n))return;this.badges.push({n,e});this.toast={n,e};SFX.unlock();fire({particleCount:60,spread:60,origin:{y:.2}});setTimeout(()=>this.toast=null,2800)},
+ m3d,
+
+ /* ---- Stage 1 ---- */
+ wuPick(i){if(this.wu.patternDone)return;this.wu.pick=i;this.wu.patternDone=true;i===this.wu.ans?SFX.good():SFX.click();this.addXp(50);this.checkWu()},
+ wuLock(){this.wu.sliderDone=true;SFX.click();this.addXp(50);this.checkWu()},
+ checkWu(){if(this.wu.patternDone&&this.wu.sliderDone)setTimeout(()=>this.award('Journey Begun','🚀'),350)},
+ startQuest(){SFX.click();this.stage=2;this.pillar=1;this.p1intro=true;window.scrollTo({top:0,behavior:'smooth'})},
+
+ /* ---- Pillar 1 ---- */
+ get curQ(){return this.aptQs[this.qi]},
+ get combo(){return 1+Math.floor(this.streak/2)*.5},
+ get totalSteps(){return this.aptQs.length+this.cards.length+1},
+ get doneSteps(){return this.pillar===1?(this.p1intro?0:this.qi):this.pillar===2?this.aptQs.length+this.ci:this.aptQs.length+this.cards.length},
+ get pct(){return Math.min(100,Math.round(this.doneSteps/this.totalSteps*100))},
+ aptLive(i){const a=avg(this.aptScores[i]);return a===null?.08:Math.max(.08,a)},
+ beginP1(){SFX.click();this.p1intro=false;this.prepQ()},
+ prepQ(){const q=this.curQ;this.locked=false;this.fb=null;this.tMax=q.time;this.tLeft=q.time;
+  if(q.type==='cube'){let t=I3;const keys=Object.keys(ROT);let prev='';do{t=I3;for(let i=0;i<q.moves;i++){let k;do{k=keys[Math.floor(Math.random()*6)]}while(k===prev);prev=k;t=mmul(ROT[k],t)}}while(meq(t,I3));this.cube={user:I3,target:t,moves:0}}
+  clearInterval(this._tq);this._tq=setInterval(()=>{this.tLeft=Math.max(0,this.tLeft-.1);if(this.tLeft<=0)this.answerApt(null)},100)},
+ rotateCube(k){if(this.locked)return;this.cube.user=mmul(ROT[k],this.cube.user);this.cube.moves++;SFX.tick()},
+ answerApt(pick){if(this.locked)return;this.locked=true;clearInterval(this._tq);const q=this.curQ;
+  const ok=q.type==='cube'?(pick==='lock'&&meq(this.cube.user,this.cube.target)):pick===q.ans;
+  const speed=this.tLeft/this.tMax,score=ok?.7+.3*speed:0;
+  this.aptScores[q.dim].push(score);
+  this.brain=Math.max(5,Math.min(100,this.brain*.45+(ok?55+45*speed:15)*.55));
+  if(ok){this.streak++;this.addXp(100*this.combo);SFX.good();if(this.streak===3)this.award('Combo Starter','🔥')}else{this.streak=0;SFX.bad()}
+  this.fb={ok,pick,msg:ok?(speed>.6?'⚡ Lightning-fast and correct!':'✔ Correct!'):(pick===null?'⏳ Time ran out — no stress, we move on.':'Not quite — that is perfectly fine, it only shapes your profile.')};
+  setTimeout(()=>{if(this.qi<this.aptQs.length-1){this.qi++;this.prepQ()}else{this.pillar=2;this.award('Cognitive Core','🧠')}},1250)},
+
+ /* ---- Pillar 2 ---- */
+ dragStart(e){if(this.ci>=this.cards.length)return;this.dragging=true;const sx=e.clientX,sy=e.clientY;
+  const mv=ev=>{this.dx=ev.clientX-sx;this.dy=Math.min(0,(ev.clientY-sy)*.4)};
+  const up=()=>{window.removeEventListener('pointermove',mv);window.removeEventListener('pointerup',up);this.dragging=false;
+   if(this.dx>110)this.swipe(1);else if(this.dx<-110)this.swipe(0);else{this.dx=0;this.dy=0}};
+  window.addEventListener('pointermove',mv);window.addEventListener('pointerup',up)},
+ swipe(v){if(this.ci>=this.cards.length||this.fly)return;this.fly=true;const c=this.cards[this.ci];
+  this.dragging=false;this.dx=v===1?520:v===0?-520:0;this.dy=v===.5?-420:0;v===1?SFX.good():v===0?SFX.click():SFX.tick();
+  this.intAns[c.d].push(v);this.addXp(25);
+  setTimeout(()=>{this.ci++;this.dx=0;this.dy=0;this.fly=false;if(this.ci>=this.cards.length){this.pillar=3;this.award('Passion Compass','🧭')}},260)},
+
+ /* ---- Pillar 3 ---- */
+ setPoint(k,v){v=Math.max(0,Math.min(100,v));const o=[0,1,2].filter(i=>i!==k),rest=100-v,sum=this.pts[o[0]]+this.pts[o[1]];
+  const a=sum===0?Math.round(rest/2):Math.round(this.pts[o[0]]/sum*rest);const n=[...this.pts];n[k]=v;n[o[0]]=a;n[o[1]]=rest-a;this.pts=n;SFX.tick()},
+ finishAssessment(){this.award('Value Keeper','💎');this.addXp(150);setTimeout(()=>this.startEngine(),900)},
+
+ /* ---- profile + matching ---- */
+ get profile(){const mx=Math.max(...this.pts)||1;
+  return {apt:this.aptScores.map(a=>avg(a)??.5),int:this.intAns.map(a=>avg(a)??.5),val:this.pts.map(p=>p/mx)}},
+ simsFor(r,v){const a=cos(v.apt,r.apt),i=cos(v.int??this.profile.int,r.int),l=cos(v.val,r.val);return {apt:a,int:i,val:l,fit:.35*a+.45*i+.20*l}},
+ get active(){return {apt:this.tweak.apt,int:this.profile.int,val:this.tweak.val}},
+ simsOf(r){return this.simsFor(r,this.active)},
+ get ranked(){return this.ROLES.map(r=>({...r,...this.simsOf(r)})).sort((a,b)=>b.fit-a.fit)},
+ rankOf(id){return this.ranked.findIndex(r=>r.id===id)},
+ get top(){return this.ranked[0]},
+ get topSims(){return this.top},
+ get engTop(){const v=this.profile;return this.ROLES.map(r=>({...r,...this.simsFor(r,v)})).sort((a,b)=>b.fit-a.fit)[0]},
+ get isTweaked(){const p=this.profile;return this.tweak.apt.some((v,i)=>Math.abs(v-p.apt[i])>.001)||this.tweak.val.some((v,i)=>Math.abs(v-p.val[i])>.001)},
+ resetTweak(){const p=this.profile;this.tweak={apt:[...p.apt],val:[...p.val]};SFX.click()},
+ roleVec(r){return [...r.apt,...r.int,...r.val]},
+ get youVec(){return [...this.active.apt,...this.active.int,...this.active.val]},
+ radarPts(v){return v.map((x,i)=>{const a=-Math.PI/2+i*2*Math.PI/13;return (150+Math.max(.02,x)*105*Math.cos(a)).toFixed(1)+','+(150+Math.max(.02,x)*105*Math.sin(a)).toFixed(1)}).join(' ')},
+ lx(i){return 150+128*Math.cos(-Math.PI/2+i*2*Math.PI/13)},
+ ly(i){return 150+128*Math.sin(-Math.PI/2+i*2*Math.PI/13)},
+ fmt(a){return '['+a.map(v=>v.toFixed(2)).join(', ')+']'},
+ get vecBlocks(){const p=this.profile;return [
+  {name:'S_apt',label:'Pillar 1 · Cognitive (Num, Log, Verb, Spat)',v:p.apt,c:'#592ac7'},
+  {name:'S_int',label:'Pillar 2 · RIASEC (R, I, A, S, E, C)',v:p.int,c:'#8b6cf0'},
+  {name:'S_val',label:'Pillar 3 · Values (Earn, Indep, Stab)',v:p.val,c:'#16a34a'}]},
+
+ /* ---- Stage 3 ---- */
+ startEngine(){this.stage=3;this.clearEng();this.eng={step:0,scanned:0,log:[],n:0};window.scrollTo({top:0,behavior:'smooth'});SFX.unlock();
+  const T=(ms,fn)=>this._timers.push(setTimeout(fn,ms));
+  T(500,()=>{this.eng.step=1;SFX.tick()});T(1600,()=>{this.eng.step=2;SFX.tick()});T(2700,()=>{this.eng.step=3;SFX.tick()});
+  T(3700,()=>{this.eng.step=4;const iv=setInterval(()=>{const e=this.eng;e.scanned=Math.min(TOTAL,e.scanned+20+Math.floor(Math.random()*40));
+    const n=ROLE_POOL[Math.floor(Math.random()*ROLE_POOL.length)];e.log=[...e.log,{id:e.n++,n:n+' · NSQF L'+(2+Math.floor(Math.random()*7)),s:.45+Math.random()*.5}].slice(-8);SFX.scan();
+    if(e.scanned>=TOTAL){clearInterval(iv);T(500,()=>{this.eng.step=5;SFX.good()});T(2000,()=>{this.eng.step=6;SFX.chime()})}},70);this._timers.push(iv)})},
+ clearEng(){this._timers.forEach(t=>{clearTimeout(t);clearInterval(t)});this._timers=[]},
+ reveal(){this.clearEng();this.stage=4;const p=this.profile;this.tweak={apt:[...p.apt],val:[...p.val]};
+  this.bookmarks=this.weak.slice();this.doneDays=[];this.shownFit=0;
+  window.scrollTo({top:0});SFX.chime();fire();setTimeout(()=>fire({particleCount:90,angle:60,origin:{x:0,y:.7}}),250);setTimeout(()=>fire({particleCount:90,angle:120,origin:{x:1,y:.7}}),450);
+  this.award('Horizon Unlocked','🌅');this.addXp(300);
+  const target=this.top.fit*100,t0=performance.now(),step=t=>{const k=Math.min(1,(t-t0)/1500);this.shownFit=target*(1-Math.pow(1-k,3));if(k<1)requestAnimationFrame(step);else this._settled=true};requestAnimationFrame(step)},
+
+ /* ---- local grounding ---- */
+ get colleges(){const l=COLLEGES[this.loc.state];const m=l.filter(c=>c.r.includes(this.top.id));return (m.length?m:l).slice(0,4)},
+ get schemes(){const {cat,inc,gender}=this.loc;return SCHEMES.map(s=>{let ok=true,reason='';
+  if(!s.cats.includes('*')&&!s.cats.includes(cat)){ok=false;reason='For '+s.cats.join('/')+' category students'}
+  else if(inc>s.inc){ok=false;reason='Income limit ₹'+s.inc+' L'}
+  else if(s.gender&&gender!==s.gender){ok=false;reason='For '+s.gender.toLowerCase()+' students'}
+  return {...s,ok,reason}}).sort((a,b)=>b.ok-a.ok)},
+
+ /* ---- level-up ---- */
+ get weak(){return [0,1,2,3].sort((a,b)=>this.profile.apt[a]-this.profile.apt[b]).slice(0,2)},
+ toggleBookmark(i){const b=this.bookmarks;this.bookmarks=b.includes(i)?b.filter(x=>x!==i):[...b,i];SFX.click()},
+ get plan(){const dims=this.bookmarks.length?this.bookmarks:this.weak;return Array.from({length:30},(_,k)=>{const d=dims[k%dims.length],boss=(k+1)%7===0;
+  return {day:k+1,boss,icon:DRILL_ICON[d],drill:boss?'Boss day: mixed timed challenge on '+APT[d]:DRILLS[d][Math.floor(k/dims.length)%DRILLS[d].length]}})},
+ get nextDrill(){const d=this.plan.find(p=>!this.doneDays.includes(p.day));return d?'Day '+d.day+' — '+d.drill:'All 30 days complete. You levelled up! 🎉'},
+ openPlan(){this.planOpen=true;SFX.click()},
+ toggleDay(n){if(this.doneDays.includes(n)){this.doneDays=this.doneDays.filter(x=>x!==n);SFX.click()}else{this.doneDays=[...this.doneDays,n];SFX.good();this.addXp(40);if(this.doneDays.length===30){this.award('30-Day Level-Up','🏅')}}},
+ retake(){this.clearEng();clearInterval(this._tq);Object.assign(this,{stage:2,pillar:1,p1intro:true,p2intro:true,qi:0,streak:0,brain:10,locked:false,fb:null,aptScores:[[],[],[],[]],ci:0,dx:0,dy:0,fly:false,intAns:[[],[],[],[],[],[]],pts:[34,33,33],planOpen:false});
+  this.cards=shuffle(SWIPE).map(([e,t,d])=>({e,t,d,tag:'Type: '+INT[d]}));SFX.click();window.scrollTo({top:0,behavior:'smooth'})}
+}}
+
+/* ============ AMBIENT PARTICLES ============ */
+(function(){const c=document.getElementById('bg'),x=c.getContext('2d'),rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ let w,h,P=[],m={x:-999,y:-999};const col=['#592ac7','#8b6cf0','#ffc240'];
+ function size(){w=c.width=innerWidth;h=c.height=innerHeight;P=Array.from({length:Math.min(90,Math.floor(w*h/15000))},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35,r:Math.random()*1.5+.5,c:col[Math.floor(Math.random()*3)]}))}
+ function frame(){x.clearRect(0,0,w,h);
+  for(const p of P){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>w)p.vx*=-1;if(p.y<0||p.y>h)p.vy*=-1;
+   const dx=p.x-m.x,dy=p.y-m.y,d=dx*dx+dy*dy;if(d<14000){p.x+=dx*.004;p.y+=dy*.004}
+   x.beginPath();x.arc(p.x,p.y,p.r,0,6.283);x.fillStyle=p.c;x.globalAlpha=.8;x.fill()}
+  for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){const a=P[i],b=P[j],d=(a.x-b.x)**2+(a.y-b.y)**2;if(d<11000){x.globalAlpha=(1-d/11000)*.18;x.strokeStyle='#592ac7';x.beginPath();x.moveTo(a.x,a.y);x.lineTo(b.x,b.y);x.stroke()}}
+  x.globalAlpha=1;if(!rm)requestAnimationFrame(frame)}
+ addEventListener('resize',size);addEventListener('pointermove',e=>{m.x=e.clientX;m.y=e.clientY});size();frame();
+})();
+</script>
+</body>
+</html>

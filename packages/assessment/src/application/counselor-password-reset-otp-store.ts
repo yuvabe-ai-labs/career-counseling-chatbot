@@ -19,7 +19,7 @@ export type CounselorPasswordResetOtpStore = {
   delete(email: string): void;
 };
 
-/** Same shape/tradeoffs as InMemoryIdentityOtpStore — short-lived challenges, in-process is fine. */
+/** Same shape/tradeoffs as InMemoryGuardianOtpStore — short-lived challenges, in-process is fine. */
 export class InMemoryCounselorPasswordResetOtpStore implements CounselorPasswordResetOtpStore {
   private readonly challenges = new Map<string, CounselorPasswordResetOtpChallenge>();
 

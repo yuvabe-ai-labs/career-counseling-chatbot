@@ -1,10 +1,10 @@
 /**
- * Delivery abstraction for every OTP/notification email in Module 1 — identity verification
- * and guardian consent both use this (no SMS/phone delivery remains anywhere in the app). We
- * own OTP generation, storage, and verification ourselves (identity-service.ts,
- * guardian-consent-service.ts); a provider only ever sends the message.
+ * Delivery abstraction for every OTP/notification email in Module 1 — guardian consent and
+ * counselor password reset both use this (no SMS/phone delivery remains anywhere in the app).
+ * We own OTP generation, storage, and verification ourselves (guardian-consent-service.ts,
+ * counselor-auth-service.ts); a provider only ever sends the message.
  */
-export type EmailContext = "identity_otp" | "guardian_otp" | "counselor_password_reset_otp";
+export type EmailContext = "guardian_otp" | "counselor_password_reset_otp";
 
 export type SendEmailInput = {
   to: string;

@@ -16,6 +16,10 @@ const COUNSELOR_USER_ID_KEY = "yuvapath.counselorUserId";
 /** The counselor's display name (operations.staff_profiles.display_name), captured at sign-in so
  *  the account-avatar initials survive a reload without a re-fetch — see CounselorSessionContext. */
 const COUNSELOR_DISPLAY_NAME_KEY = "yuvapath.counselorDisplayName";
+/** The regional admin's session — structurally separate from the student and counselor sessions
+ *  for the same reason COUNSELOR_USER_ID_KEY is separate from USER_ID_KEY. */
+const ADMIN_USER_ID_KEY = "yuvapath.adminUserId";
+const ADMIN_DISPLAY_NAME_KEY = "yuvapath.adminDisplayName";
 const JOURNEY_SESSION_ID_KEY = "yuvapath.journeySessionId";
 const PENDING_SESSION_ID_KEY = "yuvapath.pendingSessionId";
 const EMAIL_KEY = "yuvapath.email";
@@ -57,6 +61,7 @@ function remove(key: string): void {
 export const SESSION_TIMEOUT_MS = 60 * 60 * 1000;
 const SESSION_EXPIRES_AT_KEY = "yuvapath.sessionExpiresAt";
 const COUNSELOR_SESSION_EXPIRES_AT_KEY = "yuvapath.counselorSessionExpiresAt";
+const ADMIN_SESSION_EXPIRES_AT_KEY = "yuvapath.adminSessionExpiresAt";
 
 /** True once the stored deadline has passed. A session stored before this timeout existed has no
  *  deadline yet — its clock starts now, rather than signing everyone out on deploy. */
@@ -104,6 +109,29 @@ export const getStoredCounselorDisplayName = () => read(COUNSELOR_DISPLAY_NAME_K
 export const setStoredCounselorDisplayName = (displayName: string) =>
   write(COUNSELOR_DISPLAY_NAME_KEY, displayName);
 export const clearStoredCounselorDisplayName = () => remove(COUNSELOR_DISPLAY_NAME_KEY);
+
+export const getStoredAdminUserId = () => {
+  const userId = read(ADMIN_USER_ID_KEY);
+  if (userId && isExpired(ADMIN_SESSION_EXPIRES_AT_KEY)) {
+    clearStoredAdminUserId();
+    remove(ADMIN_DISPLAY_NAME_KEY);
+    return null;
+  }
+  return userId;
+};
+export const setStoredAdminUserId = (userId: string) => {
+  write(ADMIN_USER_ID_KEY, userId);
+  write(ADMIN_SESSION_EXPIRES_AT_KEY, String(Date.now() + SESSION_TIMEOUT_MS));
+};
+export const clearStoredAdminUserId = () => {
+  remove(ADMIN_USER_ID_KEY);
+  remove(ADMIN_SESSION_EXPIRES_AT_KEY);
+};
+
+export const getStoredAdminDisplayName = () => read(ADMIN_DISPLAY_NAME_KEY);
+export const setStoredAdminDisplayName = (displayName: string) =>
+  write(ADMIN_DISPLAY_NAME_KEY, displayName);
+export const clearStoredAdminDisplayName = () => remove(ADMIN_DISPLAY_NAME_KEY);
 
 export const getStoredJourneySessionId = () => read(JOURNEY_SESSION_ID_KEY);
 export const setStoredJourneySessionId = (sessionId: string) =>

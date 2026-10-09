@@ -1,3 +1,4 @@
+export * from "./admin-catalog.js";
 export * from "./ai-generation.js";
 export * from "./audit.js";
 export * from "./auth.js";

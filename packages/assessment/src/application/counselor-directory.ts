@@ -43,3 +43,13 @@ export type CounselorDirectory = {
    *  sign-in, so a revoked counselor's still-cached header can't keep reading data. */
   isActiveCounselor(userId: string): Promise<boolean>;
 };
+
+/**
+ * The same staff-role gate, instantiated for role='regional_admin' (see
+ * SupabaseCounselorDirectory's `role` option). The inherited counselor-named methods then mean
+ * "regional admin": sign-in, forgot-password and the per-request active check all gate on that
+ * role instead. getAdminScope additionally returns the state this admin manages.
+ */
+export type RegionalAdminDirectory = CounselorDirectory & {
+  getAdminScope(userId: string): Promise<{ state: string; displayName: string } | null>;
+};

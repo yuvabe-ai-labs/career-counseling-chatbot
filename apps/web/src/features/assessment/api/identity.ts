@@ -41,10 +41,10 @@ export function checkEmailAvailability(input: CheckEmailAvailabilityRequest) {
  * independently re-checks that a granted guardian consent exists for this pendingSessionId
  * (see api/guardian-consent.ts's requestPendingGuardianConsent/verifyPendingGuardianConsent).
  *
- * Note: the older email-OTP identity endpoints (`/auth/otp/request`, `/auth/otp/verify`) still
- * exist on the backend but are intentionally not called anywhere in this app anymore —
- * registration no longer verifies the student's own email; that's planned as a separate
- * dashboard feature later, on an already-created account.
+ * Registration never verifies the student's own email — that's planned as a separate dashboard
+ * feature later, on an already-created account. The older email-OTP identity endpoints
+ * (`/auth/otp/request`, `/auth/otp/verify`) this app never called have been removed from the
+ * backend entirely.
  */
 export function signUpWithPassword(input: SignUpWithPasswordRequest) {
   SignUpWithPasswordRequestSchema.parse(input);

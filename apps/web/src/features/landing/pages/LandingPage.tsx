@@ -1,6 +1,7 @@
-import { GraduationCap, UserRound } from "lucide-react";
+import { GraduationCap, ShieldCheck, UserRound } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AppHeader } from "@/components/AppHeader";
+import { useAdminSession } from "@/features/admin";
 import { useSession } from "@/features/assessment";
 import { useCounselorSession } from "@/features/counselor";
 
@@ -26,8 +27,10 @@ import { useCounselorSession } from "@/features/counselor";
 export function LandingPage() {
   const session = useSession();
   const counselorSession = useCounselorSession();
+  const adminSession = useAdminSession();
   const aspirantTo = session.userId && session.journeySessionId ? "/home" : "/sign-up";
   const counselorTo = counselorSession.userId ? "/counselor/home" : "/counselor/sign-in";
+  const adminTo = adminSession.userId ? "/admin/home" : "/admin/sign-in";
 
   return (
     <main className="flex min-h-screen flex-col bg-[#ece9f7]">
@@ -44,7 +47,7 @@ export function LandingPage() {
           </p>
         </div>
 
-        <div className="grid w-full max-w-xl grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid w-full max-w-4xl grid-cols-1 gap-4 sm:grid-cols-3">
           <Link
             to={aspirantTo}
             className="flex flex-col items-center gap-3 rounded-2xl border border-input bg-background p-8 shadow-xs transition-colors hover:border-brand"
@@ -63,6 +66,16 @@ export function LandingPage() {
             <span className="font-display text-lg font-semibold text-foreground">Counsellor</span>
             <span className="text-sm text-muted-foreground">
               Sign in to access the counsellor dashboard
+            </span>
+          </Link>
+          <Link
+            to={adminTo}
+            className="flex flex-col items-center gap-3 rounded-2xl border border-input bg-background p-8 shadow-xs transition-colors hover:border-brand"
+          >
+            <ShieldCheck className="size-9 text-brand" aria-hidden="true" />
+            <span className="font-display text-lg font-semibold text-foreground">Regional Admin</span>
+            <span className="text-sm text-muted-foreground">
+              Sign in to manage colleges and financial aid for your region
             </span>
           </Link>
         </div>

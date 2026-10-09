@@ -1,5 +1,17 @@
 import { createBrowserRouter } from "react-router-dom";
 import {
+  AdminAidDetailPage,
+  AdminAidListPage,
+  AdminBulkUploadPage,
+  AdminCollegeDetailPage,
+  AdminCollegesPage,
+  AdminComingSoonPage,
+  AdminForgotPasswordPage,
+  AdminHomePage,
+  AdminNewPasswordPage,
+  AdminSignInPage,
+} from "@/features/admin";
+import {
   GuardianConsentPage,
   HomePage,
   IntakeQuestionsPage,
@@ -51,4 +63,19 @@ export const router = createBrowserRouter([
   { path: "/counselor/home", element: <CounselorHomePage /> },
   { path: "/counselor/students", element: <CounselorStudentsPage /> },
   { path: "/counselor/students/:studentId", element: <CounselorStudentReportPage /> },
+  { path: "/admin/sign-in", element: <AdminSignInPage /> },
+  { path: "/admin/forgot-password", element: <AdminForgotPasswordPage /> },
+  { path: "/admin/new-password", element: <AdminNewPasswordPage /> },
+  { path: "/admin/home", element: <AdminHomePage /> },
+  { path: "/admin/colleges", element: <AdminCollegesPage /> },
+  { path: "/admin/colleges/new", element: <AdminCollegeDetailPage /> },
+  { path: "/admin/colleges/:collegeId", element: <AdminCollegeDetailPage /> },
+  { path: "/admin/aid-schemes", element: <AdminAidListPage kind="aid" /> },
+  { path: "/admin/aid-schemes/new", element: <AdminAidDetailPage kind="aid" /> },
+  { path: "/admin/aid-schemes/:schemeId", element: <AdminAidDetailPage kind="aid" /> },
+  { path: "/admin/scholarships", element: <AdminAidListPage kind="scholarship" /> },
+  { path: "/admin/scholarships/new", element: <AdminAidDetailPage kind="scholarship" /> },
+  { path: "/admin/scholarships/:schemeId", element: <AdminAidDetailPage kind="scholarship" /> },
+  { path: "/admin/bulk-upload", element: <AdminBulkUploadPage /> },
+  { path: "/admin/careers", element: <AdminComingSoonPage title="Career" /> },
 ]);

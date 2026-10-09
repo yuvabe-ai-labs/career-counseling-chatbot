@@ -34,16 +34,26 @@ const sendError = (response: Parameters<RequestHandler>[1], error: unknown): voi
  * flow, under its own /api/v1/counselor/auth/* prefix so it's never reachable via the student
  * paths and vice versa. See docs/architecture/counselor-auth-landing-page-plan.md.
  */
+export type CounselorAuthRoutesOptions = {
+  /** Defaults to the counselor prefix; the regional admin reuses these routes under its own. */
+  basePath?: string;
+  /** Noun used in OpenAPI summaries, e.g. "counselor" or "regional admin". */
+  label?: string;
+};
+
 export const registerCounselorAuthRoutes = (
   app: Express,
   registry: OpenAPIRegistry,
   service: CounselorAuthService,
+  options: CounselorAuthRoutesOptions = {},
 ): void => {
+  const basePath = options.basePath ?? "/api/v1/counselor/auth";
+  const label = options.label ?? "counselor";
   registry.registerPath({
     method: "post",
-    path: "/api/v1/counselor/auth/signin",
+    path: `${basePath}/signin`,
     tags: ["Assessment"],
-    summary: "Sign in to a counselor (staff) account",
+    summary: `Sign in to a ${label} (staff) account`,
     request: {
       body: { content: { "application/json": { schema: CounselorSignInRequestSchema } } },
     },
@@ -60,7 +70,7 @@ export const registerCounselorAuthRoutes = (
     },
   });
 
-  app.post("/api/v1/counselor/auth/signin", async (request, response, next) => {
+  app.post(`${basePath}/signin`, async (request, response, next) => {
     try {
       const body = CounselorSignInRequestSchema.parse(request.body);
       const result = await service.signIn(body);
@@ -76,9 +86,9 @@ export const registerCounselorAuthRoutes = (
 
   registry.registerPath({
     method: "post",
-    path: "/api/v1/counselor/auth/forgot-password/request-otp",
+    path: `${basePath}/forgot-password/request-otp`,
     tags: ["Assessment"],
-    summary: "Request (or resend) a counselor password-reset OTP by email",
+    summary: `Request (or resend) a ${label} password-reset OTP by email`,
     request: {
       body: {
         content: { "application/json": { schema: RequestCounselorPasswordResetOtpRequestSchema } },
@@ -97,7 +107,7 @@ export const registerCounselorAuthRoutes = (
     },
   });
 
-  app.post("/api/v1/counselor/auth/forgot-password/request-otp", async (request, response, next) => {
+  app.post(`${basePath}/forgot-password/request-otp`, async (request, response, next) => {
     try {
       const body = RequestCounselorPasswordResetOtpRequestSchema.parse(request.body);
       const result = await service.requestPasswordResetOtp(body);
@@ -113,9 +123,9 @@ export const registerCounselorAuthRoutes = (
 
   registry.registerPath({
     method: "post",
-    path: "/api/v1/counselor/auth/forgot-password/verify-otp",
+    path: `${basePath}/forgot-password/verify-otp`,
     tags: ["Assessment"],
-    summary: "Verify a counselor password-reset OTP and receive a short-lived reset token",
+    summary: `Verify a ${label} password-reset OTP and receive a short-lived reset token`,
     request: {
       body: {
         content: { "application/json": { schema: VerifyCounselorPasswordResetOtpRequestSchema } },
@@ -133,7 +143,7 @@ export const registerCounselorAuthRoutes = (
     },
   });
 
-  app.post("/api/v1/counselor/auth/forgot-password/verify-otp", async (request, response, next) => {
+  app.post(`${basePath}/forgot-password/verify-otp`, async (request, response, next) => {
     try {
       const body = VerifyCounselorPasswordResetOtpRequestSchema.parse(request.body);
       const result = await service.verifyPasswordResetOtp(body);
@@ -149,9 +159,9 @@ export const registerCounselorAuthRoutes = (
 
   registry.registerPath({
     method: "post",
-    path: "/api/v1/counselor/auth/forgot-password/set-password",
+    path: `${basePath}/forgot-password/set-password`,
     tags: ["Assessment"],
-    summary: "Set a new counselor password using a verified reset token",
+    summary: `Set a new ${label} password using a verified reset token`,
     request: {
       body: { content: { "application/json": { schema: SetCounselorPasswordRequestSchema } } },
     },
@@ -167,7 +177,7 @@ export const registerCounselorAuthRoutes = (
     },
   });
 
-  app.post("/api/v1/counselor/auth/forgot-password/set-password", async (request, response, next) => {
+  app.post(`${basePath}/forgot-password/set-password`, async (request, response, next) => {
     try {
       const body = SetCounselorPasswordRequestSchema.parse(request.body);
       const result = await service.setNewPassword(body);

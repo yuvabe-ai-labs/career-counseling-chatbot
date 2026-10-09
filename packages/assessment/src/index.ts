@@ -19,7 +19,6 @@ import { InMemoryGuardianDeclineTokenStore } from "./application/guardian-declin
 import { InMemoryGuardianOtpStore } from "./application/guardian-otp-store.js";
 import type { EmailProvider, SendEmailResult } from "./application/email-provider.js";
 import { IdentityService } from "./application/identity-service.js";
-import { InMemoryIdentityOtpStore } from "./application/identity-otp-store.js";
 import type { IdentityUserDirectory } from "./application/identity-user-directory.js";
 import type { IntakeRepository } from "./application/intake-repository.js";
 import { IntakeService } from "./application/intake-service.js";
@@ -405,20 +404,22 @@ export type RegisterAssessmentRoutesOptions = {
   guardianConsentRepository?: GuardianConsentRepository;
   /** No default stand-in (no dev-echo) — pass a real provider (e.g. SmtpEmailProvider, wired
    * up in apps/api) or OTP requests fail with a clear 503 rather than a silent fake send.
-   * Shared by both the student identity-OTP flow and guardian consent — no SMS/phone
-   * delivery exists anywhere in Module 1 anymore. */
+   * Shared by guardian consent and counselor password reset — no SMS/phone delivery exists
+   * anywhere in Module 1 anymore. */
   emailProvider?: EmailProvider;
-  /** Exposes the guardian-consents/{consentId}/otp-debug and auth/otp/debug/{pendingSessionId}
-   * routes. Defaults to true; apps/api should pass false in production regardless of which
-   * emailProvider is configured. */
+  /** Exposes the guardian-consents/{consentId}/otp-debug route. Defaults to true; apps/api
+   * should pass false in production regardless of which emailProvider is configured. */
   enableGuardianOtpDebugRoute?: boolean;
-  /** Resolves/creates the Supabase Auth user behind a verified identity-OTP email (see
-   * identity-user-directory.ts). Required for POST /auth/otp/verify to work — defaults to a
-   * 503-returning stub, matching every other Unavailable* repository default here. */
+  /** Resolves/creates the Supabase Auth user behind password-based signup/signin (see
+   * identity-user-directory.ts). Defaults to a 503-returning stub, matching every other
+   * Unavailable* repository default here. */
   identityUserDirectory?: IdentityUserDirectory;
   /** Backs the counselor sign-in/forgot-password routes (see counselor-directory.ts). Defaults
    *  to a 503-returning stub, matching identityUserDirectory's own default. */
   counselorDirectory?: CounselorDirectory;
+  /** Backs the regional-admin sign-in/forgot-password routes under /admin/auth (same shape as
+   *  counselorDirectory, gated on role='regional_admin'). Defaults to a 503-returning stub. */
+  regionalAdminDirectory?: CounselorDirectory;
   /** Backs GET /counselor/dashboard/stats (see counselor-dashboard-repository.ts). Defaults to
    *  a Postgres-backed implementation when a pool is given, else a 503-returning stub. */
   counselorDashboardRepository?: CounselorDashboardRepository;
@@ -460,6 +461,8 @@ export const registerAssessmentRoutes = (
   const identityUserDirectory =
     options.identityUserDirectory ?? new UnavailableIdentityUserDirectory();
   const counselorDirectory = options.counselorDirectory ?? new UnavailableCounselorDirectory();
+  const regionalAdminDirectory =
+    options.regionalAdminDirectory ?? new UnavailableCounselorDirectory();
   const counselorDashboardRepository =
     options.counselorDashboardRepository ??
     (options.pool
@@ -472,10 +475,9 @@ export const registerAssessmentRoutes = (
       : new UnavailableCounselorStudentRepository());
   const otpStore = new InMemoryGuardianOtpStore();
   const declineTokenStore = new InMemoryGuardianDeclineTokenStore();
-  const identityOtpStore = new InMemoryIdentityOtpStore();
   // Shared between IdentityService and GuardianConsentService — a minor's guardian-consent
-  // request/verify and their final password signup all reference the same pendingSessionId
-  // lifecycle as the adult email-OTP path, so both services need the same store instance.
+  // request/verify and their final password signup both reference the same pendingSessionId
+  // lifecycle, so both services need the same store instance.
   const pendingSignupStore = new InMemoryPendingSignupStore();
   const journeySessionService = new JourneySessionService({ repository });
   const guardianConsentService = new GuardianConsentService({
@@ -490,8 +492,6 @@ export const registerAssessmentRoutes = (
   });
   const identityService = new IdentityService({
     pendingSignupStore,
-    otpStore: identityOtpStore,
-    emailProvider,
     userDirectory: identityUserDirectory,
     guardianConsentRepository,
   });
@@ -517,6 +517,12 @@ export const registerAssessmentRoutes = (
     resetTokenStore: new InMemoryCounselorResetTokenStore(),
     emailProvider,
   });
+  const regionalAdminAuthService = new CounselorAuthService({
+    counselorDirectory: regionalAdminDirectory,
+    otpStore: new InMemoryCounselorPasswordResetOtpStore(),
+    resetTokenStore: new InMemoryCounselorResetTokenStore(),
+    emailProvider,
+  });
   const counselorDashboardService = new CounselorDashboardService({
     counselorDirectory,
     repository: counselorDashboardRepository,
@@ -527,10 +533,7 @@ export const registerAssessmentRoutes = (
     assessmentRepository,
     userProfileRepository,
   });
-  registerIdentityRoutes(app, registry, identityService, {
-    otpStore: identityOtpStore,
-    enableOtpDebugRoute: options.enableGuardianOtpDebugRoute ?? true,
-  });
+  registerIdentityRoutes(app, registry, identityService);
   registerJourneySessionRoutes(app, registry, journeySessionService);
   registerUserProfileRoutes(app, registry, userProfileService);
   registerGuardianConsentRoutes(app, registry, guardianConsentService, {
@@ -541,6 +544,10 @@ export const registerAssessmentRoutes = (
   registerIntakeRoutes(app, registry, intakeService);
   registerAssessmentRunRoutes(app, registry, assessmentService);
   registerCounselorAuthRoutes(app, registry, counselorAuthService);
+  registerCounselorAuthRoutes(app, registry, regionalAdminAuthService, {
+    basePath: "/api/v1/admin/auth",
+    label: "regional admin",
+  });
   registerCounselorDashboardRoutes(app, registry, counselorDashboardService);
   registerCounselorStudentRoutes(app, registry, counselorStudentService);
 };
@@ -550,7 +557,7 @@ export { AssessmentService } from "./application/assessment-service.js";
 export { CounselorAuthService } from "./application/counselor-auth-service.js";
 export { CounselorDashboardService } from "./application/counselor-dashboard-service.js";
 export type { CounselorDashboardRepository } from "./application/counselor-dashboard-repository.js";
-export type { CounselorDirectory } from "./application/counselor-directory.js";
+export type { CounselorDirectory, RegionalAdminDirectory } from "./application/counselor-directory.js";
 export { CounselorStudentService } from "./application/counselor-student-service.js";
 export type {
   CounselorStudentListFilters,
@@ -564,7 +571,6 @@ export { GuardianConsentService } from "./application/guardian-consent-service.j
 export { InMemoryGuardianDeclineTokenStore } from "./application/guardian-decline-token-store.js";
 export { InMemoryGuardianOtpStore } from "./application/guardian-otp-store.js";
 export { IdentityService } from "./application/identity-service.js";
-export { InMemoryIdentityOtpStore } from "./application/identity-otp-store.js";
 export { InMemoryPendingSignupStore } from "./application/pending-signup-store.js";
 export { IntakeService } from "./application/intake-service.js";
 export { JourneySessionService } from "./application/journey-session-service.js";
@@ -597,7 +603,6 @@ export type {
   GuardianDeclineTokenChallenge,
   GuardianDeclineTokenStore,
 } from "./application/guardian-decline-token-store.js";
-export type { IdentityOtpChallenge, IdentityOtpStore } from "./application/identity-otp-store.js";
 export type { IdentityUserDirectory } from "./application/identity-user-directory.js";
 export type { PendingSignup, PendingSignupStore } from "./application/pending-signup-store.js";
 export type {

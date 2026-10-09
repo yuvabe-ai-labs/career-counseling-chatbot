@@ -3,12 +3,11 @@ import { DateOnlySchema, IsoTimestampSchema, UuidSchema } from "./common.js";
 
 /**
  * Custom identity-bootstrap contract (Module 1, Gap 1): a short-lived anonymous session
- * created before email verification, followed by our own OTP request/verify pair (delivered
- * via SMTP — see @yuvapath/assessment's EmailProvider). Verifying successfully returns a real
- * userId (backed by a Supabase Auth `auth.users` row created on first verification) that the
- * frontend then uses as the `x-yuvapath-user-id` header for every other Module 1 route — no
- * change to those routes' auth model. Guardian consent (see guardian-consent.ts) also moved to
- * email/SMTP, delivered through the same EmailProvider — no SMS/phone delivery remains anywhere.
+ * created ahead of password-based account setup (SignUpWithPasswordRequestSchema below).
+ * Registration never verifies the student's own email today — that's planned as a separate
+ * dashboard feature later, on an already-created account. Guardian consent (see
+ * guardian-consent.ts) is email/SMTP-based, delivered through @yuvapath/assessment's
+ * EmailProvider — no SMS/phone delivery remains anywhere.
  */
 export const RequestAnonymousSessionResponseSchema = z.object({
   pendingSessionId: UuidSchema,
@@ -16,33 +15,9 @@ export const RequestAnonymousSessionResponseSchema = z.object({
 });
 export type RequestAnonymousSessionResponse = z.infer<typeof RequestAnonymousSessionResponseSchema>;
 
-export const RequestIdentityOtpRequestSchema = z.object({
-  pendingSessionId: UuidSchema,
-  email: z.string().trim().min(3).max(254).email(),
-});
-export type RequestIdentityOtpRequest = z.infer<typeof RequestIdentityOtpRequestSchema>;
-
-export const RequestIdentityOtpResponseSchema = z.object({
-  sent: z.literal(true),
-});
-export type RequestIdentityOtpResponse = z.infer<typeof RequestIdentityOtpResponseSchema>;
-
-export const VerifyIdentityOtpRequestSchema = z.object({
-  pendingSessionId: UuidSchema,
-  code: z.string().regex(/^\d{6}$/),
-});
-export type VerifyIdentityOtpRequest = z.infer<typeof VerifyIdentityOtpRequestSchema>;
-
-export const VerifyIdentityOtpResponseSchema = z.object({
-  userId: UuidSchema,
-});
-export type VerifyIdentityOtpResponse = z.infer<typeof VerifyIdentityOtpResponseSchema>;
-
 /**
  * Password-based account setup (Module 1) — the single account-creation step for both adults
- * and minors, replacing the old email-OTP-based creation (RequestIdentityOtpRequestSchema /
- * VerifyIdentityOtpRequestSchema above stay defined for a possible future dashboard
- * verification feature, but nothing in registration calls them anymore).
+ * and minors.
  *
  * `dateOfBirth` is required so the backend can independently (re)confirm the age band right at
  * signup — the same value used earlier to decide whether the guardian-consent step was shown —

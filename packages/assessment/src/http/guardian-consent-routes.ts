@@ -185,9 +185,9 @@ export const registerGuardianConsentRoutes = (
     },
   );
 
-  // Pre-identity path (minor signup): the guardian-consent equivalent of /auth/otp/request +
-  // /auth/otp/verify — keyed by pendingSessionId, since there's no userId/journey session yet.
-  // See SignUpWithPasswordRequestSchema (auth.ts) for the step that follows a granted consent.
+  // Pre-identity path (minor signup): a request/verify OTP pair keyed by pendingSessionId,
+  // since there's no userId/journey session yet. See SignUpWithPasswordRequestSchema (auth.ts)
+  // for the step that follows a granted consent.
   registry.registerPath({
     method: "post",
     path: "/api/v1/auth/guardian-consents",

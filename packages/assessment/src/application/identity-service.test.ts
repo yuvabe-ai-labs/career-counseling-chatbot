@@ -1,18 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { SendEmailInput, SendEmailResult, EmailProvider } from "./email-provider.js";
 import { IdentityService } from "./identity-service.js";
-import { InMemoryIdentityOtpStore } from "./identity-otp-store.js";
 import type { IdentityUserDirectory } from "./identity-user-directory.js";
 import { InMemoryPendingSignupStore } from "./pending-signup-store.js";
-
-class FakeEmailProvider implements EmailProvider {
-  readonly sent: SendEmailInput[] = [];
-
-  send(input: SendEmailInput): Promise<SendEmailResult> {
-    this.sent.push(input);
-    return Promise.resolve({ providerMessageId: "fake-message-id" });
-  }
-}
 
 class FakeIdentityUserDirectory implements IdentityUserDirectory {
   readonly byEmail = new Map<string, string>();
@@ -72,116 +61,29 @@ class FakeGuardianConsentGate {
 }
 
 const createService = (now = new Date("2026-07-29T10:00:00.000Z")) => {
-  const emailProvider = new FakeEmailProvider();
   const userDirectory = new FakeIdentityUserDirectory();
-  const otpStore = new InMemoryIdentityOtpStore();
   const pendingSignupStore = new InMemoryPendingSignupStore();
   const guardianConsentRepository = new FakeGuardianConsentGate();
   return {
-    emailProvider,
     userDirectory,
-    otpStore,
     pendingSignupStore,
     guardianConsentRepository,
     service: new IdentityService({
       pendingSignupStore,
-      otpStore,
-      emailProvider,
       userDirectory,
       guardianConsentRepository,
       clock: () => now,
-      createOtp: () => "654321",
     }),
   };
 };
 
 describe("IdentityService", () => {
-  it("creates a pending signup and lets a code be requested for it", async () => {
-    const { service, emailProvider, otpStore } = createService();
+  it("creates a pending signup with a 30-minute expiry", () => {
+    const { service } = createService();
 
-    const { pendingSessionId, expiresAt } = service.createAnonymousSession();
+    const { expiresAt } = service.createAnonymousSession();
+
     expect(expiresAt).toBe("2026-07-29T10:30:00.000Z");
-
-    await service.requestOtp({ pendingSessionId, email: " Student@Example.com " });
-
-    expect(otpStore.get(pendingSessionId)?.code).toBe("654321");
-    expect(emailProvider.sent).toHaveLength(1);
-    expect(emailProvider.sent[0]).toMatchObject({
-      to: "student@example.com",
-      context: "identity_otp",
-      templateVars: { OTP: "654321" },
-    });
-  });
-
-  it("rejects an OTP request for an unknown/expired pending session", async () => {
-    const { service } = createService();
-
-    await expect(
-      service.requestOtp({
-        pendingSessionId: "11111111-1111-4111-8111-111111111111",
-        email: "student@example.com",
-      }),
-    ).rejects.toMatchObject({ code: "pending_signup_not_found", statusCode: 404 });
-  });
-
-  it("verifies the correct code and resolves a userId via the directory", async () => {
-    const { service, userDirectory } = createService();
-
-    const { pendingSessionId } = service.createAnonymousSession();
-    await service.requestOtp({ pendingSessionId, email: "student@example.com" });
-
-    const result = await service.verifyOtp({ pendingSessionId, code: "654321" });
-
-    expect(result.userId).toBe("created-0");
-    expect(userDirectory.calls).toEqual(["student@example.com"]);
-  });
-
-  it("resolves the same userId for a second verification of the same email", async () => {
-    const { service } = createService();
-
-    const first = service.createAnonymousSession();
-    await service.requestOtp({
-      pendingSessionId: first.pendingSessionId,
-      email: "student@example.com",
-    });
-    const firstResult = await service.verifyOtp({
-      pendingSessionId: first.pendingSessionId,
-      code: "654321",
-    });
-
-    const second = service.createAnonymousSession();
-    await service.requestOtp({
-      pendingSessionId: second.pendingSessionId,
-      email: "student@example.com",
-    });
-    const secondResult = await service.verifyOtp({
-      pendingSessionId: second.pendingSessionId,
-      code: "654321",
-    });
-
-    expect(secondResult.userId).toBe(firstResult.userId);
-  });
-
-  it("rejects an incorrect code and expires the challenge after three attempts", async () => {
-    const { service, otpStore } = createService();
-    const { pendingSessionId } = service.createAnonymousSession();
-    await service.requestOtp({ pendingSessionId, email: "student@example.com" });
-
-    await expect(service.verifyOtp({ pendingSessionId, code: "000000" })).rejects.toMatchObject({
-      code: "invalid_identity_otp",
-      statusCode: 400,
-    });
-    await expect(service.verifyOtp({ pendingSessionId, code: "000000" })).rejects.toMatchObject({
-      code: "invalid_identity_otp",
-    });
-    await expect(service.verifyOtp({ pendingSessionId, code: "000000" })).rejects.toMatchObject({
-      code: "invalid_identity_otp",
-    });
-
-    expect(otpStore.get(pendingSessionId)).toBeNull();
-    await expect(service.verifyOtp({ pendingSessionId, code: "654321" })).rejects.toMatchObject({
-      code: "invalid_identity_otp",
-    });
   });
 
   describe("checkEmailAvailability", () => {
@@ -307,14 +209,10 @@ describe("IdentityService", () => {
     });
 
     it("adult: succeeds even when no guardianConsentRepository is configured at all", async () => {
-      const emailProvider = new FakeEmailProvider();
       const userDirectory = new FakeIdentityUserDirectory();
-      const otpStore = new InMemoryIdentityOtpStore();
       const pendingSignupStore = new InMemoryPendingSignupStore();
       const service = new IdentityService({
         pendingSignupStore,
-        otpStore,
-        emailProvider,
         userDirectory,
         // guardianConsentRepository intentionally omitted.
         clock: () => new Date("2026-07-29T10:00:00.000Z"),

@@ -6,6 +6,7 @@ import {
   type AssessmentHttpDependencies,
   type CounselorDirectory,
   type EmailProvider,
+  type RegionalAdminDirectory,
   type IdentityUserDirectory,
 } from "@yuvapath/assessment";
 import { createOpenApiRegistry, generateOpenApiDocument } from "@yuvapath/contracts";
@@ -25,6 +26,7 @@ import {
   InMemoryLocationRepository,
   InMemoryStreamRepository,
   LocalCatalogImportCoordinator,
+  PostgresAdminCatalogRepository,
   PostgresAidSchemeRepository,
   PostgresCareerRepository,
   PostgresCareerSearchRepository,
@@ -32,7 +34,9 @@ import {
   PostgresDatasetRepository,
   PostgresLocationRepository,
   PostgresStreamRepository,
+  registerAdminCatalogRoutes,
   registerKnowledgeRoutes,
+  type AdminCatalogRepository,
   type AidSchemeRepository,
   type CareerRepository,
   type CareerSearchRepository,
@@ -95,6 +99,10 @@ export type CreateAppOptions = {
   assessment?: AssessmentHttpDependencies;
   identityUserDirectory?: IdentityUserDirectory;
   counselorDirectory?: CounselorDirectory;
+  /** Backs /admin/auth/* sign-in and the x-yuvapath-admin-id guard on /admin/* catalog routes. */
+  regionalAdminDirectory?: RegionalAdminDirectory;
+  /** Backs the regional-admin colleges/aid CRUD routes; defaults to Postgres when a pool exists. */
+  adminCatalogRepository?: AdminCatalogRepository;
   emailProvider?: EmailProvider;
   recommendations?: RecommendationHttpDependencies;
   recommendationStore?: RecommendationStore;
@@ -224,11 +232,27 @@ export const createApp = (options: CreateAppOptions = {}): Express => {
         })
       : undefined);
 
+  // Same class as counselorDirectory, gated on role='regional_admin' instead (its scope_json
+  // carries the state the admin manages).
+  const regionalAdminDirectory =
+    options.regionalAdminDirectory ??
+    (databasePool && env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY
+      ? new SupabaseCounselorDirectory({
+          pool: databasePool,
+          role: "regional_admin",
+          client: createSupabaseServerClient({
+            url: env.SUPABASE_URL,
+            apiKey: env.SUPABASE_SERVICE_ROLE_KEY,
+          }),
+        })
+      : undefined);
+
   registerAssessmentRoutes(app, registry, {
     ...(databasePool ? { pool: databasePool } : {}),
     ...(emailProvider ? { emailProvider } : {}),
     ...(identityUserDirectory ? { identityUserDirectory } : {}),
     ...(counselorDirectory ? { counselorDirectory } : {}),
+    ...(regionalAdminDirectory ? { regionalAdminDirectory } : {}),
     enableGuardianOtpDebugRoute: env.NODE_ENV !== "production",
   });
   registerAssessmentSnapshotRoutes(app, registry, options.assessment);
@@ -279,6 +303,19 @@ export const createApp = (options: CreateAppOptions = {}): Express => {
       options.internalApiKey ?? env.INTERNAL_API_KEY,
     ),
   });
+
+  const adminCatalogRepository =
+    options.adminCatalogRepository ??
+    (databasePool ? new PostgresAdminCatalogRepository(databasePool) : undefined);
+  if (adminCatalogRepository && regionalAdminDirectory) {
+    registerAdminCatalogRoutes(app, registry, {
+      repository: adminCatalogRepository,
+      resolveAdminScope: async (adminId) => {
+        const scope = await regionalAdminDirectory.getAdminScope(adminId);
+        return scope ? { adminId, ...scope } : null;
+      },
+    });
+  }
 
   registerCounselorRoutes(app, registry, options.counselor);
 

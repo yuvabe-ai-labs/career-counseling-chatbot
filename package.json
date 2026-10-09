@@ -34,6 +34,7 @@
     "ai-catalog:review": "tsx scripts/ingest/review-ai-catalog.ts",
     "ai-catalog:promote": "tsx scripts/ingest/promote-ai-catalog.ts",
     "counselor:create": "tsx scripts/create-counselor.ts",
+    "admin:create": "tsx scripts/create-regional-admin.ts",
     "db:init": "supabase init",
     "db:login": "supabase login",
     "db:link": "supabase link",

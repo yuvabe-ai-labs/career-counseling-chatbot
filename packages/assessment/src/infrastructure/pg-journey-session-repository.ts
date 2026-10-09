@@ -71,7 +71,7 @@ export class PgJourneySessionRepository implements JourneySessionRepository {
         ],
       );
     } catch (error) {
-      // user_id is FK'd to auth.users. Normally the /auth/otp/verify identity-bootstrap flow
+      // user_id is FK'd to auth.users. Normally the /auth/signup identity-bootstrap flow
       // guarantees this row exists before a client ever has a userId to call this with, but a
       // stale/deleted user (or a client bypassing that flow) should surface as a clean 401,
       // not an unhandled 500.

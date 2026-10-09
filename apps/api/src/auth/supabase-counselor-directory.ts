@@ -1,4 +1,4 @@
-import type { CounselorDirectory } from "@yuvapath/assessment";
+import type { RegionalAdminDirectory } from "@yuvapath/assessment";
 import type { Pool } from "pg";
 
 /**
@@ -35,6 +35,9 @@ const errorMessage = (error: unknown): string =>
 export type SupabaseCounselorDirectoryOptions = {
   pool: Pool;
   client: CounselorAdminClient;
+  /** The operations.staff_role_assignments.role this directory gates on. Defaults to
+   *  'counselor'; the regional-admin sign-in reuses this class with 'regional_admin'. */
+  role?: string;
 };
 
 /**
@@ -45,33 +48,41 @@ export type SupabaseCounselorDirectoryOptions = {
  * than taking a cross-package dependency for one query. See
  * docs/architecture/counselor-auth-landing-page-plan.md.
  */
-export class SupabaseCounselorDirectory implements CounselorDirectory {
+export class SupabaseCounselorDirectory implements RegionalAdminDirectory {
   private readonly pool: Pool;
   private readonly client: CounselorAdminClient;
+  private readonly role: string;
 
   constructor(options: SupabaseCounselorDirectoryOptions) {
     this.pool = options.pool;
     this.client = options.client;
+    this.role = options.role ?? "counselor";
   }
 
   private async getActiveCounselor(
     userId: string,
-  ): Promise<{ mustResetPassword: boolean; displayName: string } | null> {
-    const result = await this.pool.query<{ must_reset_password: boolean; display_name: string }>(
-      `select profiles.must_reset_password, profiles.display_name
+  ): Promise<{ mustResetPassword: boolean; displayName: string; scope: unknown } | null> {
+    const result = await this.pool.query<{
+      must_reset_password: boolean;
+      display_name: string;
+      scope_json: unknown;
+    }>(
+      `select profiles.must_reset_password, profiles.display_name, assignments.scope_json
       from operations.staff_profiles profiles
       join operations.staff_role_assignments assignments
         on assignments.staff_user_id = profiles.user_id
       where profiles.user_id = $1
         and profiles.staff_status = 'active'
-        and assignments.role = 'counselor'
+        and assignments.role = $2
         and assignments.revoked_at is null
         and (assignments.expires_at is null or assignments.expires_at > now())
       limit 1`,
-      [userId],
+      [userId, this.role],
     );
     const row = result.rows[0];
-    return row ? { mustResetPassword: row.must_reset_password, displayName: row.display_name } : null;
+    return row
+      ? { mustResetPassword: row.must_reset_password, displayName: row.display_name, scope: row.scope_json }
+      : null;
   }
 
   async verifyCounselorPassword(
@@ -116,5 +127,18 @@ export class SupabaseCounselorDirectory implements CounselorDirectory {
 
   async isActiveCounselor(userId: string): Promise<boolean> {
     return (await this.getActiveCounselor(userId)) !== null;
+  }
+
+  /** The regional-admin view of an active staff account: its display name and the state in
+   *  scope_json ({"state":"Tamil Nadu"}). Null when inactive or when no state is configured —
+   *  a regional admin without a state has no region to manage. */
+  async getAdminScope(userId: string): Promise<{ state: string; displayName: string } | null> {
+    const staff = await this.getActiveCounselor(userId);
+    const scope = staff?.scope;
+    const state =
+      typeof scope === "object" && scope !== null && "state" in scope && typeof scope.state === "string"
+        ? scope.state.trim()
+        : "";
+    return staff && state ? { state, displayName: staff.displayName } : null;
   }
 }

@@ -1,23 +1,37 @@
 import { useMutation } from "@tanstack/react-query";
+import type {
+  CounselorSignInRequest,
+  RequestCounselorPasswordResetOtpRequest,
+  SetCounselorPasswordRequest,
+  VerifyCounselorPasswordResetOtpRequest,
+} from "@yuvapath/contracts";
 import {
   requestCounselorPasswordResetOtp,
   setCounselorPassword,
   signInAsCounselor,
   verifyCounselorPasswordResetOtp,
+  type StaffAuthRole,
 } from "../api/counselor-auth";
 
-export function useSignInAsCounselor() {
-  return useMutation({ mutationFn: signInAsCounselor });
+// `role` defaults to the counselor flow; the regional admin passes "admin" to hit /admin/auth/*.
+export function useSignInAsCounselor(role: StaffAuthRole = "counselor") {
+  return useMutation({ mutationFn: (input: CounselorSignInRequest) => signInAsCounselor(input, role) });
 }
 
-export function useRequestCounselorPasswordResetOtp() {
-  return useMutation({ mutationFn: requestCounselorPasswordResetOtp });
+export function useRequestCounselorPasswordResetOtp(role: StaffAuthRole = "counselor") {
+  return useMutation({
+    mutationFn: (input: RequestCounselorPasswordResetOtpRequest) =>
+      requestCounselorPasswordResetOtp(input, role),
+  });
 }
 
-export function useVerifyCounselorPasswordResetOtp() {
-  return useMutation({ mutationFn: verifyCounselorPasswordResetOtp });
+export function useVerifyCounselorPasswordResetOtp(role: StaffAuthRole = "counselor") {
+  return useMutation({
+    mutationFn: (input: VerifyCounselorPasswordResetOtpRequest) =>
+      verifyCounselorPasswordResetOtp(input, role),
+  });
 }
 
-export function useSetCounselorPassword() {
-  return useMutation({ mutationFn: setCounselorPassword });
+export function useSetCounselorPassword(role: StaffAuthRole = "counselor") {
+  return useMutation({ mutationFn: (input: SetCounselorPasswordRequest) => setCounselorPassword(input, role) });
 }
