@@ -16,18 +16,9 @@ describe("Journey session routes", () => {
     expect(body.paths["/api/v1/journey-sessions/{sessionId}"]).toBeDefined();
     expect(body.paths["/api/v1/journey-sessions/{sessionId}/resume"]).toBeDefined();
     expect(body.paths["/api/v1/journey-sessions/{sessionId}/user-profile"]).toBeDefined();
-    expect(body.paths["/api/v1/journey-sessions/{sessionId}/intake/questions"]).toBeDefined();
-    expect(body.paths["/api/v1/journey-sessions/{sessionId}/intake/answers/{questionId}"]).toBeDefined();
-    expect(body.paths["/api/v1/journey-sessions/{sessionId}/assessment-runs"]).toBeDefined();
-    // Was previously missing from the OpenAPI doc despite the route being fully functional —
-    // see docs/poc/Validating-endpoints.md's Gap 7. Now registered alongside assessment-runs.
-    expect(body.paths["/api/v1/journey-sessions/{sessionId}/work-values-runs"]).toBeDefined();
-    expect(body.paths["/api/v1/assessment-runs/{runId}/next"]).toBeDefined();
-    expect(body.paths["/api/v1/assessment-runs/{runId}/responses"]).toBeDefined();
-    expect(body.paths["/api/v1/assessment-runs/{runId}/score"]).toBeDefined();
-    expect(
-      body.paths["/api/v1/journey-sessions/{sessionId}/assessment-runs/{runId}/assessment-snapshot"],
-    ).toBeDefined();
+    // The RIASEC flow's intake and assessment-run routes were removed with the old journey.
+    expect(body.paths["/api/v1/journey-sessions/{sessionId}/intake/questions"]).toBeUndefined();
+    expect(body.paths["/api/v1/journey-sessions/{sessionId}/assessment-runs"]).toBeUndefined();
   });
 
   it("validates the authenticated actor header before creating a session", async () => {

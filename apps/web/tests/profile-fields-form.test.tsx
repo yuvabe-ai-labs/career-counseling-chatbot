@@ -46,10 +46,16 @@ describe("ProfileFieldsForm", () => {
     expect(screen.getByText(/please enter your date of birth/i)).toBeInTheDocument();
     expect(screen.getByText(/please select your city/i)).toBeInTheDocument();
     expect(screen.getByText(/please select your state/i)).toBeInTheDocument();
-    expect(screen.getByText(/please select your current stage/i)).toBeInTheDocument();
   });
 
-  it("rejects an age below the ageBand floor of 12 (Figma node 139:3886 copy)", async () => {
+  it("shows the current stage fixed to In school, not editable", () => {
+    render(<ControlledForm onNext={vi.fn()} />);
+    const stage = screen.getByLabelText("Current stage");
+    expect(stage).toBeDisabled();
+    expect(stage).toHaveValue("school");
+  });
+
+  it("has no minimum age: a 9-year-old Class 9 student can continue", async () => {
     const user = userEvent.setup();
     const onNext = vi.fn();
     render(<ControlledForm onNext={onNext} />);
@@ -58,8 +64,8 @@ describe("ProfileFieldsForm", () => {
     fireEvent.change(screen.getByLabelText(/date of birth/i), { target: { value: dobForAge(9) } });
     await user.click(screen.getByRole("button", { name: /next/i }));
 
-    expect(onNext).not.toHaveBeenCalled();
-    expect(screen.getByText(/you must be 12 or older to continue/i)).toBeInTheDocument();
+    expect(screen.queryByText(/12 or older/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/valid date of birth/i)).not.toBeInTheDocument();
   });
 
   it("rejects an age above the 100 ceiling", async () => {

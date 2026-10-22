@@ -5,7 +5,8 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { queryClient } from "@/lib/query-client";
 import { getStoredUserId, setStoredJourneySessionId, setStoredUserId } from "@/lib/storage";
-import { HomePage, SessionProvider, SignInPage } from "@/features/assessment";
+import { AppHeader } from "@/components/AppHeader";
+import { SessionProvider, SignInPage } from "@/features/assessment";
 
 // AppHeader fetches the student's profile on demand when the in-memory session doesn't already
 // have one (the normal case for a returning signed-in user — see useProfile.ts's own comment),
@@ -17,8 +18,8 @@ vi.mock("@/features/assessment/api/profile", () => ({
   upsertUserProfile: vi.fn(),
 }));
 
-// AppHeader (used by HomePage and every other post-auth screen) is where the account menu /
-// sign-out lives — HomePage is just a convenient, side-effect-free host to render it under.
+// AppHeader (used by every post-auth screen) is where the account menu / sign-out lives — a bare
+// page with just the header is a side-effect-free host to render it under.
 // /sign-in renders the *real* SignInPage, not a stub: the actual session.reset() call now
 // happens in SignInPage's own mount effect (see AppHeader's handleSignOut comment for why), so
 // a stub route here would silently not exercise that at all.
@@ -28,10 +29,8 @@ function renderHome() {
       <SessionProvider>
         <MemoryRouter initialEntries={["/home"]}>
           <Routes>
-            {/* "/" is a real route in the app's own router.tsx (OnboardingPage) — included here
-              too since HomePage's own guard targets it if ever reached with no session. */}
             <Route path="/" element={<div>Onboarding screen</div>} />
-            <Route path="/home" element={<HomePage />} />
+            <Route path="/home" element={<AppHeader />} />
             <Route path="/sign-in" element={<SignInPage />} />
           </Routes>
         </MemoryRouter>
@@ -115,7 +114,7 @@ describe("AppHeader — account menu / sign out", () => {
 
     expect(screen.queryByRole("menuitem")).not.toBeInTheDocument();
     expect(getStoredUserId()).toBe("user-id");
-    expect(screen.getByRole("heading", { name: /find your path/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Account menu" })).toBeInTheDocument();
   });
 
   it("opens the account menu on click and shows Sign out", async () => {
@@ -150,7 +149,7 @@ describe("AppHeader — account menu / sign out", () => {
     await user.click(document.body);
 
     expect(screen.queryByRole("menuitem", { name: /sign out/i })).not.toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /find your path/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Account menu" })).toBeInTheDocument();
   });
 
   it("closes the menu on Escape without signing out", async () => {

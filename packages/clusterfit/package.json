@@ -1,0 +1,20 @@
+{
+  "name": "@yuvapath/clusterfit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "scripts": {
+    "sync-prompt": "node scripts/sync-prompt.mjs"
+  },
+  "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^9.1.0",
+    "@yuvapath/assessment": "workspace:*",
+    "@yuvapath/contracts": "workspace:*",
+    "@yuvapath/database": "workspace:*",
+    "@yuvapath/safety": "workspace:*",
+    "express": "^5.2.1",
+    "pg": "^8.22.0",
+    "zod": "^4.4.3"
+  }
+}

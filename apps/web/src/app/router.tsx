@@ -1,81 +1,21 @@
-import { createBrowserRouter } from "react-router-dom";
-import {
-  AdminAidDetailPage,
-  AdminAidListPage,
-  AdminBulkUploadPage,
-  AdminCollegeDetailPage,
-  AdminCollegesPage,
-  AdminComingSoonPage,
-  AdminForgotPasswordPage,
-  AdminHomePage,
-  AdminNewPasswordPage,
-  AdminSignInPage,
-} from "@/features/admin";
-import {
-  GuardianConsentPage,
-  HomePage,
-  IntakeQuestionsPage,
-  OnboardingPage,
-  RiasecAssessmentPage,
-  RiasecResultsPage,
-  SignInPage,
-} from "@/features/assessment";
-import {
-  CounselorForgotPasswordPage,
-  CounselorHomePage,
-  CounselorNewPasswordPage,
-  CounselorSignInPage,
-  CounselorStudentReportPage,
-  CounselorStudentsPage,
-} from "@/features/counselor";
+import { Navigate, createBrowserRouter } from "react-router-dom";
+import { GuardianConsentPage, HomePage, OnboardingPage, SignInPage } from "@/features/assessment";
+import { ClusterfitPage, ClusterfitResultsPage } from "@/features/clusterfit";
 import { LandingPage } from "@/features/landing";
-import {
-  CareerPage,
-  CollegePage,
-  ExplorePathPage,
-  PathwayPage,
-  PlanPage,
-  ScholarshipPage,
-  StreamPage,
-} from "@/features/recommendations";
 
+/**
+ * The student journey: sign up or sign in (guardian consent for under-18s), then the clusterfit
+ * chat, activities, puzzles and work style, then the career-cluster results.
+ */
 export const router = createBrowserRouter([
-  // Temporary, simple entry point — see docs/architecture/counselor-auth-landing-page-plan.md.
-  // Sign-up used to live at "/" directly; it moved to "/sign-up" so this could take its place.
   { path: "/", element: <LandingPage /> },
   { path: "/sign-up", element: <OnboardingPage /> },
   { path: "/sign-in", element: <SignInPage /> },
   { path: "/guardian-consent", element: <GuardianConsentPage /> },
+  // Every auth path ends on /home, which forwards a signed-in student to the journey.
   { path: "/home", element: <HomePage /> },
-  { path: "/intake-questions", element: <IntakeQuestionsPage /> },
-  { path: "/riasec-assessment", element: <RiasecAssessmentPage /> },
-  { path: "/riasec-results", element: <RiasecResultsPage /> },
-  { path: "/explore-path", element: <ExplorePathPage /> },
-  { path: "/explore-path/career", element: <CareerPage /> },
-  { path: "/explore-path/stream", element: <StreamPage /> },
-  { path: "/explore-path/pathway", element: <PathwayPage /> },
-  { path: "/explore-path/college", element: <CollegePage /> },
-  { path: "/explore-path/plan", element: <PlanPage /> },
-  { path: "/explore-path/scholarship", element: <ScholarshipPage /> },
-  { path: "/counselor/sign-in", element: <CounselorSignInPage /> },
-  { path: "/counselor/forgot-password", element: <CounselorForgotPasswordPage /> },
-  { path: "/counselor/new-password", element: <CounselorNewPasswordPage /> },
-  { path: "/counselor/home", element: <CounselorHomePage /> },
-  { path: "/counselor/students", element: <CounselorStudentsPage /> },
-  { path: "/counselor/students/:studentId", element: <CounselorStudentReportPage /> },
-  { path: "/admin/sign-in", element: <AdminSignInPage /> },
-  { path: "/admin/forgot-password", element: <AdminForgotPasswordPage /> },
-  { path: "/admin/new-password", element: <AdminNewPasswordPage /> },
-  { path: "/admin/home", element: <AdminHomePage /> },
-  { path: "/admin/colleges", element: <AdminCollegesPage /> },
-  { path: "/admin/colleges/new", element: <AdminCollegeDetailPage /> },
-  { path: "/admin/colleges/:collegeId", element: <AdminCollegeDetailPage /> },
-  { path: "/admin/aid-schemes", element: <AdminAidListPage kind="aid" /> },
-  { path: "/admin/aid-schemes/new", element: <AdminAidDetailPage kind="aid" /> },
-  { path: "/admin/aid-schemes/:schemeId", element: <AdminAidDetailPage kind="aid" /> },
-  { path: "/admin/scholarships", element: <AdminAidListPage kind="scholarship" /> },
-  { path: "/admin/scholarships/new", element: <AdminAidDetailPage kind="scholarship" /> },
-  { path: "/admin/scholarships/:schemeId", element: <AdminAidDetailPage kind="scholarship" /> },
-  { path: "/admin/bulk-upload", element: <AdminBulkUploadPage /> },
-  { path: "/admin/careers", element: <AdminComingSoonPage title="Career" /> },
+  { path: "/clusterfit", element: <ClusterfitPage /> },
+  { path: "/clusterfit/results", element: <ClusterfitResultsPage /> },
+  // Unknown paths (including old bookmarks to removed pages) go to the landing page.
+  { path: "*", element: <Navigate to="/" replace /> },
 ]);

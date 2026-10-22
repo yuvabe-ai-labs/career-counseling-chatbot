@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import request from "supertest";
 import { HealthResponseSchema } from "@yuvapath/contracts";
-import { createInMemoryRecommendationStore } from "@yuvapath/recommendations";
 import { z } from "zod";
 import { createApp } from "../src/app/create-app.js";
 
@@ -17,15 +16,7 @@ describe("GET /api/v1/health", () => {
     const body = HealthResponseSchema.parse(JSON.parse(response.text) as unknown);
     expect(body.status).toBe("ok");
     expect(body.database.status).toBe("connected");
-    expect(body.modules).toHaveLength(6);
-    expect(body.modules.map((module) => module.code)).toEqual([
-      "m1",
-      "m2",
-      "m3",
-      "m4",
-      "m5-safety",
-      "m5-evaluation",
-    ]);
+    expect(body.modules.map((module) => module.code)).toEqual(["m1", "clusterfit", "m5-safety"]);
   });
 
   it("reports a failed database connection instead of a false healthy status", async () => {
@@ -54,26 +45,17 @@ describe("GET /api/v1/health", () => {
   });
 
   it("publishes OpenAPI JSON for the shared testing UI", async () => {
-    const response = await request(
-      createApp({ logging: false, recommendationStore: createInMemoryRecommendationStore() }),
-    ).get("/openapi.json");
+    const response = await request(createApp({ logging: false })).get("/openapi.json");
     expect(response.status).toBe(200);
     const body = OpenApiPathsSchema.parse(JSON.parse(response.text) as unknown);
-    expect(body.paths["/api/v1/health"]).toBeDefined();
-    expect(body.paths["/api/v1/catalog/colleges"]).toBeDefined();
-    expect(body.paths["/api/v1/catalog/careers/{slug}"]).toBeDefined();
-    expect(body.paths["/api/v1/catalog/careers/search"]).toBeDefined();
-    expect(body.paths["/api/v1/catalog/streams"]).toBeDefined();
-    expect(Object.keys(body.paths).slice(0, 9)).toEqual([
+    for (const path of [
       "/api/v1/health",
-      "/api/v1/catalog/datasets",
-      "/api/v1/catalog/careers/search",
-      "/api/v1/catalog/careers/{slug}",
-      "/api/v1/catalog/streams",
-      "/api/v1/catalog/colleges",
-      "/api/v1/catalog/aid-schemes",
-      "/api/v1/internal/catalog/imports",
-      "/api/v1/internal/catalog/imports/{id}/report",
-    ]);
+      "/api/v1/catalog/states",
+      "/api/v1/catalog/cities",
+      "/api/v1/clusterfit/sessions",
+    ]) {
+      expect(body.paths[path]).toBeDefined();
+    }
+    expect(body.paths["/api/v1/catalog/colleges"]).toBeUndefined();
   });
 });

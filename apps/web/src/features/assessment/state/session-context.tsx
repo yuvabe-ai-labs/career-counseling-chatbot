@@ -9,6 +9,7 @@ import {
   setStoredJourneySessionId,
   setStoredUserId,
 } from "@/lib/storage";
+import { queryClient } from "@/lib/query-client";
 
 interface SessionState {
   userId: string | null;
@@ -48,6 +49,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     () => ({
       ...state,
       setUserId: (userId: string) => {
+        // A different student in this browser: drop every cached response (journey session,
+        // results, profile) so nothing from the previous student is ever shown to this one.
+        if (userId !== state.userId) queryClient.clear();
         setStoredUserId(userId);
         setState((prev) => ({ ...prev, userId }));
       },
@@ -62,6 +66,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setProfile: (profile: UserProfile) => setState((prev) => ({ ...prev, profile })),
       reset: () => {
         clearStoredSession();
+        queryClient.clear();
         setState({ userId: null, journeySessionId: null, email: null, profile: null });
       },
     }),

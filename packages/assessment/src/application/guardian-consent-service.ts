@@ -38,7 +38,6 @@ import {
   journeySessionNotFound,
   journeySessionNotResumable,
   pendingSignupNotFound,
-  under12Ineligible,
   userProfileNotFound,
 } from "./errors.js";
 import type { EmailProvider } from "./email-provider.js";
@@ -227,9 +226,6 @@ export class GuardianConsentService {
     // The backend independently computes age from dateOfBirth — never trusts a client-supplied
     // age number, same reasoning as UserProfileService.upsertForSession's own dateOfBirth path.
     const age = calculateAgeAtOnboarding(input.dateOfBirth, now);
-    if (age < 12) {
-      throw under12Ineligible();
-    }
     if (!isMinorAge(age)) {
       throw guardianConsentNotRequired();
     }

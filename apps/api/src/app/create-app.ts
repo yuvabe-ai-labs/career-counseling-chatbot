@@ -1,73 +1,17 @@
-import { timingSafeEqual } from "node:crypto";
 import {
-  registerAssessmentSnapshotRoutes,
   registerAssessmentRoutes,
   SmtpEmailProvider,
-  type AssessmentHttpDependencies,
-  type CounselorDirectory,
   type EmailProvider,
-  type RegionalAdminDirectory,
   type IdentityUserDirectory,
-} from "@yuvapath/assessment";
-import { createOpenApiRegistry, generateOpenApiDocument } from "@yuvapath/contracts";
-import { registerCounselorRoutes, type CounselorHttpDependencies } from "@yuvapath/counselor";
-import { createDatabasePool, createSupabaseServerClient } from "@yuvapath/database";
-import {
-  createPostgresEvaluationRunRepository,
-  type EvaluationRunRepository,
-  registerEvaluationRoutes,
-} from "@yuvapath/evaluation";
-import {
-  InMemoryAidSchemeRepository,
-  InMemoryCareerRepository,
-  InMemoryCareerSearchRepository,
-  InMemoryCollegeRepository,
-  InMemoryDatasetRepository,
-  InMemoryLocationRepository,
-  InMemoryStreamRepository,
-  LocalCatalogImportCoordinator,
-  PostgresAdminCatalogRepository,
-  PostgresAidSchemeRepository,
-  PostgresCareerRepository,
-  PostgresCareerSearchRepository,
-  PostgresCollegeRepository,
-  PostgresDatasetRepository,
-  PostgresLocationRepository,
-  PostgresStreamRepository,
-  registerAdminCatalogRoutes,
-  registerKnowledgeRoutes,
-  type AdminCatalogRepository,
-  type AidSchemeRepository,
-  type CareerRepository,
-  type CareerSearchRepository,
-  type CatalogImportCoordinator,
-  type CollegeRepository,
-  type DatasetRepository,
   type LocationRepository,
-  type StreamRepository,
-} from "@yuvapath/knowledge";
-import {
-  createPostgresRecommendationDataSource,
-  createPostgresRecommendationStore,
-  registerRecommendationSetRoutes,
-  registerRecommendationRoutes,
-  type RecommendationHttpDependencies,
-  type RecommendationStore,
-} from "@yuvapath/recommendations";
-import {
-  createPostgresPrivacyJobRepository,
-  createPostgresSafetyOperationsRepository,
-  type PrivacyJobRepository,
-  type ResolveSafetyUserId,
-  type SafetyOperationsRepository,
-  registerSafetyRoutes,
-} from "@yuvapath/safety";
+} from "@yuvapath/assessment";
+import { registerClusterfitModule } from "@yuvapath/clusterfit";
+import { createOpenApiRegistry, generateOpenApiDocument } from "@yuvapath/contracts";
+import { createDatabasePool, createSupabaseServerClient } from "@yuvapath/database";
 import cors from "cors";
 import express, { type Express } from "express";
 import helmet from "helmet";
-import type { Pool } from "pg";
 import swaggerUi from "swagger-ui-express";
-import { SupabaseCounselorDirectory } from "../auth/supabase-counselor-directory.js";
 import { SupabaseIdentityDirectory } from "../auth/supabase-identity-directory.js";
 import { env } from "../config/env.js";
 import { errorHandler, notFoundHandler } from "../middleware/error-handler.js";
@@ -88,76 +32,24 @@ export type CreateAppOptions = {
    * Apply the `cors` middleware (Access-Control-Allow-Origin etc., from CORS_ORIGIN). Defaults
    * to true. The Lambda entrypoint sets this to false: the Lambda Function URL already adds its
    * own CORS headers (see infra/bootstrap-aws.sh), so leaving this on there means every response
-   * carries two, comma-joined Access-Control-Allow-Origin values — which browsers reject outright
-   * ("contains multiple values ..., but only one is allowed"). server.ts (local dev / a
-   * non-Lambda deployment) has no CORS-handling front door in front of it, so it keeps this on.
+   * carries two, comma-joined Access-Control-Allow-Origin values — which browsers reject outright.
    */
   cors?: boolean;
   checkDatabase?: () => Promise<boolean>;
   databaseRequired?: boolean;
+  /** Connect to DATABASE_URL. Defaults to true outside tests; false keeps every module in memory. */
   database?: boolean;
-  assessment?: AssessmentHttpDependencies;
   identityUserDirectory?: IdentityUserDirectory;
-  counselorDirectory?: CounselorDirectory;
-  /** Backs /admin/auth/* sign-in and the x-yuvapath-admin-id guard on /admin/* catalog routes. */
-  regionalAdminDirectory?: RegionalAdminDirectory;
-  /** Backs the regional-admin colleges/aid CRUD routes; defaults to Postgres when a pool exists. */
-  adminCatalogRepository?: AdminCatalogRepository;
-  emailProvider?: EmailProvider;
-  recommendations?: RecommendationHttpDependencies;
-  recommendationStore?: RecommendationStore;
-  counselor?: CounselorHttpDependencies;
-  careerRepository?: CareerRepository;
-  careerSearchRepository?: CareerSearchRepository;
-  collegeRepository?: CollegeRepository;
-  streamRepository?: StreamRepository;
-  aidSchemeRepository?: AidSchemeRepository;
-  datasetRepository?: DatasetRepository;
   locationRepository?: LocationRepository;
-  catalogImportCoordinator?: CatalogImportCoordinator;
-  internalApiKey?: string;
-  evaluationRunRepository?: EvaluationRunRepository;
-  privacyJobRepository?: PrivacyJobRepository;
-  resolveSafetyUserId?: ResolveSafetyUserId;
-  safetyOperationsRepository?: SafetyOperationsRepository;
+  emailProvider?: EmailProvider;
+  /** Overrides GEMINI_API_KEY for the clusterfit chat; null turns the chat off (tests). */
+  geminiApiKey?: string | null;
 };
 
-type KnowledgeRepositories = {
-  careerRepository: CareerRepository;
-  careerSearchRepository: CareerSearchRepository;
-  collegeRepository: CollegeRepository;
-  streamRepository: StreamRepository;
-  aidSchemeRepository: AidSchemeRepository;
-  datasetRepository: DatasetRepository;
-  locationRepository: LocationRepository;
-  catalogImportCoordinator?: CatalogImportCoordinator;
-};
-
-const createDefaultKnowledgeRepositories = (pool: Pool | undefined): KnowledgeRepositories => {
-  if (!pool) {
-    return {
-      careerRepository: new InMemoryCareerRepository([]),
-      careerSearchRepository: new InMemoryCareerSearchRepository([]),
-      collegeRepository: new InMemoryCollegeRepository([]),
-      streamRepository: new InMemoryStreamRepository([], [], []),
-      aidSchemeRepository: new InMemoryAidSchemeRepository([]),
-      datasetRepository: new InMemoryDatasetRepository([]),
-      locationRepository: new InMemoryLocationRepository([], []),
-    };
-  }
-
-  return {
-    careerRepository: new PostgresCareerRepository(pool),
-    careerSearchRepository: new PostgresCareerSearchRepository(pool),
-    collegeRepository: new PostgresCollegeRepository(pool),
-    streamRepository: new PostgresStreamRepository(pool),
-    aidSchemeRepository: new PostgresAidSchemeRepository(pool),
-    datasetRepository: new PostgresDatasetRepository(pool),
-    locationRepository: new PostgresLocationRepository(pool),
-    catalogImportCoordinator: new LocalCatalogImportCoordinator(pool),
-  };
-};
-
+/**
+ * The API: student accounts (sign-up, sign-in, guardian consent, profile, state/city search) and
+ * the clusterfit journey. Every public endpoint is in the OpenAPI document served at /docs.
+ */
 export const createApp = (options: CreateAppOptions = {}): Express => {
   const app = express();
   const registry = createOpenApiRegistry();
@@ -171,7 +63,10 @@ export const createApp = (options: CreateAppOptions = {}): Express => {
   app.use(helmet({ contentSecurityPolicy: false }));
   if (options.cors ?? true) {
     app.use(
-      cors({ origin: env.CORS_ORIGIN.split(",").map((origin) => origin.trim()), credentials: true }),
+      cors({
+        origin: env.CORS_ORIGIN.split(",").map((origin) => origin.trim()),
+        credentials: true,
+      }),
     );
   }
   app.use(express.json({ limit: "1mb" }));
@@ -203,8 +98,7 @@ export const createApp = (options: CreateAppOptions = {}): Express => {
         })
       : undefined);
 
-  // Needs the Supabase service-role client (admin.createUser) — separate from the anon-key
-  // client used elsewhere for user-token verification (createSupabaseUserResolver).
+  // Needs the Supabase service-role client (admin.createUser) for password-based sign-up.
   const identityUserDirectory: IdentityUserDirectory | undefined =
     options.identityUserDirectory ??
     (databasePool && env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY
@@ -217,155 +111,27 @@ export const createApp = (options: CreateAppOptions = {}): Express => {
         })
       : undefined);
 
-  // Same service-role client shape as identityUserDirectory above, gated by
-  // operations.staff_profiles/staff_role_assignments instead of just auth.users — see
-  // docs/architecture/counselor-auth-landing-page-plan.md.
-  const counselorDirectory =
-    options.counselorDirectory ??
-    (databasePool && env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY
-      ? new SupabaseCounselorDirectory({
-          pool: databasePool,
-          client: createSupabaseServerClient({
-            url: env.SUPABASE_URL,
-            apiKey: env.SUPABASE_SERVICE_ROLE_KEY,
-          }),
-        })
-      : undefined);
-
-  // Same class as counselorDirectory, gated on role='regional_admin' instead (its scope_json
-  // carries the state the admin manages).
-  const regionalAdminDirectory =
-    options.regionalAdminDirectory ??
-    (databasePool && env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY
-      ? new SupabaseCounselorDirectory({
-          pool: databasePool,
-          role: "regional_admin",
-          client: createSupabaseServerClient({
-            url: env.SUPABASE_URL,
-            apiKey: env.SUPABASE_SERVICE_ROLE_KEY,
-          }),
-        })
-      : undefined);
-
   registerAssessmentRoutes(app, registry, {
     ...(databasePool ? { pool: databasePool } : {}),
     ...(emailProvider ? { emailProvider } : {}),
     ...(identityUserDirectory ? { identityUserDirectory } : {}),
-    ...(counselorDirectory ? { counselorDirectory } : {}),
-    ...(regionalAdminDirectory ? { regionalAdminDirectory } : {}),
+    ...(options.locationRepository ? { locationRepository: options.locationRepository } : {}),
     enableGuardianOtpDebugRoute: env.NODE_ENV !== "production",
   });
-  registerAssessmentSnapshotRoutes(app, registry, options.assessment);
 
-  const recommendationStore =
-    options.recommendationStore ??
-    (databasePool ? createPostgresRecommendationStore({ pool: databasePool }) : undefined);
-  if (recommendationStore) {
-    registerRecommendationRoutes(app, registry, {
-      store: recommendationStore,
-      ...(databasePool ? { dataSource: createPostgresRecommendationDataSource(databasePool) } : {}),
-      registerReadRoute: options.recommendations ? false : true,
-    });
-  }
-  if (options.recommendations) {
-    registerRecommendationSetRoutes(app, registry, options.recommendations);
-  }
-
-  const defaultKnowledgeRepositories =
-    options.careerRepository === undefined ||
-    options.careerSearchRepository === undefined ||
-    options.collegeRepository === undefined ||
-    options.streamRepository === undefined ||
-    options.aidSchemeRepository === undefined ||
-    options.datasetRepository === undefined ||
-    options.locationRepository === undefined
-      ? createDefaultKnowledgeRepositories(databasePool)
-      : undefined;
-  registerKnowledgeRoutes(app, registry, {
-    careerRepository: options.careerRepository ?? defaultKnowledgeRepositories!.careerRepository,
-    careerSearchRepository:
-      options.careerSearchRepository ?? defaultKnowledgeRepositories!.careerSearchRepository,
-    collegeRepository: options.collegeRepository ?? defaultKnowledgeRepositories!.collegeRepository,
-    streamRepository: options.streamRepository ?? defaultKnowledgeRepositories!.streamRepository,
-    aidSchemeRepository:
-      options.aidSchemeRepository ?? defaultKnowledgeRepositories!.aidSchemeRepository,
-    datasetRepository: options.datasetRepository ?? defaultKnowledgeRepositories!.datasetRepository,
-    locationRepository:
-      options.locationRepository ?? defaultKnowledgeRepositories!.locationRepository,
-    ...((options.catalogImportCoordinator ??
-      defaultKnowledgeRepositories?.catalogImportCoordinator) === undefined
-      ? {}
-      : {
-          catalogImportCoordinator:
-            options.catalogImportCoordinator ?? defaultKnowledgeRepositories!.catalogImportCoordinator!,
-        }),
-    authorizeInternalRequest: createInternalAuthorizer(
-      options.internalApiKey ?? env.INTERNAL_API_KEY,
-    ),
+  registerClusterfitModule(app, registry, {
+    databasePool,
+    geminiApiKey:
+      options.geminiApiKey === undefined ? env.GEMINI_API_KEY : (options.geminiApiKey ?? undefined),
+    liveModel: env.GEMINI_LIVE_MODEL,
+    extractionModels: env.CLUSTERFIT_EXTRACTION_MODELS.split(",")
+      .map((model) => model.trim())
+      .filter(Boolean),
+    extractionBudgetMs: env.CLUSTERFIT_EXTRACTION_BUDGET_MS,
+    nodeEnv: env.NODE_ENV,
   });
 
-  const adminCatalogRepository =
-    options.adminCatalogRepository ??
-    (databasePool ? new PostgresAdminCatalogRepository(databasePool) : undefined);
-  if (adminCatalogRepository && regionalAdminDirectory) {
-    registerAdminCatalogRoutes(app, registry, {
-      repository: adminCatalogRepository,
-      resolveAdminScope: async (adminId) => {
-        const scope = await regionalAdminDirectory.getAdminScope(adminId);
-        return scope ? { adminId, ...scope } : null;
-      },
-    });
-  }
-
-  registerCounselorRoutes(app, registry, options.counselor);
-
-  const privacyJobRepository =
-    options.privacyJobRepository ??
-    (databasePool ? createPostgresPrivacyJobRepository(databasePool) : undefined);
-  const evaluationRunRepository =
-    options.evaluationRunRepository ??
-    (databasePool ? createPostgresEvaluationRunRepository(databasePool) : undefined);
-  const safetyOperationsRepository =
-    options.safetyOperationsRepository ??
-    (databasePool ? createPostgresSafetyOperationsRepository(databasePool) : undefined);
-  const safetyRouteDependencies =
-    privacyJobRepository || safetyOperationsRepository || options.resolveSafetyUserId
-      ? {
-          ...(privacyJobRepository ? { privacyJobRepository } : {}),
-          ...(safetyOperationsRepository ? { safetyOperationsRepository } : {}),
-          ...(options.resolveSafetyUserId ? { resolveUserId: options.resolveSafetyUserId } : {}),
-        }
-      : undefined;
-
-  registerSafetyRoutes(app, registry, safetyRouteDependencies);
-  registerEvaluationRoutes(
-    app,
-    registry,
-    evaluationRunRepository ? { evaluationRunRepository } : undefined,
-  );
-
   const openApiDocument = generateOpenApiDocument(registry);
-  const swaggerPathOrder = [
-    "/api/v1/health",
-    "/api/v1/catalog/datasets",
-    "/api/v1/catalog/careers/search",
-    "/api/v1/catalog/careers/{slug}",
-    "/api/v1/catalog/streams",
-    "/api/v1/catalog/colleges",
-    "/api/v1/catalog/aid-schemes",
-    "/api/v1/internal/catalog/imports",
-    "/api/v1/internal/catalog/imports/{id}/report",
-  ];
-  const orderedPaths: typeof openApiDocument.paths = {};
-  for (const path of swaggerPathOrder) {
-    const pathItem = openApiDocument.paths[path];
-    if (pathItem !== undefined) orderedPaths[path] = pathItem;
-  }
-  for (const [path, pathItem] of Object.entries(openApiDocument.paths)) {
-    if (orderedPaths[path] === undefined) orderedPaths[path] = pathItem;
-  }
-  openApiDocument.paths = orderedPaths;
-
   app.get("/openapi.json", (_request, response) => response.json(openApiDocument));
   if (options.docs ?? true) {
     app.use(
@@ -379,13 +145,3 @@ export const createApp = (options: CreateAppOptions = {}): Express => {
   app.use(errorHandler);
   return app;
 };
-
-const createInternalAuthorizer = (expectedKey: string | undefined) =>
-  (authorization: string | undefined): boolean => {
-    if (expectedKey === undefined || authorization === undefined) return false;
-    const prefix = "Bearer ";
-    if (!authorization.startsWith(prefix)) return false;
-    const supplied = Buffer.from(authorization.slice(prefix.length));
-    const expected = Buffer.from(expectedKey);
-    return supplied.length === expected.length && timingSafeEqual(supplied, expected);
-  };

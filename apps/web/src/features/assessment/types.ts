@@ -12,8 +12,14 @@ export type ProfileFormValues = {
   stateCode: string;
   city: string;
   country: string;
-  selfStage: EducationStage | "";
+  selfStage: EducationStage;
 };
+
+/**
+ * YuvaPath is for students in Classes 9–12, so sign-up records every student as "In school"
+ * (shown, not editable). The chat then learns the exact class and updates the stage.
+ */
+export const SIGNUP_STAGE: EducationStage = "school";
 
 export const emptyProfileFormValues: ProfileFormValues = {
   name: "",
@@ -22,7 +28,7 @@ export const emptyProfileFormValues: ProfileFormValues = {
   stateCode: "",
   city: "",
   country: "India",
-  selfStage: "",
+  selfStage: SIGNUP_STAGE,
 };
 
 export type GuardianModalPhase = "email_entry" | "otp_verification";

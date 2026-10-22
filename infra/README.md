@@ -65,10 +65,9 @@ environment-scoped config):
 | `LAMBDA_FUNCTION_NAME` | `yuvapath-api-staging` | `yuvapath-api-prod` |
 | `LAMBDA_FUNCTION_URL` | from bootstrap output | from bootstrap output |
 | `CORS_ORIGIN` | your staging frontend origin | your production frontend origin |
-| `AI_PROVIDER` | `gemini` (or `anthropic` / `auto` / `disabled`) | |
-| `GEMINI_MODEL` | e.g. `gemini-3.5-flash-lite` | |
-| `ANTHROPIC_MODEL` | leave unset unless using Claude | |
-| `SAFETY_SERVICE_URL` | leave unset (safety runs in-process) | |
+| `GEMINI_LIVE_MODEL` | `gemini-3.8-live` | |
+| `CLUSTERFIT_EXTRACTION_MODELS` | `gemini-flash-lite-latest,gemini-flash-latest` | |
+| `CLUSTERFIT_EXTRACTION_BUDGET_MS` | `27000` (raise with the Lambda timeout) | |
 | `SMTP_PORT` | `587` | |
 | `SMTP_FROM` | `YuvaPath <noreply@yourdomain.com>` | |
 
@@ -77,12 +76,9 @@ environment-scoped config):
 | Name | Notes |
 |---|---|
 | `SUPABASE_URL` | |
-| `SUPABASE_ANON_KEY` | |
 | `SUPABASE_SERVICE_ROLE_KEY` | bypasses RLS — server-only |
 | `DATABASE_URL` | Supabase pooler connection string |
-| `INTERNAL_API_KEY` | 32+ random chars, used for the catalog-import internal routes |
 | `GEMINI_API_KEY` | |
-| `ANTHROPIC_API_KEY` | only if `AI_PROVIDER` uses Claude |
 | `SMTP_HOST` | |
 | `SMTP_USER` | |
 | `SMTP_PASSWORD` | |

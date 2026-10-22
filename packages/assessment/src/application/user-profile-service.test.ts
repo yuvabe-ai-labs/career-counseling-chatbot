@@ -142,25 +142,25 @@ describe("UserProfileService", () => {
     expect(profile.segment).toBe("explorer");
   });
 
-  it("does not persist under-12 profiles", async () => {
+  it("stores an under-12 profile in the under-12 age band (no minimum age)", async () => {
     const { service, profileRepository } = createService();
 
-    await expect(
-      service.upsertForSession({
-        sessionId,
-        userId,
-        profile: {
-          firstName: "Tiny",
-          dateOfBirth: "2015-07-29",
-          city: "Pune",
-          state: "Maharashtra",
-          homeDistrict: "Chennai",
-          countryCode: "IN",
-          selfStage: "school",
-        },
-      }),
-    ).rejects.toMatchObject({ code: "under_12_ineligible", statusCode: 422 });
-    expect(profileRepository.profiles.size).toBe(0);
+    const profile = await service.upsertForSession({
+      sessionId,
+      userId,
+      profile: {
+        firstName: "Tiny",
+        dateOfBirth: "2015-07-29",
+        city: "Pune",
+        state: "Maharashtra",
+        homeDistrict: "Chennai",
+        countryCode: "IN",
+        selfStage: "school",
+      },
+    });
+
+    expect(profile.ageBand).toBe("minor_under_12");
+    expect(profileRepository.profiles.size).toBe(1);
   });
 
   it("lets self-described stage override the age-based segment", async () => {

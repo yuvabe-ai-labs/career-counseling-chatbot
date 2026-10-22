@@ -12,7 +12,7 @@ import {
   journeySessionExpired,
   journeySessionNotFound,
   journeySessionNotResumable,
-  under12Ineligible,
+  invalidDateOfBirth,
   userProfileNotFound,
 } from "./errors.js";
 import type { JourneySessionRepository } from "./journey-session-repository.js";
@@ -66,8 +66,8 @@ export class UserProfileService {
         ? calculateAgeAtOnboarding(input.profile.dateOfBirth, now)
         : input.profile.ageAtOnboarding;
 
-    if (age === undefined || age < 12) {
-      throw under12Ineligible();
+    if (age === undefined) {
+      throw invalidDateOfBirth();
     }
 
     return this.userProfileRepository.upsert({

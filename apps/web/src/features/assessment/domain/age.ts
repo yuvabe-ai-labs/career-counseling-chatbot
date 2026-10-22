@@ -30,4 +30,3 @@ export function calculateAge(dateOfBirth: string, now: Date = new Date()): numbe
 }
 
 export const MINOR_AGE_CEILING = 18;
-export const MIN_ELIGIBLE_AGE = 12;

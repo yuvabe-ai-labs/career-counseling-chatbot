@@ -229,7 +229,7 @@ describe("IdentityService", () => {
       expect(result.userId).toBe("password-user-1");
     });
 
-    it("rejects under-12 outright, before any guardian-consent check", async () => {
+    it("treats an under-12 like any minor: guardian consent first, no age floor", async () => {
       const { service } = createService();
       const { pendingSessionId } = service.createAnonymousSession();
 
@@ -240,7 +240,7 @@ describe("IdentityService", () => {
           email: "child@example.com",
           password: "Str0ng!Pass",
         }),
-      ).rejects.toMatchObject({ code: "under_12_ineligible", statusCode: 422 });
+      ).rejects.toMatchObject({ code: "guardian_consent_required_for_signup", statusCode: 409 });
     });
 
     it("rejects an unknown/expired pendingSessionId", async () => {

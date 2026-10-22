@@ -19,7 +19,8 @@ import { SelectField } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { searchCities, searchStates } from "../api/location";
 import { EDUCATION_STAGE_OPTIONS } from "../data";
-import { calculateAge, MIN_ELIGIBLE_AGE } from "../domain/age";
+import { calculateAge } from "../domain/age";
+import { SIGNUP_STAGE } from "../types";
 import type { ProfileFormValues } from "../types";
 import {
   authFormClass,
@@ -100,17 +101,13 @@ export function ProfileFieldsForm({
     if (!value.dateOfBirth) next.dateOfBirth = "Please enter your date of birth.";
     else {
       const age = calculateAge(value.dateOfBirth);
-      // Figma node 139:3886 specs this exact copy for the under-12 case — the
-      // ageBand floor (`AgeBandSchema` starts at "minor_12_13") is the real
-      // constraint; 100 is just a sanity ceiling, not a designed message.
-      if (age === null) next.dateOfBirth = "Enter a valid date of birth.";
-      else if (age > 100) next.dateOfBirth = "Enter a valid date of birth.";
-      else if (age < MIN_ELIGIBLE_AGE) next.dateOfBirth = "You must be 12 or older to continue";
+      // No age limit: any Class 9–12 student may sign up (under-18s go through guardian
+      // consent). Only an impossible date is rejected; 100 is a sanity ceiling.
+      if (age === null || age > 100) next.dateOfBirth = "Enter a valid date of birth.";
     }
 
     if (!value.city) next.city = "Please select your city.";
     if (!value.state) next.state = "Please select your state.";
-    if (!value.selfStage) next.selfStage = "Please select your current stage.";
 
     setErrors(next);
     if (Object.keys(next).length === 0) onNext();
@@ -202,16 +199,15 @@ export function ProfileFieldsForm({
           <div className="sm:flex-1">
             <Label className="text-foreground">Current stage *</Label>
             <SelectField
-              value={value.selfStage}
-              onValueChange={(next) => set("selfStage", next as ProfileFormValues["selfStage"])}
+              value={SIGNUP_STAGE}
+              onValueChange={() => undefined}
               options={EDUCATION_STAGE_OPTIONS}
               placeholder="Select your current stage"
               icon={<GraduationCap className="size-[18px]" />}
               aria-label="Current stage"
-              aria-invalid={Boolean(errors.selfStage)}
+              disabled
               className="mt-2"
             />
-            <FieldError message={errors.selfStage} />
           </div>
         </div>
 

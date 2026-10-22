@@ -1,16 +1,6 @@
 import { assessmentModule } from "@yuvapath/assessment";
-import { counselorModule } from "@yuvapath/counselor";
-import { evaluationModule } from "@yuvapath/evaluation";
-import { knowledgeModule } from "@yuvapath/knowledge";
-import { recommendationsModule } from "@yuvapath/recommendations";
-import { safetyModule } from "@yuvapath/safety";
+import { clusterfitModule } from "@yuvapath/clusterfit";
 import type { ModuleDescriptor } from "@yuvapath/contracts";
+import { safetyModule } from "@yuvapath/safety";
 
-export const modules: ModuleDescriptor[] = [
-  assessmentModule,
-  recommendationsModule,
-  knowledgeModule,
-  counselorModule,
-  safetyModule,
-  evaluationModule,
-];
+export const modules: ModuleDescriptor[] = [assessmentModule, clusterfitModule, safetyModule];

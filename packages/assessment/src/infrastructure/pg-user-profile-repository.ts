@@ -1,9 +1,10 @@
-import { UserProfileSchema, type UserProfile } from "@yuvapath/contracts";
+import { UserProfileSchema, type EducationStage, type UserProfile } from "@yuvapath/contracts";
 import type { Pool } from "pg";
 import type {
   UpsertUserProfileRecord,
   UserProfileRepository,
 } from "../application/user-profile-repository.js";
+import { deriveSegment } from "../domain/user-profile.js";
 
 type UserProfileRow = {
   user_id: string;
@@ -99,6 +100,34 @@ export class PgUserProfileRepository implements UserProfileRepository {
       throw new Error("User profile upsert returned no row.");
     }
     return mapUserProfileRow(row);
+  }
+
+  /**
+   * Records the student's education stage after sign-up (for example once a plug-in learns their
+   * class in a chat) and re-derives the segment from it. Returns the updated profile, or null.
+   */
+  async updateEducationStage(input: {
+    userId: string;
+    selfStage: EducationStage;
+    now: string;
+  }): Promise<UserProfile | null> {
+    const result = await this.pool.query<UserProfileRow>(
+      `
+        update assessment.user_profiles
+        set self_stage = $2, segment = $3, updated_at = $4
+        where user_id = $1 and profile_status = 'active'
+        returning *
+      `,
+      [
+        input.userId,
+        input.selfStage,
+        // The segment follows the stage alone (deriveSegment doesn't use age for it).
+        deriveSegment({ age: 0, selfStage: input.selfStage }),
+        input.now,
+      ],
+    );
+    const row = result.rows[0];
+    return row ? mapUserProfileRow(row) : null;
   }
 
   async findByUserId(userId: string): Promise<UserProfile | null> {

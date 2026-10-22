@@ -166,7 +166,7 @@ create_function_if_missing() {
     --timeout 30 \
     --memory-size 512 \
     --zip-file "fileb://$PLACEHOLDER_DIR/placeholder.zip" \
-    --environment "Variables={NODE_ENV=production,COUNSELOR_RUNTIME=unconfigured}" >/dev/null
+    --environment "Variables={NODE_ENV=production}" >/dev/null
   aws lambda wait function-active --function-name "$name"
 
   echo "Creating Function URL for $name..."

@@ -27,6 +27,9 @@ export const calculateAgeAtOnboarding = (dateOfBirth: string, now: Date): number
 };
 
 export const deriveAgeBand = (age: number): AgeBand => {
+  if (age < 12) {
+    return "minor_under_12";
+  }
   if (age <= 13) {
     return "minor_12_13";
   }
@@ -48,8 +51,5 @@ export const deriveSegment = (input: { age: number; selfStage: EducationStage })
       return "explorer";
     case "higher_secondary":
       return "pathfinder";
-    case "college":
-    case "graduate":
-      return "launcher";
   }
 };

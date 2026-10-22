@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import type { EducationStage } from "@yuvapath/contracts";
 import { ApiRequestError } from "@/lib/api-client";
 import { getErrorMessage } from "@/lib/error-messages";
 import {
@@ -357,7 +356,7 @@ export function OnboardingPage() {
           city: profile.city,
           state: profile.state,
           countryCode: "IN",
-          selfStage: profile.selfStage as EducationStage,
+          selfStage: profile.selfStage,
         },
       });
       session.setProfile(savedProfile);

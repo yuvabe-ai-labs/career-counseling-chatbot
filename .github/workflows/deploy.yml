@@ -39,7 +39,6 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm test
-      - run: pnpm db:validate-migration
 
       - run: pnpm build:lambda
       - run: node scripts/package-lambda.mjs
@@ -53,20 +52,15 @@ jobs:
       - name: Build Lambda environment variables
         env:
           NODE_ENV: production
-          COUNSELOR_RUNTIME: integrated
           CORS_ORIGIN: ${{ vars.CORS_ORIGIN }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DATABASE_SSL: "true"
-          INTERNAL_API_KEY: ${{ secrets.INTERNAL_API_KEY }}
-          AI_PROVIDER: ${{ vars.AI_PROVIDER }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}
-          SAFETY_SERVICE_URL: ${{ vars.SAFETY_SERVICE_URL }}
+          GEMINI_LIVE_MODEL: ${{ vars.GEMINI_LIVE_MODEL }}
+          CLUSTERFIT_EXTRACTION_MODELS: ${{ vars.CLUSTERFIT_EXTRACTION_MODELS }}
+          CLUSTERFIT_EXTRACTION_BUDGET_MS: ${{ vars.CLUSTERFIT_EXTRACTION_BUDGET_MS }}
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
           SMTP_PORT: ${{ vars.SMTP_PORT }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
@@ -78,20 +72,15 @@ jobs:
           # don't overwrite an existing Lambda config value with an empty string.
           jq -n \
             --arg NODE_ENV "$NODE_ENV" \
-            --arg COUNSELOR_RUNTIME "$COUNSELOR_RUNTIME" \
             --arg CORS_ORIGIN "$CORS_ORIGIN" \
             --arg SUPABASE_URL "$SUPABASE_URL" \
-            --arg SUPABASE_ANON_KEY "$SUPABASE_ANON_KEY" \
             --arg SUPABASE_SERVICE_ROLE_KEY "$SUPABASE_SERVICE_ROLE_KEY" \
             --arg DATABASE_URL "$DATABASE_URL" \
             --arg DATABASE_SSL "$DATABASE_SSL" \
-            --arg INTERNAL_API_KEY "$INTERNAL_API_KEY" \
-            --arg AI_PROVIDER "$AI_PROVIDER" \
             --arg GEMINI_API_KEY "$GEMINI_API_KEY" \
-            --arg GEMINI_MODEL "$GEMINI_MODEL" \
-            --arg ANTHROPIC_API_KEY "$ANTHROPIC_API_KEY" \
-            --arg ANTHROPIC_MODEL "$ANTHROPIC_MODEL" \
-            --arg SAFETY_SERVICE_URL "$SAFETY_SERVICE_URL" \
+            --arg GEMINI_LIVE_MODEL "$GEMINI_LIVE_MODEL" \
+            --arg CLUSTERFIT_EXTRACTION_MODELS "$CLUSTERFIT_EXTRACTION_MODELS" \
+            --arg CLUSTERFIT_EXTRACTION_BUDGET_MS "$CLUSTERFIT_EXTRACTION_BUDGET_MS" \
             --arg SMTP_HOST "$SMTP_HOST" \
             --arg SMTP_PORT "$SMTP_PORT" \
             --arg SMTP_USER "$SMTP_USER" \

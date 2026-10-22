@@ -6,7 +6,8 @@ export const IsoTimestampSchema = z.string().datetime({ offset: true });
  * from this via calculateAgeAtOnboarding (packages/assessment/src/domain/user-profile.ts). */
 export const DateOnlySchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD.");
 
-export const SegmentSchema = z.enum(["explorer", "pathfinder", "launcher"]);
+/** YuvaPath serves Classes 9–12 only: explorer = Classes 9–10, pathfinder = Classes 11–12. */
+export const SegmentSchema = z.enum(["explorer", "pathfinder"]);
 export type Segment = z.infer<typeof SegmentSchema>;
 
 // A full user-supplied state/UT value. Canonical lookup is a separate concern.
@@ -66,7 +67,7 @@ export const TnDistrictSchema = z.enum([
 export type TnDistrict = z.infer<typeof TnDistrictSchema>;
 
 export const ModuleDescriptorSchema = z.object({
-  code: z.enum(["m1", "m2", "m3", "m4", "m5-evaluation", "m5-safety"]),
+  code: z.enum(["m1", "clusterfit", "m5-safety"]),
   name: z.string().min(1),
   packageName: z.string().startsWith("@yuvapath/"),
   status: z.enum(["scaffolded", "in_progress", "ready"]),

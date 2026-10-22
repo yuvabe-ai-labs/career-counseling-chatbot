@@ -32,7 +32,6 @@ const FRIENDLY_MESSAGES: Record<string, string> = {
   // Account creation / sign-in
   email_already_registered: "This email was already registered.",
   invalid_credentials: "Incorrect email or password. Please try again.",
-  under_12_ineligible: "You must be 12 or older to continue.",
   invalid_date_of_birth: "Enter a valid date of birth.",
 
   // Journey session / profile

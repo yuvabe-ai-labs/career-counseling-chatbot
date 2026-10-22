@@ -16,8 +16,6 @@ export const GUARDIAN_CONSENT_TEXT_VERSION = "v1";
 export const EDUCATION_STAGE_OPTIONS: { value: EducationStage; label: string }[] = [
   { value: "school", label: "In school" },
   { value: "higher_secondary", label: "Higher secondary" },
-  { value: "college", label: "In college" },
-  { value: "graduate", label: "Graduate" },
 ];
 
 /** Display labels for TnDistrictSchema (packages/contracts/src/common.ts) — a genuinely closed

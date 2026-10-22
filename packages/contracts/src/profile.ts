@@ -8,15 +8,12 @@ import {
   UuidSchema,
 } from "./common.js";
 
-export const EducationStageSchema = z.enum([
-  "school",
-  "higher_secondary",
-  "college",
-  "graduate",
-]);
+/** School = Classes 9–10, higher secondary = Classes 11–12 (the only students YuvaPath serves). */
+export const EducationStageSchema = z.enum(["school", "higher_secondary"]);
 export type EducationStage = z.infer<typeof EducationStageSchema>;
 
 export const AgeBandSchema = z.enum([
+  "minor_under_12",
   "minor_12_13",
   "minor_14_15",
   "minor_16_17",
@@ -28,7 +25,7 @@ export type AgeBand = z.infer<typeof AgeBandSchema>;
 export const UserProfileSchema = z.object({
   userId: UuidSchema,
   firstName: z.string().trim().min(1).max(100),
-  ageAtOnboarding: z.number().int().min(12).max(100),
+  ageAtOnboarding: z.number().int().min(0).max(120),
   ageBand: AgeBandSchema,
   city: z.string().trim().min(1).max(160),
   state: StateSchema,

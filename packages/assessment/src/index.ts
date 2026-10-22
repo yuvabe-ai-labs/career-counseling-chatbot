@@ -2,16 +2,6 @@ import type { ModuleDescriptor } from "@yuvapath/contracts";
 import type { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import type { Express } from "express";
 import type { Pool } from "pg";
-import type { AssessmentRepository } from "./application/assessment-repository.js";
-import { AssessmentService } from "./application/assessment-service.js";
-import { CounselorAuthService } from "./application/counselor-auth-service.js";
-import { CounselorDashboardService } from "./application/counselor-dashboard-service.js";
-import type { CounselorDashboardRepository } from "./application/counselor-dashboard-repository.js";
-import type { CounselorDirectory } from "./application/counselor-directory.js";
-import { CounselorStudentService } from "./application/counselor-student-service.js";
-import type { CounselorStudentRepository } from "./application/counselor-student-repository.js";
-import { InMemoryCounselorPasswordResetOtpStore } from "./application/counselor-password-reset-otp-store.js";
-import { InMemoryCounselorResetTokenStore } from "./application/counselor-reset-token-store.js";
 import { AssessmentApplicationError } from "./application/errors.js";
 import type { GuardianConsentRepository } from "./application/guardian-consent-repository.js";
 import { GuardianConsentService } from "./application/guardian-consent-service.js";
@@ -20,43 +10,36 @@ import { InMemoryGuardianOtpStore } from "./application/guardian-otp-store.js";
 import type { EmailProvider, SendEmailResult } from "./application/email-provider.js";
 import { IdentityService } from "./application/identity-service.js";
 import type { IdentityUserDirectory } from "./application/identity-user-directory.js";
-import type { IntakeRepository } from "./application/intake-repository.js";
-import { IntakeService } from "./application/intake-service.js";
 import { JourneySessionService } from "./application/journey-session-service.js";
 import type { JourneySessionRepository } from "./application/journey-session-repository.js";
 import { InMemoryPendingSignupStore } from "./application/pending-signup-store.js";
 import type { UserProfileRepository } from "./application/user-profile-repository.js";
 import { UserProfileService } from "./application/user-profile-service.js";
-import { registerAssessmentRunRoutes } from "./http/assessment-run-routes.js";
-import { registerCounselorAuthRoutes } from "./http/counselor-auth-routes.js";
-import { registerCounselorDashboardRoutes } from "./http/counselor-dashboard-routes.js";
-import { registerCounselorStudentRoutes } from "./http/counselor-student-routes.js";
+import type { LocationRepository } from "./domain/location.js";
 import { registerGuardianConsentRoutes } from "./http/guardian-consent-routes.js";
 import { registerIdentityRoutes } from "./http/identity-routes.js";
-import { registerIntakeRoutes } from "./http/intake-routes.js";
 import { registerJourneySessionRoutes } from "./http/journey-session-routes.js";
+import { registerLocationRoutes } from "./http/location-routes.js";
 import { registerUserProfileRoutes } from "./http/user-profile-routes.js";
-import { PgAssessmentRepository } from "./infrastructure/pg-assessment-repository.js";
-import { PgCounselorDashboardRepository } from "./infrastructure/pg-counselor-dashboard-repository.js";
-import { PgCounselorStudentRepository } from "./infrastructure/pg-counselor-student-repository.js";
+import { InMemoryLocationRepository } from "./infrastructure/in-memory-location-repository.js";
 import { PgGuardianConsentRepository } from "./infrastructure/pg-guardian-consent-repository.js";
-import { PgIntakeRepository } from "./infrastructure/pg-intake-repository.js";
 import { PgJourneySessionRepository } from "./infrastructure/pg-journey-session-repository.js";
+import { PostgresLocationRepository } from "./infrastructure/pg-location-repository.js";
 import { PgUserProfileRepository } from "./infrastructure/pg-user-profile-repository.js";
 
-export * from "./application/assessment-snapshot-reader.js";
-export * from "./application/get-assessment-snapshot.js";
-export {
-  registerAssessmentSnapshotRoutes,
-  type AssessmentHttpDependencies,
-  type AssessmentSnapshotService,
-  type ResolveAssessmentUserId,
-} from "./http/assessment-snapshot-routes.js";
-export * from "./infrastructure/postgres-assessment-snapshot-reader.js";
+// Profile access for the clusterfit module, so it never queries assessment tables directly.
+export { PgUserProfileRepository } from "./infrastructure/pg-user-profile-repository.js";
+export { InMemoryLocationRepository } from "./infrastructure/in-memory-location-repository.js";
+export { PostgresLocationRepository } from "./infrastructure/pg-location-repository.js";
+export type { LocationRepository } from "./domain/location.js";
 
+/**
+ * Module 1: the student's account — sign-up and sign-in, guardian consent for under-18s,
+ * journey sessions, the profile, and the state/city search the sign-up form uses.
+ */
 export const assessmentModule: ModuleDescriptor = {
   code: "m1",
-  name: "Assessment",
+  name: "Accounts",
   packageName: "@yuvapath/assessment",
   status: "in_progress",
 };
@@ -105,34 +88,6 @@ class UnavailableUserProfileRepository implements UserProfileRepository {
   }
 
   findByUserId() {
-    return this.unavailable();
-  }
-}
-
-class UnavailableIntakeRepository implements IntakeRepository {
-  private unavailable(): Promise<never> {
-    return Promise.reject(
-      new AssessmentApplicationError(
-        "database_unavailable",
-        "Intake storage is not configured.",
-        503,
-      ),
-    );
-  }
-
-  findApprovedQuestionSet() {
-    return this.unavailable();
-  }
-
-  findQuestionForProfileSegment() {
-    return this.unavailable();
-  }
-
-  upsertAnswer() {
-    return this.unavailable();
-  }
-
-  findAnswersForUser() {
     return this.unavailable();
   }
 }
@@ -264,169 +219,22 @@ class UnavailableEmailProvider implements EmailProvider {
   }
 }
 
-class UnavailableCounselorDirectory implements CounselorDirectory {
-  private unavailable(): Promise<never> {
-    return Promise.reject(
-      new AssessmentApplicationError(
-        "counselor_directory_unavailable",
-        "Counselor authentication is not configured (no CounselorDirectory wired up).",
-        503,
-      ),
-    );
-  }
-
-  verifyCounselorPassword(): Promise<{ userId: string; mustResetPassword: boolean; displayName: string } | null> {
-    return this.unavailable();
-  }
-
-  findActiveCounselorIdByEmail(): Promise<string | null> {
-    return this.unavailable();
-  }
-
-  clearMustResetPassword(): Promise<void> {
-    return this.unavailable();
-  }
-
-  updatePassword(): Promise<void> {
-    return this.unavailable();
-  }
-
-  isActiveCounselor(): Promise<boolean> {
-    return this.unavailable();
-  }
-}
-
-class UnavailableCounselorDashboardRepository implements CounselorDashboardRepository {
-  getStats(): Promise<never> {
-    return Promise.reject(
-      new AssessmentApplicationError(
-        "database_unavailable",
-        "Counselor dashboard storage is not configured.",
-        503,
-      ),
-    );
-  }
-}
-
-class UnavailableCounselorStudentRepository implements CounselorStudentRepository {
-  listStudents(): Promise<never> {
-    return this.unavailable();
-  }
-
-  findReportExtras(): Promise<never> {
-    return this.unavailable();
-  }
-
-  private unavailable(): Promise<never> {
-    return Promise.reject(
-      new AssessmentApplicationError(
-        "database_unavailable",
-        "Counselor student storage is not configured.",
-        503,
-      ),
-    );
-  }
-}
-
-class UnavailableAssessmentRepository implements AssessmentRepository {
-  private unavailable(): Promise<never> {
-    return Promise.reject(
-      new AssessmentApplicationError(
-        "database_unavailable",
-        "Assessment storage is not configured.",
-        503,
-      ),
-    );
-  }
-
-  findActiveVersion() {
-    return this.unavailable();
-  }
-  createRun() {
-    return this.unavailable();
-  }
-  findRunByIdForUser() {
-    return this.unavailable();
-  }
-  findLatestRunForUser() {
-    return this.unavailable();
-  }
-  listRunItems() {
-    return this.unavailable();
-  }
-  listAnsweredItemIds() {
-    return this.unavailable();
-  }
-  findItemForRun() {
-    return this.unavailable();
-  }
-  findOptionForItem() {
-    return this.unavailable();
-  }
-  upsertResponse() {
-    return this.unavailable();
-  }
-  updateRunProgress() {
-    return this.unavailable();
-  }
-  listScoringResponses() {
-    return this.unavailable();
-  }
-  createResult() {
-    return this.unavailable();
-  }
-  findResultByRunForUser() {
-    return this.unavailable();
-  }
-  findLatestResultByUserForInstrument() {
-    return this.unavailable();
-  }
-  findLatestRiasecResultForUser() {
-    return this.unavailable();
-  }
-  getIntakeSummary() {
-    return this.unavailable();
-  }
-  getNextProfileVersion() {
-    return this.unavailable();
-  }
-  createAssessmentSnapshot() {
-    return this.unavailable();
-  }
-}
-
 export type RegisterAssessmentRoutesOptions = {
   pool?: Pool;
-  assessmentRepository?: AssessmentRepository;
   journeySessionRepository?: JourneySessionRepository;
   userProfileRepository?: UserProfileRepository;
-  intakeRepository?: IntakeRepository;
   guardianConsentRepository?: GuardianConsentRepository;
+  /** State/city search for sign-up. Defaults to Postgres with a pool, else an empty in-memory list. */
+  locationRepository?: LocationRepository;
   /** No default stand-in (no dev-echo) — pass a real provider (e.g. SmtpEmailProvider, wired
-   * up in apps/api) or OTP requests fail with a clear 503 rather than a silent fake send.
-   * Shared by guardian consent and counselor password reset — no SMS/phone delivery exists
-   * anywhere in Module 1 anymore. */
+   * up in apps/api) or OTP requests fail with a clear 503 rather than a silent fake send. */
   emailProvider?: EmailProvider;
   /** Exposes the guardian-consents/{consentId}/otp-debug route. Defaults to true; apps/api
    * should pass false in production regardless of which emailProvider is configured. */
   enableGuardianOtpDebugRoute?: boolean;
   /** Resolves/creates the Supabase Auth user behind password-based signup/signin (see
-   * identity-user-directory.ts). Defaults to a 503-returning stub, matching every other
-   * Unavailable* repository default here. */
+   * identity-user-directory.ts). Defaults to a 503-returning stub. */
   identityUserDirectory?: IdentityUserDirectory;
-  /** Backs the counselor sign-in/forgot-password routes (see counselor-directory.ts). Defaults
-   *  to a 503-returning stub, matching identityUserDirectory's own default. */
-  counselorDirectory?: CounselorDirectory;
-  /** Backs the regional-admin sign-in/forgot-password routes under /admin/auth (same shape as
-   *  counselorDirectory, gated on role='regional_admin'). Defaults to a 503-returning stub. */
-  regionalAdminDirectory?: CounselorDirectory;
-  /** Backs GET /counselor/dashboard/stats (see counselor-dashboard-repository.ts). Defaults to
-   *  a Postgres-backed implementation when a pool is given, else a 503-returning stub. */
-  counselorDashboardRepository?: CounselorDashboardRepository;
-  /** Backs GET /counselor/students and GET /counselor/students/:studentId/report (see
-   *  counselor-student-repository.ts). Defaults to a Postgres-backed implementation when a pool
-   *  is given, else a 503-returning stub. */
-  counselorStudentRepository?: CounselorStudentRepository;
 };
 
 export const registerAssessmentRoutes = (
@@ -444,35 +252,19 @@ export const registerAssessmentRoutes = (
     (options.pool
       ? new PgUserProfileRepository(options.pool)
       : new UnavailableUserProfileRepository());
-  const intakeRepository =
-    options.intakeRepository ??
-    (options.pool ? new PgIntakeRepository(options.pool) : new UnavailableIntakeRepository());
   const guardianConsentRepository =
     options.guardianConsentRepository ??
     (options.pool
       ? new PgGuardianConsentRepository(options.pool)
       : new UnavailableGuardianConsentRepository());
-  const assessmentRepository =
-    options.assessmentRepository ??
+  const locationRepository =
+    options.locationRepository ??
     (options.pool
-      ? new PgAssessmentRepository(options.pool)
-      : new UnavailableAssessmentRepository());
+      ? new PostgresLocationRepository(options.pool)
+      : new InMemoryLocationRepository());
   const emailProvider = options.emailProvider ?? new UnavailableEmailProvider();
   const identityUserDirectory =
     options.identityUserDirectory ?? new UnavailableIdentityUserDirectory();
-  const counselorDirectory = options.counselorDirectory ?? new UnavailableCounselorDirectory();
-  const regionalAdminDirectory =
-    options.regionalAdminDirectory ?? new UnavailableCounselorDirectory();
-  const counselorDashboardRepository =
-    options.counselorDashboardRepository ??
-    (options.pool
-      ? new PgCounselorDashboardRepository(options.pool)
-      : new UnavailableCounselorDashboardRepository());
-  const counselorStudentRepository =
-    options.counselorStudentRepository ??
-    (options.pool
-      ? new PgCounselorStudentRepository(options.pool)
-      : new UnavailableCounselorStudentRepository());
   const otpStore = new InMemoryGuardianOtpStore();
   const declineTokenStore = new InMemoryGuardianDeclineTokenStore();
   // Shared between IdentityService and GuardianConsentService — a minor's guardian-consent
@@ -499,40 +291,7 @@ export const registerAssessmentRoutes = (
     userProfileRepository,
     journeySessionRepository: repository,
   });
-  const intakeService = new IntakeService({
-    intakeRepository,
-    guardianConsentRepository,
-    journeySessionRepository: repository,
-    userProfileRepository,
-  });
-  const assessmentService = new AssessmentService({
-    assessmentRepository,
-    journeySessionRepository: repository,
-    userProfileRepository,
-    guardianConsentRepository,
-  });
-  const counselorAuthService = new CounselorAuthService({
-    counselorDirectory,
-    otpStore: new InMemoryCounselorPasswordResetOtpStore(),
-    resetTokenStore: new InMemoryCounselorResetTokenStore(),
-    emailProvider,
-  });
-  const regionalAdminAuthService = new CounselorAuthService({
-    counselorDirectory: regionalAdminDirectory,
-    otpStore: new InMemoryCounselorPasswordResetOtpStore(),
-    resetTokenStore: new InMemoryCounselorResetTokenStore(),
-    emailProvider,
-  });
-  const counselorDashboardService = new CounselorDashboardService({
-    counselorDirectory,
-    repository: counselorDashboardRepository,
-  });
-  const counselorStudentService = new CounselorStudentService({
-    counselorDirectory,
-    repository: counselorStudentRepository,
-    assessmentRepository,
-    userProfileRepository,
-  });
+
   registerIdentityRoutes(app, registry, identityService);
   registerJourneySessionRoutes(app, registry, journeySessionService);
   registerUserProfileRoutes(app, registry, userProfileService);
@@ -541,38 +300,15 @@ export const registerAssessmentRoutes = (
     declineTokenStore,
     enableOtpDebugRoute: options.enableGuardianOtpDebugRoute ?? true,
   });
-  registerIntakeRoutes(app, registry, intakeService);
-  registerAssessmentRunRoutes(app, registry, assessmentService);
-  registerCounselorAuthRoutes(app, registry, counselorAuthService);
-  registerCounselorAuthRoutes(app, registry, regionalAdminAuthService, {
-    basePath: "/api/v1/admin/auth",
-    label: "regional admin",
-  });
-  registerCounselorDashboardRoutes(app, registry, counselorDashboardService);
-  registerCounselorStudentRoutes(app, registry, counselorStudentService);
+  registerLocationRoutes(app, registry, locationRepository);
 };
 
 export { AssessmentApplicationError } from "./application/errors.js";
-export { AssessmentService } from "./application/assessment-service.js";
-export { CounselorAuthService } from "./application/counselor-auth-service.js";
-export { CounselorDashboardService } from "./application/counselor-dashboard-service.js";
-export type { CounselorDashboardRepository } from "./application/counselor-dashboard-repository.js";
-export type { CounselorDirectory, RegionalAdminDirectory } from "./application/counselor-directory.js";
-export { CounselorStudentService } from "./application/counselor-student-service.js";
-export type {
-  CounselorStudentListFilters,
-  CounselorStudentListResult,
-  CounselorStudentRecord,
-  CounselorStudentRepository,
-} from "./application/counselor-student-repository.js";
-export { InMemoryCounselorPasswordResetOtpStore } from "./application/counselor-password-reset-otp-store.js";
-export { InMemoryCounselorResetTokenStore } from "./application/counselor-reset-token-store.js";
 export { GuardianConsentService } from "./application/guardian-consent-service.js";
 export { InMemoryGuardianDeclineTokenStore } from "./application/guardian-decline-token-store.js";
 export { InMemoryGuardianOtpStore } from "./application/guardian-otp-store.js";
 export { IdentityService } from "./application/identity-service.js";
 export { InMemoryPendingSignupStore } from "./application/pending-signup-store.js";
-export { IntakeService } from "./application/intake-service.js";
 export { JourneySessionService } from "./application/journey-session-service.js";
 export { UserProfileService } from "./application/user-profile-service.js";
 export {
@@ -586,13 +322,6 @@ export type {
   SendEmailResult,
 } from "./application/email-provider.js";
 export type {
-  AssessmentRepository,
-  AssessmentVersionRecord,
-  NewAssessmentResponse,
-  NewAssessmentRun,
-  NewAssessmentSnapshot,
-} from "./application/assessment-repository.js";
-export type {
   GuardianConsentRepository,
   NewGuardianConsent,
   NewPendingSessionGuardianConsent,
@@ -605,12 +334,6 @@ export type {
 } from "./application/guardian-decline-token-store.js";
 export type { IdentityUserDirectory } from "./application/identity-user-directory.js";
 export type { PendingSignup, PendingSignupStore } from "./application/pending-signup-store.js";
-export type {
-  IntakeQuestionSet,
-  IntakeQuestionSetWithQuestions,
-  IntakeRepository,
-  NewIntakeAnswer,
-} from "./application/intake-repository.js";
 export type {
   JourneySessionRepository,
   NewJourneySession,

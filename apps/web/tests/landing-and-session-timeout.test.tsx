@@ -6,39 +6,34 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { queryClient } from "@/lib/query-client";
 import {
   SESSION_TIMEOUT_MS,
-  getStoredCounselorUserId,
   getStoredUserId,
-  setStoredCounselorUserId,
   setStoredJourneySessionId,
   setStoredUserId,
 } from "@/lib/storage";
-import { AdminSessionProvider } from "@/features/admin";
 import { SessionProvider } from "@/features/assessment";
-import { CounselorSessionProvider } from "@/features/counselor";
 import { LandingPage } from "@/features/landing";
 
 const { getUserProfile } = vi.hoisted(() => ({ getUserProfile: vi.fn() }));
-vi.mock("@/features/assessment/api/profile", () => ({ getUserProfile, upsertUserProfile: vi.fn() }));
+vi.mock("@/features/assessment/api/profile", () => ({
+  getUserProfile,
+  upsertUserProfile: vi.fn(),
+}));
 
 function renderLanding() {
   return render(
     <QueryClientProvider client={queryClient}>
       <SessionProvider>
-        <CounselorSessionProvider>
-          <AdminSessionProvider>
-            <MemoryRouter initialEntries={["/"]}>
-              <Routes>
-                <Route path="/" element={<LandingPage />} />
-              </Routes>
-            </MemoryRouter>
-          </AdminSessionProvider>
-        </CounselorSessionProvider>
+        <MemoryRouter initialEntries={["/"]}>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+          </Routes>
+        </MemoryRouter>
       </SessionProvider>
     </QueryClientProvider>,
   );
 }
 
-describe("session timeout (1 hour, aspirant and counsellor)", () => {
+describe("session timeout (1 hour)", () => {
   beforeEach(() => {
     localStorage.clear();
     vi.useFakeTimers({ toFake: ["Date"] });
@@ -58,16 +53,6 @@ describe("session timeout (1 hour, aspirant and counsellor)", () => {
     expect(localStorage.getItem("yuvapath.userId")).toBeNull();
   });
 
-  it("keeps a counsellor session just under an hour, drops it (and its name) after", () => {
-    setStoredCounselorUserId("counselor-id");
-    localStorage.setItem("yuvapath.counselorDisplayName", "Test Counsellor");
-    vi.advanceTimersByTime(SESSION_TIMEOUT_MS - 1000);
-    expect(getStoredCounselorUserId()).toBe("counselor-id");
-    vi.advanceTimersByTime(2000);
-    expect(getStoredCounselorUserId()).toBeNull();
-    expect(localStorage.getItem("yuvapath.counselorDisplayName")).toBeNull();
-  });
-
   it("starts the clock for a session stored before the timeout existed instead of signing it out", () => {
     localStorage.setItem("yuvapath.userId", "old-user");
     expect(getStoredUserId()).toBe("old-user");
@@ -83,41 +68,23 @@ describe("LandingPage", () => {
     getUserProfile.mockResolvedValue({ profile: { firstName: "Asha" } });
   });
 
-  it("has no navbar login links, only the hero cards", () => {
+  it("sends signed-out visitors to sign-up, with sign-in for returning students", () => {
     renderLanding();
-    expect(screen.queryByRole("navigation", { name: "Primary" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "Aspirant Login" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "Counsellor Login" })).not.toBeInTheDocument();
-  });
-
-  it("sends signed-out visitors to sign-up / counsellor sign-in", () => {
-    renderLanding();
-    expect(screen.getByRole("link", { name: /aspirant/i })).toHaveAttribute("href", "/sign-up");
-    expect(screen.getByRole("link", { name: /^counsellor/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /get started/i })).toHaveAttribute("href", "/sign-up");
+    expect(screen.getByRole("link", { name: /already have an account/i })).toHaveAttribute(
       "href",
-      "/counselor/sign-in",
+      "/sign-in",
     );
+    expect(screen.queryByText(/counsellor/i)).not.toBeInTheDocument();
   });
 
-  it("offers a Regional Admin entry that leads to admin sign-in, or the console when signed in", () => {
-    const { unmount } = renderLanding();
-    expect(screen.getByRole("link", { name: /regional admin/i })).toHaveAttribute("href", "/admin/sign-in");
-    unmount();
-
-    localStorage.setItem("yuvapath.adminUserId", "admin-id");
-    renderLanding();
-    expect(screen.getByRole("link", { name: /regional admin/i })).toHaveAttribute("href", "/admin/home");
-  });
-
-  it("resumes both sessions while they are valid", () => {
+  it("lets a signed-in student continue the journey", () => {
     setStoredUserId("user-id");
     setStoredJourneySessionId("session-id");
-    setStoredCounselorUserId("counselor-id");
     renderLanding();
-    expect(screen.getByRole("link", { name: /aspirant/i })).toHaveAttribute("href", "/home");
-    expect(screen.getByRole("link", { name: /^counsellor/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /continue where you left off/i })).toHaveAttribute(
       "href",
-      "/counselor/home",
+      "/home",
     );
   });
 
@@ -144,7 +111,9 @@ describe("AppHeader account menu — hover, pin, red sign out", () => {
     await user.hover(avatar);
     const signOut = await screen.findByRole("menuitem", { name: "Sign out" });
     expect(signOut.className).toContain("text-destructive");
-    expect(screen.getByRole("menuitem", { name: "Help" }).className).not.toContain("text-destructive");
+    expect(screen.getByRole("menuitem", { name: "Help" }).className).not.toContain(
+      "text-destructive",
+    );
 
     await user.click(avatar);
     await user.unhover(avatar);

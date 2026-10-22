@@ -13,7 +13,6 @@ import {
   guardianEmailMatchesStudent,
   invalidCredentials,
   pendingSignupNotFound,
-  under12Ineligible,
 } from "./errors.js";
 import type { GuardianConsentRepository } from "./guardian-consent-repository.js";
 import type { IdentityUserDirectory } from "./identity-user-directory.js";
@@ -119,10 +118,8 @@ export class IdentityService {
       throw pendingSignupNotFound();
     }
 
+    // No minimum age: any Class 9–12 student may sign up (under-18s need guardian consent).
     const age = calculateAgeAtOnboarding(input.dateOfBirth, now);
-    if (age < 12) {
-      throw under12Ineligible();
-    }
 
     const email = normalizeEmail(input.email);
 

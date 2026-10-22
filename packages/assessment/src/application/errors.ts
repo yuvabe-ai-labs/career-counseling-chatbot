@@ -39,12 +39,6 @@ export const journeySessionNotResumable = (): AssessmentApplicationError =>
 export const userProfileNotFound = (): AssessmentApplicationError =>
   new AssessmentApplicationError("user_profile_not_found", "User profile was not found.", 404);
 
-export const under12Ineligible = (): AssessmentApplicationError =>
-  new AssessmentApplicationError(
-    "under_12_ineligible",
-    "Students under 12 cannot create a profile in Phase A.",
-    422,
-  );
 
 export const invalidDateOfBirth = (): AssessmentApplicationError =>
   new AssessmentApplicationError(
