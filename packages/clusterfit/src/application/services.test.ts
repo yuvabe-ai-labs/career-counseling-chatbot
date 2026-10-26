@@ -261,6 +261,45 @@ describe("ClusterfitService", () => {
       }),
     ).rejects.toMatchObject({ code: "clusterfit_session_scored" });
   });
+
+  it("retakes a scored test as a new attempt and archives the old one", async () => {
+    const { repository, sessions } = setup();
+    const first = await start(sessions);
+    await expect(sessions.reattempt(STUDENT, first, randomUUID())).rejects.toMatchObject({
+      code: "clusterfit_reattempt_not_allowed",
+    });
+    await sessions.saveSituationEdits(STUDENT, first, { grade: 12 });
+    await answerAll(sessions, first, "11_12");
+    await sessions.score(STUDENT, first);
+    await expect(sessions.reattempt(OTHER, first, randomUUID())).rejects.toMatchObject({
+      code: "clusterfit_session_not_found",
+    });
+
+    const key = randomUUID();
+    const retake = await sessions.reattempt(STUDENT, first, key);
+    expect(await sessions.reattempt(STUDENT, first, key)).toEqual(retake);
+    expect(repository.sessions.size).toBe(2);
+    expect(retake.sessionId).not.toBe(first);
+    expect(retake).toMatchObject({ status: "in_progress", gradePath: null });
+    expect(retake.progress.B.answered).toBe(0);
+    expect(repository.sessions.get(retake.sessionId)?.attemptNumber).toBe(2);
+
+    // The old attempt is kept, only hidden: answers and result stay, the student resumes the new one.
+    expect(repository.sessions.get(first)?.status).toBe("abandoned");
+    expect(await repository.getCurrentResult(first)).not.toBeNull();
+    expect(await sessions.startSession({ userId: STUDENT, idempotencyKey: randomUUID() })).toEqual(
+      retake,
+    );
+    await expect(sessions.getStudentResult(STUDENT, retake.sessionId)).rejects.toMatchObject({
+      code: "clusterfit_result_not_found",
+    });
+
+    await sessions.saveSituationEdits(STUDENT, retake.sessionId, { grade: 10 });
+    await answerAll(sessions, retake.sessionId, "11_12");
+    await sessions.score(STUDENT, retake.sessionId);
+    expect((await sessions.getStudentResult(STUDENT, retake.sessionId)).clusters).toHaveLength(12);
+    expect(repository.results.get(first)).toHaveLength(1);
+  });
 });
 
 describe("SituationService (Part A + E chat)", () => {

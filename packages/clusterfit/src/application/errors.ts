@@ -31,6 +31,11 @@ export const sessionLocked = error(
   "This session has already been scored, so answers can no longer change.",
   409,
 );
+export const reattemptNotAllowed = error(
+  "clusterfit_reattempt_not_allowed",
+  "Only a finished test can be taken again.",
+  409,
+);
 export const resultNotFound = error(
   "clusterfit_result_not_found",
   "No result yet for this session.",

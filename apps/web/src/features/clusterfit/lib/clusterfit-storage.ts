@@ -37,3 +37,6 @@ export const getClusterfitStartKey = (): string => {
   write(START_KEY, key);
   return key;
 };
+
+/** After a retake, the retake's key makes the next POST /sessions replay to the new attempt. */
+export const setClusterfitStartKey = (key: string) => write(START_KEY, key);

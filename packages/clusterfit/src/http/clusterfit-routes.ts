@@ -7,6 +7,7 @@ import {
   ClusterfitCompleteSituationResponseSchema,
   ClusterfitSituationResponseSchema,
   ClusterfitStudentResultResponseSchema,
+  ReattemptClusterfitRequestSchema,
   SaveClusterfitResponseRequestSchema,
   SaveClusterfitResponseResponseSchema,
   SaveClusterfitSituationRequestSchema,
@@ -264,6 +265,32 @@ export const registerClusterfitRoutes = (
       ScoreClusterfitRequestSchema.parse(request.body);
       await service.score(actorUserId(request), sessionId);
       return { status: 200, body: { scored: true } };
+    }),
+  );
+
+  registry.registerPath({
+    method: "post",
+    path: `${BASE}/sessions/{sessionId}/reattempt`,
+    tags: TAGS,
+    summary:
+      "Retake the test: archive the scored session and start a new attempt (idempotent on the key)",
+    request: {
+      headers: ActorHeaderSchema,
+      params: SessionParamsSchema,
+      body: json(ReattemptClusterfitRequestSchema),
+    },
+    responses: {
+      201: { description: "New session", ...json(ClusterfitSessionResponseSchema) },
+      ...errorResponses,
+    },
+  });
+  app.post(
+    `${BASE}/sessions/:sessionId/reattempt`,
+    handle(async (request) => {
+      const { sessionId } = SessionParamsSchema.parse(request.params);
+      const body = ReattemptClusterfitRequestSchema.parse(request.body);
+      const session = await service.reattempt(actorUserId(request), sessionId, body.idempotencyKey);
+      return { status: 201, body: { session } };
     }),
   );
 

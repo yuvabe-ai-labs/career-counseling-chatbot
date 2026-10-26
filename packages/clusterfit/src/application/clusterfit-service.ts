@@ -28,6 +28,7 @@ import {
   invalidAnswer,
   notReadyToScore,
   profileNotFound,
+  reattemptNotAllowed,
   resultNotFound,
   sessionLocked,
   sessionNotFound,
@@ -185,25 +186,54 @@ export class ClusterfitService {
     const student = await this.deps.profiles.getStudent(input.userId);
     if (!student) throw profileNotFound();
 
-    // Resume the latest session, including a scored one (its result page is the end, §18.1 R4).
+    // Resume the latest session, including a scored one, until the student chooses to retake
+    // (a retake archives it as abandoned, §18.1 R4).
     const latest = await repository.findLatestSessionForUser(input.userId);
     if (latest && latest.status !== "abandoned") return this.toDto(latest);
 
-    const created = await repository.createSession({
+    return this.toDto(
+      await this.createAttempt(input.userId, input.idempotencyKey, input.journeySessionId ?? null),
+    );
+  }
+
+  private async createAttempt(
+    userId: string,
+    idempotencyKey: string,
+    journeySessionId: string | null,
+  ): Promise<ClusterfitSessionRow> {
+    const { repository } = this.deps;
+    return repository.createSession({
       id: randomUUID(),
-      userId: input.userId,
-      journeySessionId: input.journeySessionId ?? null,
+      userId,
+      journeySessionId,
       contentVersion: CONTENT_VERSION,
       gradePath: null,
       status: "in_progress",
       liveTokensIssued: 0,
       coverageChecks: 0,
-      attemptNumber: (await repository.countSessionsForUser(input.userId)) + 1,
-      idempotencyKey: input.idempotencyKey,
+      attemptNumber: (await repository.countSessionsForUser(userId)) + 1,
+      idempotencyKey,
       startedAt: this.now(),
       scoredAt: null,
     });
-    return this.toDto(created);
+  }
+
+  /**
+   * "Retake the test" on the results page: archives the scored session as abandoned (its answers,
+   * chat and results are kept, never shown again) and starts a new attempt from About you.
+   * Idempotent on the key. Not one transaction: if the new attempt fails to save, the next
+   * POST /sessions finds the latest session abandoned and starts it anyway.
+   */
+  async reattempt(userId: string, sessionId: string, idempotencyKey: string) {
+    const replay = await this.deps.repository.findSessionByIdempotencyKey(idempotencyKey);
+    if (replay) {
+      if (replay.userId !== userId) throw sessionNotFound();
+      return this.toDto(replay);
+    }
+    const session = await this.ownedSession(userId, sessionId);
+    if (session.status !== "scored") throw reattemptNotAllowed();
+    await this.deps.repository.updateSession(sessionId, { status: "abandoned" });
+    return this.toDto(await this.createAttempt(userId, idempotencyKey, session.journeySessionId));
   }
 
   async getSession(userId: string, sessionId: string) {

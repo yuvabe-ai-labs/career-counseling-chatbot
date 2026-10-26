@@ -155,6 +155,9 @@ export const SaveClusterfitResponseResponseSchema = z.object({
 
 export const ScoreClusterfitRequestSchema = z.object({ idempotencyKey: UuidSchema });
 
+/** Retake from the results page: archives the scored session and starts a new attempt. */
+export const ReattemptClusterfitRequestSchema = z.object({ idempotencyKey: UuidSchema });
+
 const ClusterCardSchema = z.object({
   code: ClusterCodeSchema,
   name: z.string(),

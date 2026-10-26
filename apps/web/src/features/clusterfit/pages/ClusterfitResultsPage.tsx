@@ -1,4 +1,5 @@
-import { Navigate } from "react-router-dom";
+import { useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import {
   Briefcase,
   ConciergeBell,
@@ -10,21 +11,28 @@ import {
   Laptop,
   Megaphone,
   Palette,
+  RotateCcw,
   Route,
   Sparkles,
   Sprout,
   Wrench,
   type LucideIcon,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppHeader } from "@/components/AppHeader";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
 import { getErrorMessage } from "@/lib/error-messages";
 import { cn } from "@/lib/utils";
 import { useSession } from "@/features/assessment/state/session-context";
-import { getClusterfitStudentResult } from "../api/clusterfit";
-import { getStoredClusterfitSessionId } from "../lib/clusterfit-storage";
+import { getClusterfitStudentResult, reattemptClusterfitSession } from "../api/clusterfit";
+import {
+  getStoredClusterfitSessionId,
+  setClusterfitStartKey,
+  setStoredClusterfitSessionId,
+} from "../lib/clusterfit-storage";
 import { RESULT_COPY } from "../lib/copy";
 
 type Cluster = {
@@ -113,9 +121,66 @@ function ClusterCard({ cluster }: { cluster: Cluster }) {
 }
 
 /**
+ * "Retake the test": confirms inline, then archives this attempt on the server and opens a new one
+ * at About you. One idempotency key per confirm, so a retried click never starts two attempts.
+ */
+function RetakePanel({ sessionId }: { sessionId: string }) {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [confirming, setConfirming] = useState(false);
+  const [key] = useState(() => crypto.randomUUID());
+  const retake = useMutation({
+    mutationFn: () => reattemptClusterfitSession(sessionId, key),
+    onSuccess: ({ session }) => {
+      setStoredClusterfitSessionId(session.sessionId);
+      setClusterfitStartKey(key);
+      queryClient.removeQueries({ queryKey: ["clusterfit"] });
+      void navigate("/clusterfit", { replace: true });
+    },
+  });
+
+  return (
+    <div className="relative shrink-0">
+      <Button
+        type="button"
+        variant="outline"
+        aria-expanded={confirming}
+        disabled={retake.isPending}
+        onClick={() => setConfirming((open) => !open)}
+      >
+        <RotateCcw /> {RESULT_COPY.retake.button}
+      </Button>
+      {confirming && (
+        <div className="absolute top-full right-0 z-10 mt-2 flex w-[min(24rem,calc(100vw-2rem))] animate-in flex-col gap-4 rounded-[1.2rem] border border-border bg-background p-5 shadow-md duration-200 fade-in">
+          <p className="text-sm text-foreground">{RESULT_COPY.retake.confirm}</p>
+          {retake.isError && (
+            <p className="text-sm text-destructive">{getErrorMessage(retake.error)}</p>
+          )}
+          <div className="flex flex-wrap justify-end gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={retake.isPending}
+              onClick={() => setConfirming(false)}
+            >
+              {RESULT_COPY.retake.cancel}
+            </Button>
+            <Button type="button" disabled={retake.isPending} onClick={() => retake.mutate()}>
+              {retake.isPending ? <Spinner /> : <RotateCcw />}
+              {RESULT_COPY.retake.yes}
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
  * /clusterfit/results: the cluster recommendation, and the end of this iteration (plan §18.1 R4).
  * All 12 clusters, best first, three to a row on wide screens, with the top 3 highlighted (§18.1 R7). Each card has
- * a plain signal word and the doc's roles and routes; never numbers.
+ * a plain signal word and the doc's roles and routes; never numbers. The student can retake the
+ * whole test from here.
  */
 export function ClusterfitResultsPage() {
   const studentSession = useSession();
@@ -148,9 +213,12 @@ export function ClusterfitResultsPage() {
                 <span className="flex size-14 items-center justify-center rounded-full bg-brand/10 text-brand">
                   <Sparkles className="size-7" />
                 </span>
-                <h2 className="font-display text-3xl font-semibold text-foreground">
-                  {RESULT_COPY.title}
-                </h2>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="font-display text-3xl font-semibold text-foreground">
+                    {RESULT_COPY.title}
+                  </h2>
+                  <RetakePanel sessionId={sessionId} />
+                </div>
                 <p className="max-w-3xl text-muted-foreground">
                   {result.fallbackUsed ? RESULT_COPY.strongFallback : RESULT_COPY.strong}
                 </p>

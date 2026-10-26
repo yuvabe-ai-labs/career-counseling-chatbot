@@ -67,6 +67,13 @@ export const RESULT_COPY = {
     explore: "Worth exploring",
     low: "Less of a match for now",
   },
+  retake: {
+    button: "Retake the test",
+    confirm:
+      "Start again from the beginning? You'll chat and answer every part again, and these results will be replaced by your new ones.",
+    yes: "Yes, start again",
+    cancel: "Cancel",
+  },
 };
 
 /** Plain words for the chat's coded answers on the confirm card; anything else shows as written. */

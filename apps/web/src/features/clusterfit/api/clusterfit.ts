@@ -71,6 +71,13 @@ export const scoreClusterfitSession = (sessionId: string, idempotencyKey: string
     body: { idempotencyKey },
   });
 
+/** "Retake the test": archives the scored session and returns the new attempt. Idempotent on the key. */
+export const reattemptClusterfitSession = (sessionId: string, idempotencyKey: string) =>
+  apiRequest(`${session(sessionId)}/reattempt`, ClusterfitSessionResponseSchema, {
+    method: "POST",
+    body: { idempotencyKey },
+  });
+
 export const getClusterfitStudentResult = (sessionId: string) =>
   apiRequest(`${session(sessionId)}/result`, ClusterfitStudentResultResponseSchema);
 

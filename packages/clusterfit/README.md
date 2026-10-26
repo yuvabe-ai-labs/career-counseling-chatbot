@@ -2,7 +2,7 @@
 
 The student journey: the Pathfinder career-cluster flow (plan: `docs/clusterfit-prototype-plan.md`, scope §18; scoring: `docs/clusterfit-scoring-explained.md`).
 
-**Flow:** sign-up/sign-in → Gemini Live chat (Part A + Part E) → confirm card → Parts B, C, D → all 12 clusters, top 3 highlighted.
+**Flow:** sign-up/sign-in → Gemini Live chat (Part A + Part E) → confirm card → Parts B, C, D → all 12 clusters, top 3 highlighted. The results page offers "Retake the test" (`POST /sessions/{id}/reattempt`, plan §18.1 R12): the scored session is archived as `abandoned` (kept, hidden) and a new attempt starts at About you.
 
 **Source of truth:**
 
